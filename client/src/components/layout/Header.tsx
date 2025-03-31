@@ -26,7 +26,7 @@ export default function Header() {
         <nav className="flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-primary text-2xl font-bold font-heading">
+            <span className="text-red-primary text-2xl font-bold font-heading">
               <Car className="inline-block mr-2" />
               PremiumShine
             </span>
@@ -39,7 +39,7 @@ export default function Header() {
                 key={link.href}
                 href={link.href}
                 className={`font-medium transition-colors ${
-                  isActive(link.href) ? "text-primary" : "text-gray-800 hover:text-primary"
+                  isActive(link.href) ? "text-orange-primary" : "text-gray-800 hover:text-orange-primary"
                 }`}
               >
                 {link.label}
@@ -62,7 +62,7 @@ export default function Header() {
                     key={link.href}
                     href={link.href}
                     className={`text-lg font-medium py-2 ${
-                      isActive(link.href) ? "text-primary" : "text-gray-800 hover:text-primary"
+                      isActive(link.href) ? "text-orange-primary" : "text-gray-800 hover:text-orange-primary"
                     }`}
                     onClick={() => setOpen(false)}
                   >

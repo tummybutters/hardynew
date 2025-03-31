@@ -10,27 +10,74 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased text-foreground;
+    background-color: #F3F4E6;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', serif;
   }
+  
+  /* Custom color scheme */
+  :root {
+    --color-primary: #EE432C;
+    --color-primary-light: #FF7A68;
+    --color-secondary: #FFB375;
+    --color-secondary-light: #FFD7B5;
+    --color-background: #F3F4E6;
+  }
 }
 
 /* Custom gradients and animations */
 .text-gradient {
-  background: linear-gradient(90deg, #ff0f7b, #f89b29);
+  background: linear-gradient(90deg, #EE432C, #FFB375);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .bg-gradient-premium {
-  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  background: linear-gradient(135deg, #FFB375 0%, #FFD7B5 100%);
 }
 
 .bg-gradient-luxury {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EE432C 0%, #FFB375 100%);
+}
+
+/* Custom color utility classes */
+.bg-cream {
+  background-color: #F3F4E6;
+}
+
+.bg-orange-primary {
+  background-color: #FFB375;
+}
+
+.bg-orange-light {
+  background-color: #FFD7B5;
+}
+
+.bg-red-primary {
+  background-color: #EE432C;
+}
+
+.text-orange-primary {
+  color: #FFB375;
+}
+
+.text-orange-light {
+  color: #FFD7B5;
+}
+
+.text-red-primary {
+  color: #EE432C;
+}
+
+.border-orange-primary {
+  border-color: #FFB375;
+}
+
+.border-red-primary {
+  border-color: #EE432C;
 }
 
 /* Scale effects */

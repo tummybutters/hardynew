@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import Services from "@/pages/services";
 import Booking from "@/pages/booking";
 import About from "@/pages/about";
+import CardDemo from "@/pages/card-demo";
 import Layout from "@/components/layout/Layout";
 
 function Router() {
@@ -17,6 +18,7 @@ function Router() {
         <Route path="/services" component={Services} />
         <Route path="/booking" component={Booking} />
         <Route path="/about" component={About} />
+        <Route path="/card-demo" component={CardDemo} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

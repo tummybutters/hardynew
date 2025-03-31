@@ -43,7 +43,7 @@ const services: Service[] = [
       { text: "Dashboard and Infotainment Detail", value: "$15 Value" },
       { text: "Streak-free Window Detail", value: "$15 Value" }
     ],
-    bgColor: "bg-gradient-to-br from-orange-200 to-orange-300"
+    bgColor: "bg-gradient-to-br from-orange-primary to-orange-light"
   },
   {
     id: 2,
@@ -63,7 +63,7 @@ const services: Service[] = [
       { text: "Air vent dusting and cleaning", value: "$10 Value" },
       { text: "Door jams and door panel detailing", value: "$15 Value" }
     ],
-    bgColor: "bg-gradient-to-br from-orange-200 to-orange-300"
+    bgColor: "bg-gradient-to-br from-orange-light to-orange-primary"
   },
   {
     id: 3,
@@ -82,7 +82,7 @@ const services: Service[] = [
       { text: "Tire cleaning and dressing", value: "$15 value" },
       { text: "Full Contact wash with microfiber towel", value: "$35 value" }
     ],
-    bgColor: "bg-gradient-to-br from-orange-200 to-orange-300"
+    bgColor: "bg-gradient-to-br from-red-primary to-orange-primary"
   },
   {
     id: 4,
@@ -100,7 +100,7 @@ const services: Service[] = [
     bonuses: [
       { text: "Includes ALL previous Express Detail & Exterior Wax Key Fob Refurbishment/Cleaning, Pre-contact wash foam treatment, wheels and wheel barrel cleaning, tire cleaning and dressing, door jams and door panel detailing", value: "$100 Value" }
     ],
-    bgColor: "bg-gradient-to-br from-orange-200 to-orange-300"
+    bgColor: "bg-gradient-to-br from-orange-primary to-red-primary"
   },
   {
     id: 5,
@@ -121,7 +121,7 @@ const services: Service[] = [
     bonuses: [
       { text: "Includes ALL previous bonuses: iron-embedded paint decontamination, pre-contact wash foam treatment, wheels and wheel barrel cleaning, tire cleaning and dressing, contact wash with microfiber towel dry, air vent cleaning, and trunk cleaning with spot removal", value: "$150 Value" }
     ],
-    bgColor: "bg-gradient-to-br from-orange-200 to-orange-300"
+    bgColor: "bg-gradient-to-br from-red-primary to-orange-primary"
   }
 ];
 
@@ -129,15 +129,15 @@ export default function ServiceList() {
   const [hoveredService, setHoveredService] = useState<number | null>(null);
   
   return (
-    <div className="bg-gradient-to-b from-slate-50 to-white py-16">
+    <div className="bg-cream py-16">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold font-heading text-gray-900 mb-4">Our Premium Mobile Detailing Services</h2>
-          <p className="text-gray-600 max-w-xl mx-auto">
+          <p className="text-gray-700 max-w-xl mx-auto">
             We bring the full professional detailing experience right to your door, with packages designed for every need and vehicle type.
           </p>
           <div className="flex justify-center mt-4">
-            <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+            <div className="text-xs text-gray-700 bg-white/70 px-3 py-1 rounded-full">
               Pricing varies by overall condition and vehicle type (Sedan/Coupe vs. Truck/SUV)
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function ServiceList() {
                 
                 <Link href="/booking">
                   <Button 
-                    className="w-full bg-red-600 hover:bg-red-700 text-white border-0 py-2 rounded-md transition-all duration-300"
+                    className="w-full bg-red-primary hover:bg-orange-primary text-white border-0 py-2 rounded-md transition-all duration-300"
                   >
                     Book Now
                   </Button>
@@ -214,13 +214,13 @@ export default function ServiceList() {
         </div>
         
         {/* CTA Section */}
-        <div className="max-w-2xl mx-auto p-8 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 text-center">
-          <h3 className="text-2xl font-bold mb-3">Ready for the Ultimate Car Care Experience?</h3>
-          <p className="text-gray-600 mb-6">
+        <div className="max-w-2xl mx-auto p-8 rounded-xl bg-gradient-to-r from-orange-light to-orange-primary/30 text-center shadow-lg">
+          <h3 className="text-2xl font-bold mb-3 text-gray-800">Ready for the Ultimate Car Care Experience?</h3>
+          <p className="text-gray-700 mb-6">
             Remember, all our services come to your location—no need to disrupt your day. Our satisfaction guarantee ensures your car will look its best or your service is free.
           </p>
           <Link href="/booking">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white px-8">
+            <Button size="lg" className="bg-red-primary hover:bg-orange-primary text-white px-8 shadow-md">
               Book Your Mobile Detail Now <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
