@@ -1,11 +1,11 @@
 import BookingHero from "@/components/booking/BookingHero";
-import BookingForm from "@/components/booking/BookingForm";
+import MultiStepBookingForm from "@/components/booking/MultiStepBookingForm";
 
 export default function Booking() {
   return (
     <>
       <BookingHero />
-      <BookingForm />
+      <MultiStepBookingForm />
     </>
   );
 }

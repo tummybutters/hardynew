@@ -1,0 +1,397 @@
+document.addEventListener('DOMContentLoaded', function() {
+
+    const steps = document.querySelectorAll('.booking-step');
+    const nextButtons = document.querySelectorAll('.next-btn');
+    const backButtons = document.querySelectorAll('.back-btn');
+    const optionCards = document.querySelectorAll('.option-card');
+    const addonButtons = document.querySelectorAll('.addon-btn');
+    const bookNowButton = document.getElementById('book-now-btn');
+
+    let currentStep = 0;
+    let bookingData = {
+        location: null,
+        vehicleType: null,
+        serviceCategory: null,
+        mainService: { name: null, price: 0, duration: 0 },
+        addons: [], // { name: 'addon name', price: 50, duration: 1 }
+        totalPrice: 0,
+        totalDuration: 0,
+        selectedDate: null,
+        selectedTime: null,
+        conditionNotes: null,
+        firstName: null,
+        lastName: null,
+        email: null,
+        phone: null
+    };
+
+    // --- Navigation ---
+
+    function showStep(stepIndex) {
+        steps.forEach((step, index) => {
+            step.classList.toggle('active', index === stepIndex);
+        });
+        currentStep = stepIndex;
+         // If moving to review step, populate it
+        if (steps[currentStep].id === 'step-review') {
+            populateReview();
+        }
+    }
+
+    nextButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            if (validateStep(currentStep)) {
+                collectStepData(currentStep);
+                if (currentStep < steps.length - 2) { // -2 because confirmation is last
+                    showStep(currentStep + 1);
+                }
+                // Special handling for step 4 (Addons) -> 5 (DateTime)
+                if(steps[currentStep-1]?.id === 'step-service-addons') {
+                    updateDateTimeDuration();
+                }
+            }
+        });
+    });
+
+    backButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            if (currentStep > 0) {
+                showStep(currentStep - 1);
+            }
+        });
+    });
+
+    // --- Step Logic & Data Collection ---
+
+    function validateStep(stepIndex) {
+        // Clear previous errors
+        document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+        let isValid = true;
+        const currentStepId = steps[stepIndex].id;
+
+        if (currentStepId === 'step-location') {
+            const locationInput = document.getElementById('location');
+            if (!locationInput.value.trim()) {
+                document.getElementById('location-error').textContent = 'Please enter a location.';
+                document.getElementById('location-error').style.display = 'block';
+                isValid = false;
+            } else {
+                 // ### TODO: Add actual service area validation logic here ###
+                console.log("Simulating service area check for:", locationInput.value);
+            }
+        }
+        else if (currentStepId === 'step-vehicle-type') {
+             if (!bookingData.vehicleType) {
+                document.getElementById('vehicle-error').textContent = 'Please select a vehicle type.';
+                document.getElementById('vehicle-error').style.display = 'block';
+                isValid = false;
+            }
+        }
+         else if (currentStepId === 'step-service-category') {
+             if (!bookingData.serviceCategory) {
+                document.getElementById('service-cat-error').textContent = 'Please select a service.';
+                document.getElementById('service-cat-error').style.display = 'block';
+                isValid = false;
+            }
+        }
+        else if (currentStepId === 'step-datetime') {
+            const dateInput = document.getElementById('selected-date-input');
+            const timeSelect = document.getElementById('selected-time-slot');
+             if (!dateInput.value) {
+                document.getElementById('datetime-error').textContent = 'Please select a date.';
+                document.getElementById('datetime-error').style.display = 'block';
+                isValid = false;
+            } else if (!timeSelect.value) {
+                 document.getElementById('datetime-error').textContent = 'Please select a time slot.';
+                document.getElementById('datetime-error').style.display = 'block';
+                isValid = false;
+            }
+             // ### TODO: Add real time slot availability check ###
+        }
+         else if (currentStepId === 'step-details') {
+             const fname = document.getElementById('first-name');
+             const lname = document.getElementById('last-name');
+             const email = document.getElementById('email');
+             const phone = document.getElementById('phone');
+             if (!fname.value.trim()) {
+                 document.getElementById('fname-error').textContent = 'First name is required.';
+                 document.getElementById('fname-error').style.display = 'block';
+                 isValid = false;
+             }
+              if (!lname.value.trim()) {
+                 document.getElementById('lname-error').textContent = 'Last name is required.';
+                 document.getElementById('lname-error').style.display = 'block';
+                 isValid = false;
+             }
+             if (!email.value.trim() || !/^\S+@\S+\.\S+$/.test(email.value)) { // Basic email format check
+                 document.getElementById('email-error').textContent = 'Please enter a valid email.';
+                 document.getElementById('email-error').style.display = 'block';
+                 isValid = false;
+             }
+             if (!phone.value.trim()) { // Basic check, add more specific format later
+                 document.getElementById('phone-error').textContent = 'Phone number is required.';
+                 document.getElementById('phone-error').style.display = 'block';
+                 isValid = false;
+             }
+         }
+
+        // Add validation for other steps as needed
+
+        return isValid;
+    }
+
+    function collectStepData(stepIndex) {
+        const currentStepId = steps[stepIndex].id;
+
+        if (currentStepId === 'step-location') {
+            bookingData.location = document.getElementById('location').value.trim();
+        }
+        // Vehicle & Service Category are collected via card clicks (see below)
+        // Addons are collected via button clicks (see below)
+        else if (currentStepId === 'step-datetime') {
+            bookingData.selectedDate = document.getElementById('selected-date-input').value;
+            bookingData.selectedTime = document.getElementById('selected-time-slot').value;
+        }
+         else if (currentStepId === 'step-condition') {
+            bookingData.conditionNotes = document.getElementById('condition-notes').value.trim();
+        }
+         else if (currentStepId === 'step-details') {
+            bookingData.firstName = document.getElementById('first-name').value.trim();
+            bookingData.lastName = document.getElementById('last-name').value.trim();
+            bookingData.email = document.getElementById('email').value.trim();
+            bookingData.phone = document.getElementById('phone').value.trim();
+        }
+        console.log("Current Booking Data:", bookingData); // For debugging
+    }
+
+     // --- Option Card Selection (Vehicle Type, Service Category) ---
+    optionCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const stepElement = card.closest('.booking-step');
+            const stepId = stepElement.id;
+            const value = card.dataset.value;
+
+            // Remove 'selected' class from siblings within the same step
+            stepElement.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            // Add 'selected' class to the clicked card
+            card.classList.add('selected');
+
+             // Clear potential error message on selection
+            const errorMsg = stepElement.querySelector('.error-message');
+             if(errorMsg) errorMsg.style.display = 'none';
+
+            if (stepId === 'step-vehicle-type') {
+                bookingData.vehicleType = value;
+                // Automatically move to next step after selection
+                if (validateStep(currentStep)) { // Ensure previous steps were valid if applicable
+                   showStep(currentStep + 1);
+                }
+            } else if (stepId === 'step-service-category') {
+                bookingData.serviceCategory = value;
+                updateMainServiceDetails(value); // Populate the next step's info
+                 // Automatically move to next step after selection
+                if (validateStep(currentStep)) {
+                   showStep(currentStep + 1);
+                   updateAddonPricing(); // Adjust addon prices based on vehicle/service if needed
+                   updateTotals(); // Recalculate totals
+                }
+            }
+        });
+    });
+
+     // --- Service & Add-on Logic ---
+
+     function updateMainServiceDetails(serviceCategory) {
+         // ### TODO: Replace with actual data lookup based on category & vehicle type ###
+         let price = 0;
+         let duration = 0;
+         const vehicleFactor = bookingData.vehicleType === 'SUV-7Seat' || bookingData.vehicleType === 'Truck' ? 1.2 : 1.0; // Example factor
+
+         switch(serviceCategory) {
+             case 'Full Detail':
+                price = 265; duration = 3; break;
+             case 'Exterior Detail':
+                price = 150; duration = 2; break;
+             case 'Interior Detail':
+                 price = 175; duration = 2.5; break;
+             case 'Maintenance Wash':
+                 price = 80; duration = 1; break;
+             default:
+                 price = 0; duration = 0;
+         }
+
+         price = Math.round(price * vehicleFactor); // Apply vehicle factor
+         duration = Math.round(duration * vehicleFactor * 10) / 10; // Apply factor, keep one decimal
+
+         bookingData.mainService = { name: serviceCategory, price: price, duration: duration };
+
+         document.getElementById('selected-service-name').textContent = serviceCategory;
+         document.getElementById('selected-service-price').textContent = price.toFixed(2);
+         document.getElementById('selected-service-duration').textContent = duration;
+
+         updateTotals(); // Update totals when main service changes
+     }
+
+     function updateAddonPricing() {
+         // ### TODO: Implement if addon prices depend on vehicle type ###
+         console.log("Updating addon pricing (if necessary) based on vehicle:", bookingData.vehicleType);
+         // Example: Iterate through addon buttons and update their data-price attribute
+         // addonButtons.forEach(btn => {
+         //    let basePrice = parseFloat(btn.dataset.basePrice); // Assuming you add a base price attribute
+         //    let newPrice = basePrice * (bookingData.vehicleType === 'Truck' ? 1.1 : 1.0);
+         //    btn.dataset.price = newPrice;
+         //    // Update the text label too
+         // });
+         updateTotals(); // Recalculate after potential price changes
+     }
+
+
+    addonButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const addonName = button.previousElementSibling.textContent.split('(')[0].trim(); // Get name before price
+            const addonId = button.dataset.addon;
+            const price = parseFloat(button.dataset.price);
+            const duration = parseFloat(button.dataset.duration);
+
+            const existingAddonIndex = bookingData.addons.findIndex(a => a.id === addonId);
+
+            if (existingAddonIndex > -1) {
+                // Remove addon
+                bookingData.addons.splice(existingAddonIndex, 1);
+                button.textContent = 'Add';
+                button.classList.remove('added');
+            } else {
+                // Add addon
+                bookingData.addons.push({ id: addonId, name: addonName, price: price, duration: duration });
+                button.textContent = 'Remove';
+                button.classList.add('added');
+            }
+            updateTotals();
+        });
+    });
+
+     function updateTotals() {
+         bookingData.totalPrice = bookingData.mainService.price;
+         bookingData.totalDuration = bookingData.mainService.duration;
+
+         const selectedAddonsList = document.getElementById('selected-addons-summary');
+         selectedAddonsList.innerHTML = ''; // Clear previous list
+
+         bookingData.addons.forEach(addon => {
+             bookingData.totalPrice += addon.price;
+             bookingData.totalDuration += addon.duration;
+             const li = document.createElement('li');
+             li.textContent = `${addon.name} ($${addon.price.toFixed(2)}, ${addon.duration}hr)`;
+             selectedAddonsList.appendChild(li);
+         });
+
+          if (bookingData.addons.length === 0) {
+              const li = document.createElement('li');
+              li.textContent = "No add-ons selected.";
+              li.style.fontStyle = 'italic';
+              selectedAddonsList.appendChild(li);
+          }
+
+
+         document.getElementById('total-price').textContent = bookingData.totalPrice.toFixed(2);
+         document.getElementById('total-duration').textContent = bookingData.totalDuration.toFixed(1); // Show one decimal for duration
+     }
+
+    function updateDateTimeDuration() {
+         document.getElementById('datetime-duration-needed').textContent = bookingData.totalDuration.toFixed(1);
+          // ### TODO: Add logic here to filter time slots based on the new totalDuration ###
+         console.log("Need to generate/filter time slots for duration:", bookingData.totalDuration);
+    }
+
+
+     // --- Review & Booking ---
+
+     function populateReview() {
+         document.getElementById('review-location').textContent = bookingData.location || 'N/A';
+         document.getElementById('review-vehicle').textContent = bookingData.vehicleType || 'N/A';
+         document.getElementById('review-datetime').textContent = `${bookingData.selectedDate || 'N/A'} at ${bookingData.selectedTime || 'N/A'}`;
+         document.getElementById('review-service').textContent = `${bookingData.mainService.name || 'N/A'} ($${bookingData.mainService.price.toFixed(2)})`;
+
+         const addonsUl = document.getElementById('review-addons');
+         addonsUl.innerHTML = ''; // Clear previous
+         if (bookingData.addons.length > 0) {
+            bookingData.addons.forEach(addon => {
+                 const li = document.createElement('li');
+                 li.textContent = `${addon.name} ($${addon.price.toFixed(2)})`;
+                 addonsUl.appendChild(li);
+             });
+         } else {
+             const li = document.createElement('li');
+             li.textContent = 'None';
+             addonsUl.appendChild(li);
+         }
+
+         document.getElementById('review-duration').textContent = bookingData.totalDuration.toFixed(1);
+         document.getElementById('review-condition').textContent = bookingData.conditionNotes || 'None provided';
+         document.getElementById('review-name').textContent = `${bookingData.firstName || ''} ${bookingData.lastName || ''}`;
+         document.getElementById('review-email').textContent = bookingData.email || 'N/A';
+         document.getElementById('review-phone').textContent = bookingData.phone || 'N/A';
+         document.getElementById('review-total').textContent = bookingData.totalPrice.toFixed(2);
+     }
+
+     bookNowButton.addEventListener('click', function() {
+        console.log("Attempting to book with data:", bookingData);
+        document.getElementById('booking-error').style.display = 'none'; // Hide previous error
+
+        // ### !!! CRUCIAL: Backend Integration Point !!! ###
+        // 1. Show a loading indicator if desired
+        // 2. Send 'bookingData' to your backend server API using fetch()
+        // 3. Handle the response from the server
+
+        // Example using fetch (replace with your actual backend endpoint):
+        /*
+        fetch('/api/create-booking', { // YOUR BACKEND ENDPOINT HERE
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(bookingData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                // If response status is not 2xx, throw an error to be caught below
+                return response.json().then(err => { throw new Error(err.message || 'Booking failed. Please try again.') });
+            }
+            return response.json(); // Parse JSON body of the success response
+        })
+        .then(data => { // 'data' is the parsed JSON from the backend on success
+            console.log('Booking successful:', data);
+            // Populate confirmation screen
+            document.getElementById('confirm-email').textContent = bookingData.email;
+            document.getElementById('confirm-ref').textContent = data.bookingId || 'N/A'; // Assuming backend sends back an ID
+             document.getElementById('confirm-datetime').textContent = `${bookingData.selectedDate} at ${bookingData.selectedTime}`;
+            // Move to confirmation step
+            showStep(steps.length - 1); // Show the last step (confirmation)
+        })
+        .catch(error => {
+            console.error('Booking failed:', error);
+            document.getElementById('booking-error').textContent = `Booking failed: ${error.message}`;
+             document.getElementById('booking-error').style.display = 'block';
+            // Hide loading indicator if shown
+        });
+        */
+
+        // --- SIMULATION FOR NOW (Remove when using fetch) ---
+        console.warn("SIMULATING Booking Success! Remove this block when backend is connected.");
+         setTimeout(() => { // Simulate network delay
+            // Populate confirmation screen
+            document.getElementById('confirm-email').textContent = bookingData.email;
+            document.getElementById('confirm-ref').textContent = `SIM-${Date.now()}`; // Simulated ID
+            document.getElementById('confirm-datetime').textContent = `${bookingData.selectedDate} at ${bookingData.selectedTime}`;
+            // Move to confirmation step
+            showStep(steps.length - 1); // Show the last step (confirmation)
+         }, 1000);
+         // --- END SIMULATION ---
+
+    });
+
+    // --- Initial Setup ---
+    updateTotals(); // Calculate initial totals based on default main service (if any)
+    showStep(0); // Show the first step initially
+
+});

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Detailing Booking</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="booking-container">
+        <h1>Book Your Car Detail</h1>
+
+        <!-- ========= Step 1: Location ========= -->
+        <div id="step-location" class="booking-step active">
+            <h2>Step 1: Enter Your Service Location</h2>
+            <label for="location">Address or Zip Code:</label>
+            <input type="text" id="location" name="location" placeholder="e.g., 123 Main St, Anytown or 90210">
+            <p class="error-message" id="location-error"></p>
+            <button class="next-btn" data-step="1">Check Availability & Continue</button>
+        </div>
+
+        <!-- ========= Step 2: Vehicle Type ========= -->
+        <div id="step-vehicle-type" class="booking-step">
+            <h2>Step 2: Select Your Vehicle Type</h2>
+            <div class="option-group">
+                <!-- Add more vehicle types as needed -->
+                <div class="option-card" data-value="Sedan">
+                    <img src="placeholder-sedan.png" alt="Sedan"> <!-- Replace with actual image -->
+                    <p>Sedan (4 Door)</p>
+                </div>
+                <div class="option-card" data-value="Coupe">
+                    <img src="placeholder-coupe.png" alt="Coupe"> <!-- Replace with actual image -->
+                    <p>Coupe (2 Door)</p>
+                </div>
+                <div class="option-card" data-value="SUV-5Seat">
+                    <img src="placeholder-suv5.png" alt="SUV 5 Seat"> <!-- Replace with actual image -->
+                    <p>SUV (5 Seat)</p>
+                </div>
+                 <div class="option-card" data-value="SUV-7Seat">
+                    <img src="placeholder-suv7.png" alt="SUV 7 Seat"> <!-- Replace with actual image -->
+                    <p>SUV (7 Seat)</p>
+                </div>
+                 <div class="option-card" data-value="Truck">
+                    <img src="placeholder-truck.png" alt="Truck"> <!-- Replace with actual image -->
+                    <p>Truck</p>
+                </div>
+            </div>
+            <p class="error-message" id="vehicle-error"></p>
+            <button class="back-btn" data-step="2">Back</button>
+            <!-- Selection handled by JS, no dedicated next button needed here unless required -->
+        </div>
+
+        <!-- ========= Step 3: Service Category ========= -->
+        <div id="step-service-category" class="booking-step">
+            <h2>Step 3: Choose Your Service</h2>
+             <div class="option-group">
+                <div class="option-card" data-value="Full Detail">
+                     <img src="placeholder-full.png" alt="Full Detail"> <!-- Replace with actual image -->
+                     <p>Full Detail (Inside & Out)</p>
+                </div>
+                 <div class="option-card" data-value="Exterior Detail">
+                     <img src="placeholder-exterior.png" alt="Exterior Detail"> <!-- Replace with actual image -->
+                     <p>Exterior Detail</p>
+                </div>
+                 <div class="option-card" data-value="Interior Detail">
+                     <img src="placeholder-interior.png" alt="Interior Detail"> <!-- Replace with actual image -->
+                     <p>Interior Detail</p>
+                </div>
+                 <div class="option-card" data-value="Maintenance Wash">
+                     <img src="placeholder-wash.png" alt="Maintenance Wash"> <!-- Replace with actual image -->
+                     <p>Maintenance Wash</p>
+                </div>
+            </div>
+            <p class="error-message" id="service-cat-error"></p>
+            <button class="back-btn" data-step="3">Back</button>
+             <!-- Selection handled by JS -->
+        </div>
+
+        <!-- ========= Step 4: Specific Service & Add-ons ========= -->
+        <div id="step-service-addons" class="booking-step">
+            <h2>Step 4: Confirm Service & Add Extras</h2>
+            <div id="main-service-details">
+                <!-- Details populated by JS based on Step 3 selection -->
+                <h3>Selected Service: <span id="selected-service-name"></span></h3>
+                <p>Base Price: $<span id="selected-service-price">0.00</span></p>
+                <p>Est. Duration: <span id="selected-service-duration">0</span> hours</p>
+            </div>
+            <hr>
+            <h3>Available Add-ons:</h3>
+            <div id="addons-list">
+                <!-- Add-ons loaded here by JS -->
+                <div class="addon-item">
+                    <span>6-7 Year Ceramic Coating ($530.00)</span>
+                    <button class="addon-btn" data-addon="ceramic-7yr" data-price="530" data-duration="5">Add</button>
+                </div>
+                 <div class="addon-item">
+                    <span>2-3 Year Ceramic Coating ($332.00)</span>
+                    <button class="addon-btn" data-addon="ceramic-3yr" data-price="332" data-duration="4">Add</button>
+                </div>
+                 <div class="addon-item">
+                    <span>3 Month Deep Wax ($98.00)</span>
+                    <button class="addon-btn" data-addon="deep-wax" data-price="98" data-duration="1">Add</button>
+                </div>
+                <!-- Add more add-ons -->
+            </div>
+            <hr>
+            <div id="current-selection-summary">
+                <h4>Your Selection:</h4>
+                <ul id="selected-addons-summary">
+                    <!-- Selected items listed by JS -->
+                </ul>
+                <p><strong>Total Estimated Duration:</strong> <span id="total-duration">0</span> hours</p>
+                <p><strong>Total Price:</strong> $<span id="total-price">0.00</span></p>
+            </div>
+            <button class="back-btn" data-step="4">Back</button>
+            <button class="next-btn" data-step="4">Select Date & Time</button>
+        </div>
+
+        <!-- ========= Step 5: Date & Time ========= -->
+        <div id="step-datetime" class="booking-step">
+            <h2>Step 5: Select Date & Time</h2>
+            <p>Total duration needed: <span id="datetime-duration-needed">0</span> hours</p>
+
+            <div id="calendar-container">
+                <!-- ### COMPLEX UI: Calendar Implementation Needed ### -->
+                <p><strong>Calendar Placeholder:</strong> Interactive calendar UI goes here.</p>
+                <input type="date" id="selected-date-input"> <!-- Simple date picker for now -->
+                 <!-- ### COMPLEX UI: Calendar Implementation Needed ### -->
+            </div>
+
+            <div id="time-slots-container">
+                 <!-- ### COMPLEX LOGIC: Time Slot Generation Needed ### -->
+                <p><strong>Time Slots Placeholder:</strong> Available time slots for the selected date, considering duration and existing bookings, will be displayed here.</p>
+                <select id="selected-time-slot">
+                    <option value="">--Select a time--</option>
+                    <option value="09:00">9:00 AM</option> <!-- Example static slots -->
+                    <option value="13:00">1:00 PM</option>
+                </select>
+                 <!-- ### COMPLEX LOGIC: Time Slot Generation Needed ### -->
+            </div>
+             <p class="error-message" id="datetime-error"></p>
+            <button class="back-btn" data-step="5">Back</button>
+            <button class="next-btn" data-step="5">Describe Vehicle</button>
+        </div>
+
+        <!-- ========= Step 6: Vehicle Condition ========= -->
+        <div id="step-condition" class="booking-step">
+            <h2>Step 6: Describe Vehicle Condition</h2>
+            <label for="condition-notes">Any specific notes about the vehicle's condition? (Optional)</label>
+            <textarea id="condition-notes" name="condition-notes" rows="4" placeholder="e.g., Heavy pet hair on back seats, coffee stain on passenger side floor, significant tar on lower panels..."></textarea>
+            <button class="back-btn" data-step="6">Back</button>
+            <button class="next-btn" data-step="6">Enter Your Details</button>
+        </div>
+
+        <!-- ========= Step 7: Customer Details ========= -->
+        <div id="step-details" class="booking-step">
+            <h2>Step 7: Your Details</h2>
+            <div>
+                <label for="first-name">First Name:</label>
+                <input type="text" id="first-name" name="first-name" required>
+                <p class="error-message" id="fname-error"></p>
+            </div>
+            <div>
+                <label for="last-name">Last Name:</label>
+                <input type="text" id="last-name" name="last-name" required>
+                 <p class="error-message" id="lname-error"></p>
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                 <p class="error-message" id="email-error"></p>
+            </div>
+            <div>
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" name="phone" required>
+                 <p class="error-message" id="phone-error"></p>
+            </div>
+            <button class="back-btn" data-step="7">Back</button>
+            <button class="next-btn" data-step="7">Review Booking</button>
+        </div>
+
+        <!-- ========= Step 8: Review & Book ========= -->
+        <div id="step-review" class="booking-step">
+            <h2>Step 8: Review Your Booking</h2>
+            <div id="review-summary">
+                <p><strong>Location:</strong> <span id="review-location"></span></p>
+                <p><strong>Vehicle Type:</strong> <span id="review-vehicle"></span></p>
+                <p><strong>Date & Time:</strong> <span id="review-datetime"></span></p>
+                <p><strong>Service:</strong> <span id="review-service"></span></p>
+                <p><strong>Add-ons:</strong></p>
+                <ul id="review-addons"></ul>
+                <p><strong>Est. Duration:</strong> <span id="review-duration"></span> hours</p>
+                <p><strong>Condition Notes:</strong> <span id="review-condition"></span></p>
+                <p><strong>Name:</strong> <span id="review-name"></span></p>
+                <p><strong>Email:</strong> <span id="review-email"></span></p>
+                <p><strong>Phone:</strong> <span id="review-phone"></span></p>
+                <hr>
+                <p><strong>Total Price:</strong> $<span id="review-total"></span></p>
+            </div>
+            <p class="error-message" id="booking-error"></p>
+            <button class="back-btn" data-step="8">Back</button>
+            <button id="book-now-btn">Book Now</button> <!-- Final Booking Button -->
+        </div>
+
+         <!-- ========= Step 9: Confirmation ========= -->
+        <div id="step-confirmation" class="booking-step">
+            <h2>Booking Confirmed!</h2>
+            <p>Thank you for booking your car detail with us.</p>
+            <p>You will receive an email confirmation shortly at <span id="confirm-email"></span>.</p>
+            <p>Your booking reference is: <strong id="confirm-ref">Loading...</strong></p> <!-- Needs backend response -->
+            <p>See you on <span id="confirm-datetime"></span>!</p>
+            <button onclick="window.location.reload()">Book Another Service</button> <!-- Simple way to restart -->
+        </div>
+
+    </div><!-- /.booking-container -->
+
+    <script src="script.js"></script>
+</body>
+</html>

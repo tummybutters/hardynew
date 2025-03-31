@@ -1,0 +1,191 @@
+efined User Booking Flow:
+
+Step 1: Enter Location
+
+User Action: Enters address/zip code. Clicks "Next/Check Availability".
+
+System Logic:
+
+Input Validation: Check if the input looks like a plausible location (basic format check).
+
+Service Area Check: Compare the input location against a predefined list/database/boundary definition of serviceable areas.
+
+Decision:
+
+If OUTSIDE Area: Display a clear message (e.g., "Sorry, we currently do not service this location.") - End of flow for this user path.
+
+If INSIDE Area: Store the validated service_location.
+
+Data Carried Forward: service_location
+
+Transition: Proceed to Step 2.
+
+Step 2: Select Vehicle Type
+
+User Action: Clicks on a vehicle type card (Coupe, Sedan, SUV, Truck, etc.).
+
+System Logic:
+
+Identify the selected vehicle type.
+
+Store the selected_vehicle_type.
+
+(Potential Future Logic): This selection might influence pricing or duration displayed in later steps.
+
+Data Carried Forward: service_location, selected_vehicle_type
+
+Transition: Proceed to Step 3.
+
+Step 3: Select Service Category
+
+User Action: Clicks on a main service category (Full Detail, Exterior Only, Interior Only, Maintenance).
+
+System Logic:
+
+Identify the selected service category.
+
+Store the selected_service_category.
+
+Prepare to display specific service packages within this category for the next step.
+
+Data Carried Forward: service_location, selected_vehicle_type, selected_service_category
+
+Transition: Proceed to Step 4.
+
+Step 4: Select Specific Service & Add-ons
+
+User Action: Views details of the primary service (based on Step 3), selects quantities (+) or (-) for desired Add-ons. Clicks "Add to Cart / Select Date & Time".
+
+System Logic:
+
+Display the primary service package details (description, base price, base duration) relevant to the selected_service_category. Adjust price/duration based on selected_vehicle_type if applicable.
+
+Display available Add-ons, again adjusting price/duration based on selected_vehicle_type if applicable.
+
+Dynamic Calculation: As user adds/removes add-ons:
+
+Update quantities for each selected add-on.
+
+Recalculate total_estimated_duration (base service duration + sum of selected add-on durations).
+
+Recalculate total_price (base service price + sum of selected add-on prices).
+
+Update the UI to reflect current selections and totals.
+
+On Confirmation Click: Store the selected_main_service (including its final price/duration), a list of selected_addons (each with name, quantity, price, duration), the calculated total_price, and the crucial total_estimated_duration.
+
+Data Carried Forward: service_location, selected_vehicle_type, selected_main_service, selected_addons (list), total_price, total_estimated_duration
+
+Transition: Proceed to Step 5.
+
+Step 5: Select Date & Time
+
+User Action: Selects an available date on the calendar, then selects an available time slot. Clicks "Next".
+
+System Logic:
+
+Display calendar interface. Mark available/unavailable dates (based on business rules, maybe existing bookings).
+
+On Date Selection:
+
+Fetch or calculate available time slots for the selected date.
+
+Availability Filtering: Ensure displayed slots meet criteria:
+
+Within business operating hours.
+
+Does not conflict with existing bookings.
+
+The time slot window is >= total_estimated_duration (from Step 4).
+
+Accounts for potential buffer time between appointments.
+
+On Time Selection: Highlight the chosen slot.
+
+On "Next" Click: Validate that a date and time slot have been selected. Store the selected_date and selected_start_time.
+
+Data Carried Forward: All previous data + selected_date, selected_start_time
+
+Transition: Proceed to Step 6.
+
+Step 6: Describe Vehicle Condition
+
+User Action: Enters notes into the text area about the vehicle's condition. Clicks "Next".
+
+System Logic:
+
+Capture the text input.
+
+Store the vehicle_condition_notes. (Validation might be minimal, e.g., length check).
+
+Data Carried Forward: All previous data + vehicle_condition_notes
+
+Transition: Proceed to Step 7.
+
+Step 7: Enter Customer Details
+
+User Action: Fills in First Name, Last Name, Email, Phone Number. Clicks "Next / Review Booking".
+
+System Logic:
+
+Capture input values.
+
+Input Validation:
+
+Check required fields are not empty.
+
+Check for valid email format.
+
+Check for plausible phone number format (can be basic).
+
+Decision:
+
+If Validation Fails: Display specific error messages near the relevant fields. Prevent proceeding.
+
+If Validation Passes: Store customer_first_name, customer_last_name, customer_email, customer_phone.
+
+Data Carried Forward: All previous data + customer_first_name, customer_last_name, customer_email, customer_phone
+
+Transition: Proceed to Step 8.
+
+Step 8: Review & Book
+
+User Action: Reviews the complete summary of the booking details. Clicks "Book Now".
+
+System Logic:
+
+Display Summary: Retrieve and clearly present all collected data:
+
+service_location
+
+selected_vehicle_type
+
+selected_main_service (name, price)
+
+selected_addons (list with names, quantities, prices)
+
+selected_date and selected_start_time (possibly show calculated end time: start time + total_estimated_duration)
+
+vehicle_condition_notes
+
+customer_first_name, customer_last_name, customer_email, customer_phone
+
+total_price
+
+(Optional): Display Promo Code field and apply logic if used.
+
+On "Book Now" Click:
+
+Compile all the final booking data into a structured object.
+
+Crucial API Call: Send this booking object to the backend server endpoint responsible for creating appointments.
+
+Handle Response:
+
+If Backend Success: Server confirms booking (e.g., saves to database, returns success status/booking ID). Redirect user to a dedicated Confirmation Screen/Page displaying success message and key details (like booking ID). Clear the temporary booking data stored in the user's browser session/state.
+
+If Backend Failure: Server indicates an error (e.g., time slot just got booked, payment issue [if implemented], general server error). Display a clear, user-friendly error message on the Review screen (e.g., "Sorry, that time slot is no longer available. Please go back and select a different time."). Do not clear the form data yet, allowing the user to potentially correct the issue (like choosing a new time).
+
+Data Carried Forward: None (cleared on success). Booking data is now persistent on the server.
+
+Transition: To Confirmation Screen (on success) or stay on Review Screen with error message (on failure).

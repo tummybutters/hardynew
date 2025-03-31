@@ -1,0 +1,211 @@
+body {
+    font-family: sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align items to the top */
+    min-height: 100vh;
+}
+
+.booking-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 700px; /* Adjust max-width as needed */
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+h2 {
+    color: #555;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+h3 {
+    color: #444;
+    margin-top: 25px;
+    margin-bottom: 10px;
+}
+
+.booking-step {
+    display: none; /* Hide all steps by default */
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.booking-step.active {
+    display: block; /* Show the active step */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #666;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding in width */
+    font-size: 1em;
+}
+
+textarea {
+    resize: vertical;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 10px;
+    transition: background-color 0.2s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button.back-btn {
+    background-color: #6c757d;
+    margin-right: 10px;
+}
+
+button.back-btn:hover {
+    background-color: #5a6268;
+}
+
+.option-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.option-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    flex: 1 1 150px; /* Allow cards to grow and shrink, base width 150px */
+    max-width: 200px;
+}
+
+.option-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.option-card.selected {
+    border-color: #007bff;
+    background-color: #e7f3ff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+}
+
+.option-card img {
+    max-width: 80px;
+    height: auto;
+    margin-bottom: 10px;
+    opacity: 0.8;
+}
+
+.option-card p {
+    margin: 0;
+    font-weight: bold;
+    color: #555;
+}
+
+.addon-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.addon-item:last-child {
+    border-bottom: none;
+}
+
+button.addon-btn {
+    background-color: #28a745;
+    padding: 5px 10px;
+    font-size: 0.9em;
+}
+button.addon-btn:hover {
+    background-color: #218838;
+}
+button.addon-btn.added {
+    background-color: #dc3545;
+}
+button.addon-btn.added:hover {
+    background-color: #c82333;
+}
+
+
+#review-summary p, #review-summary ul {
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+#review-summary span, #review-summary li {
+    color: #333;
+    font-weight: normal; /* Reset potential bolding */
+}
+#review-summary ul {
+    list-style: disc;
+    padding-left: 20px;
+    margin-top: 5px;
+}
+#review-summary li {
+     margin-bottom: 5px;
+}
+
+#review-summary strong {
+    color: #555;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 25px 0;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.9em;
+    margin-top: -10px; /* Pull up below the input */
+    margin-bottom: 10px;
+    display: none; /* Hidden by default */
+}
