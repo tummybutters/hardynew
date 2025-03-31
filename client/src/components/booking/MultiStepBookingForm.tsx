@@ -458,6 +458,12 @@ export default function MultiStepBookingForm() {
                                   description: "We currently only service areas within California, from Sacramento to San Diego. Please enter a location within our service area.",
                                   variant: "destructive",
                                 });
+                              } else if (isValid && field.value) {
+                                toast({
+                                  title: "Address Verified",
+                                  description: "Great! Your location is within our service area.",
+                                  variant: "default",
+                                });
                               }
                             }}
                             field={field}
