@@ -455,7 +455,7 @@ export default function MultiStepBookingForm() {
                               if (!isValid && field.value) {
                                 toast({
                                   title: "Location Outside Service Area",
-                                  description: "We currently only service areas within 25 miles of Irvine, CA. Please enter a location within our service area.",
+                                  description: "We currently only service areas within California, from Sacramento to San Diego. Please enter a location within our service area.",
                                   variant: "destructive",
                                 });
                               }
@@ -471,7 +471,7 @@ export default function MultiStepBookingForm() {
                                 <div>
                                   <h4 className="text-sm font-medium text-red-800">Outside Service Area</h4>
                                   <p className="text-sm text-red-700 mt-1">
-                                    The address you've entered is outside our service area. We currently only service locations within 25 miles of Irvine, CA. Please enter a different address or contact us for special arrangements.
+                                    The address you've entered is outside our service area. We currently only service locations within California, from Sacramento to San Diego. Please enter a different address or contact us for special arrangements.
                                   </p>
                                 </div>
                               </div>

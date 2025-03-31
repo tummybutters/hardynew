@@ -9,11 +9,19 @@ import { MapPin, Check, X } from 'lucide-react';
 // Set your Mapbox access token
 mapboxgl.accessToken = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcQ';
 
-// Service area coordinates - approximately 25 miles around Irvine, CA
-const IRVINE_CENTER = [-117.8265, 33.6846]; // Irvine, CA coordinates
-const SERVICE_RADIUS_MILES = 25;
+// Service area coordinates - Central California
+const CENTER_POINT = [-119.4179, 36.7783]; // Central California coordinates
+const SERVICE_RADIUS_MILES = 300; // Large enough to cover most of California
 const MILES_TO_KM = 1.60934;
 const KM_TO_DEGREES = 0.01; // Very rough approximation, 1km ≈ 0.01 degrees at the equator
+
+// Service area bounds - covering Sacramento to SoCal
+const CALIFORNIA_BOUNDS = {
+  north: 39.5, // Sacramento area
+  south: 32.5, // San Diego area
+  west: -124.4, // Pacific Coast
+  east: -114.1 // Eastern California
+};
 
 interface LocationSearchProps {
   value: string;
@@ -31,7 +39,7 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState('');
-  const [showMap, setShowMap] = useState(false);
+  const [showMap, setShowMap] = useState(true);
   const [isInServiceArea, setIsInServiceArea] = useState<boolean | null>(null);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
   
@@ -43,37 +51,41 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
       const mapInstance = new mapboxgl.Map({
         container: mapContainerRef.current!,
         style: 'mapbox://styles/mapbox/streets-v12',
-        center: [IRVINE_CENTER[0], IRVINE_CENTER[1]] as [number, number],
-        zoom: 10
+        center: [CENTER_POINT[0], CENTER_POINT[1]] as [number, number],
+        zoom: 6
       });
       
       mapInstance.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
       
-      // Add a circle to represent service area
+      // Add California service area
       mapInstance.on('load', () => {
-        mapInstance.addSource('service-area', {
+        // Create a bounding box for California
+        mapInstance.addSource('california-area', {
           type: 'geojson',
           data: {
             type: 'Feature',
             geometry: {
-              type: 'Point',
-              coordinates: [IRVINE_CENTER[0], IRVINE_CENTER[1]] as [number, number]
+              type: 'Polygon',
+              coordinates: [[
+                [CALIFORNIA_BOUNDS.west, CALIFORNIA_BOUNDS.north], // Northwest
+                [CALIFORNIA_BOUNDS.east, CALIFORNIA_BOUNDS.north], // Northeast
+                [CALIFORNIA_BOUNDS.east, CALIFORNIA_BOUNDS.south], // Southeast
+                [CALIFORNIA_BOUNDS.west, CALIFORNIA_BOUNDS.south], // Southwest
+                [CALIFORNIA_BOUNDS.west, CALIFORNIA_BOUNDS.north]  // Back to Northwest to close the polygon
+              ]]
             },
             properties: {}
           }
         });
         
         mapInstance.addLayer({
-          id: 'service-area-fill',
-          type: 'circle',
-          source: 'service-area',
+          id: 'california-area-fill',
+          type: 'fill',
+          source: 'california-area',
           paint: {
-            'circle-radius': SERVICE_RADIUS_MILES * MILES_TO_KM * KM_TO_DEGREES * 100,
-            'circle-color': '#FFB375',
-            'circle-opacity': 0.2,
-            'circle-stroke-width': 2,
-            'circle-stroke-color': '#EE432C',
-            'circle-stroke-opacity': 0.6
+            'fill-color': '#FFB375',
+            'fill-opacity': 0.2,
+            'fill-outline-color': '#EE432C'
           }
         });
       });
@@ -93,25 +105,18 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
     };
   }, [showMap]);
   
-  // Function to check if coordinates are within service area
+  // Function to check if coordinates are within California service area
   const checkServiceArea = (coords: [number, number]): boolean => {
-    // Calculate approximate distance using Haversine formula
-    const lat1 = IRVINE_CENTER[1];
-    const lon1 = IRVINE_CENTER[0];
-    const lat2 = coords[1];
-    const lon2 = coords[0];
+    const lon = coords[0];
+    const lat = coords[1];
     
-    const R = 6371; // Radius of the earth in km
-    const dLat = deg2rad(lat2 - lat1);
-    const dLon = deg2rad(lon2 - lon1);
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2); 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-    const distance = R * c; // Distance in km
-    
-    return distance <= (SERVICE_RADIUS_MILES * MILES_TO_KM);
+    // Check if coordinates are within California bounds
+    return (
+      lat >= CALIFORNIA_BOUNDS.south &&
+      lat <= CALIFORNIA_BOUNDS.north &&
+      lon >= CALIFORNIA_BOUNDS.west &&
+      lon <= CALIFORNIA_BOUNDS.east
+    );
   };
   
   const deg2rad = (deg: number): number => {
@@ -134,7 +139,7 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
       });
       
       const response = await fetch(
-        `https://api.mapbox.com/search/searchbox/v1/suggest?q=${encodeURIComponent(query)}&language=en&limit=5&session_token=${sessionToken}&country=US&proximity=${IRVINE_CENTER[0]},${IRVINE_CENTER[1]}&access_token=${mapboxgl.accessToken}`
+        `https://api.mapbox.com/search/searchbox/v1/suggest?q=${encodeURIComponent(query)}&language=en&limit=5&session_token=${sessionToken}&country=US&proximity=${CENTER_POINT[0]},${CENTER_POINT[1]}&access_token=${mapboxgl.accessToken}`
       );
       
       const data = await response.json();
@@ -217,11 +222,6 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
   const handleSelectSuggestion = (suggestion: any) => {
     retrieveAddress(suggestion.mapbox_id);
   };
-  
-  // Toggle map visibility
-  const toggleMap = () => {
-    setShowMap(!showMap);
-  };
 
   return (
     <div className="space-y-4">
@@ -273,7 +273,7 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
         
         {isInServiceArea === false && (
           <div className="text-xs text-red-500 mt-1">
-            This address is outside our service area (25 miles from Irvine, CA).
+            This address is outside our service area in California.
           </div>
         )}
         
@@ -284,26 +284,15 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
       
       <div className="flex items-center justify-between">
         <div className="text-xs text-gray-500">
-          We service Irvine and surrounding areas within a 25-mile radius.
+          We service all California locations from Sacramento to San Diego.
         </div>
-        
-        <Button 
-          type="button" 
-          variant="outline" 
-          size="sm"
-          onClick={toggleMap}
-          className="text-xs"
-        >
-          {showMap ? 'Hide Map' : 'Show Map'}
-        </Button>
       </div>
       
-      {showMap && (
-        <div 
-          ref={mapContainerRef} 
-          className="h-[200px] w-full rounded-md border border-gray-200 overflow-hidden transition-all duration-300"
-        />
-      )}
+      {/* Map is always visible */}
+      <div 
+        ref={mapContainerRef} 
+        className="h-[350px] w-full rounded-md border border-gray-200 overflow-hidden transition-all duration-300 mt-4"
+      />
     </div>
   );
 }

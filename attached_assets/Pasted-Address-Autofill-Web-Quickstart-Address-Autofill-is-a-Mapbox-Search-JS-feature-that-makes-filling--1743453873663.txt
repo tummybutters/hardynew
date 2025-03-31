@@ -1,0 +1,238 @@
+Address Autofill - Web Quickstart
+Address Autofill is a Mapbox Search JS feature that makes filling out postal addresses on web forms faster, easier, and more accurate. It presents the user with suggested address matches after they begin typing in your form. Users can click a suggested address and instantly fill in the remaining inputs (city, state, postal code, etc).
+
+Address autofill allows users to enter their information with fewer keystrokes and provide more accurate information.
+
+autofill-and-minimap
+This Quickstart Guide will help you get started with Address Autofill using the Mapbox Search JS Web framework (using HTML Custom Elements).
+
+To use Address Autofill in a React app, see the Address Autofill React Quickstart.
+
+Prerequisites
+To use Mapbox Search JS, you need to have a Mapbox access token.
+
+Your default public token
+You can use your default public token to get started with the code snippets in this guide.
+
+Because you are logged in to your Mapbox account, your default public token is available to copy below.
+
+pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcQ
+This access token associates your search requests with a Mapbox account for billing. For more information on creating and using access tokens, see our token management documentation.
+
+Installation
+There are two ways to include Mapbox Search JS depending on your web project's architecture. You can use the Mapbox CDN to quickly add Mapbox Search JS to any web page with a <script> tag. For more complex projects that use a javascript module bundler such as webpack or rollup, you can install Mapbox Search JS via npm.
+
+Installation when using the Mapbox CDN
+Include the Mapbox Search JS Web framework in your project by adding the following <script> tag to the <head> in your HTML file.
+
+<script id="search-js" defer src="https://api.mapbox.com/search-js/v1.0.0/web.js"></script>
+This script will give you access to Mapbox's HTML Custom Elements (<mapbox-address-autofill>,<mapbox-search-box> <mapbox-geocoder>, etc ) as well as the mapboxsearch global object. These will allow your webpage access to the Mapbox Search JS functionality.
+
+Installation when using a Module Bundler
+Install the NPM package.
+
+npm install --save @mapbox/search-js-web
+There is no default export for @mapbox/search-js-web, you must use named exports.
+
+import { MapboxAddressAutofill, MapboxSearchBox, MapboxGeocoder, config } from '@mapbox/search-js-web'
+Automatic attachment to an existing form
+The autofill function automatically attaches to eligible <input> elements and is the easiest and fastest way to add address autofill to your website.
+
+Eligible inputs must be a descendant of a <form> element, and the form must have inputs with appropriate HTML autocomplete attributes.
+
+<form>
+  <input type="text" name="address-1" autocomplete="address-line1" />
+  <input type="text" name="address-2" autocomplete="address-line2" />
+  <input type="text" name="city" autocomplete="address-level2" />
+  <input type="text" name="state" autocomplete="address-level1" />
+  <input type="text" name="zip" autocomplete="postal-code" />
+</form>
+Implementation when using the Mapbox CDN:
+<script>
+    const script = document.getElementById('search-js');
+    // wait for the Mapbox Search JS script to load before using it
+    script.onload = function () {
+      mapboxsearch.config.accessToken = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcQ'
+
+      mapboxsearch.autofill({
+        options: {
+          country: 'us'
+        }
+      })
+    };
+</script>
+Implementation when using a module bundler:
+import { autofill, config } from '@mapbox/search-js-web'
+
+config.accessToken = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcQ'
+
+autofill({
+  options: {
+    country: 'us'
+  }
+})
+EXAMPLE
+Autofill suggestions example
+This example uses the autofill() function to automatically add suggestions to an address input.
+
+Using the Custom Element in HTML
+You can add the <mapbox-address-auofill> component directly to your HTML. This method does not require JavaScript code after adding the library to your project.
+
+<mapbox-address-autofill> must be a descendant of a <form> element must wrap <input> elements with appropriate autocomplete attributes.
+
+<form>
+    <mapbox-address-autofill
+      access-token="pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcQ"
+      theme='{"variables": {"colorText": "#32a852"}}'
+      popover-options='{"offset": 30}'
+    >
+        <input
+          type="text"
+          name="address-1"
+          autocomplete="address-line1"
+          placeholder="Address"
+        />
+        <input
+          type="text"
+          name="address-2"
+          autocomplete="address-line2"
+          placeholder="Apartment, suite, etc. (optional)"
+        />
+        <div class="city-state-zip">
+            <input
+              type="text"
+              name="address"
+              autocomplete="address-level2"
+              placeholder="City"
+            />
+            <input
+              type="text"
+              name="address"
+              autocomplete="address-level1"
+              placeholder="State"
+            />
+            <input
+              type="text"
+              name="address"
+              autocomplete="postal-code"
+              placeholder="ZIP Code"
+            />
+        </div>
+    </mapbox-address-autofill>
+</form>
+In the above example, the HTML custom element has its access-token, theme, and popover-options attributes set.
+
+EXAMPLE
+Autofill suggestions (custom elements) example
+Try the full Address Autofill workflow on a working address form.
+
+Using the Custom Element via JavaScript
+You may also add the <mapbox-address-autofill> element to the page after it loads via JavaScript code by using the MapboxAddressAutofill class. You can configure the autofill behavior by setting various properties on the element's instance before adding it to the DOM.
+
+This method may be preferable for users who are already using a lot of JavaScript in their projects, and want to control and configure address autofill from their JavaScript code.
+
+The same rules for placement apply, it must be a descendant of a <form> element must wrap <input> elements with appropriate autocomplete attributes.
+
+<form>
+  <input id="address-input" type="text" name="address" autocomplete="shipping street-address" />
+</form>
+Implementation when using the Mapbox CDN
+<script>
+  const script = document.getElementById('search-js');
+  // wait for the Mapbox Search JS script to load before using it
+  script.onload = function () {
+      // instantiate a <mapbox-address-autofill> element using the MapboxAddressAutofill class
+      const autofillElement = new mapboxsearch.MapboxAddressAutofill()
+
+      autofillElement.accessToken = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcQ'
+
+      // set the <mapbox-address-autofill> element's options
+      autofillElement.options = {
+          country: 'us',
+      }
+
+
+      const the_input = document.getElementById('address-input');
+      const the_form = the_input.parentElement
+
+      // append the <input> to <mapbox-address-autofill>
+      autofillElement.appendChild(the_input);
+      // append <mapbox-address-autofill> to the <form>
+      the_form.appendChild(autofillElement);
+
+  };
+</script>
+Implementation when using a module bundler
+import { MapboxAddressAutofill } from '@mapbox/search-js-web'
+
+// instantiate a <mapbox-address-autofill> element using the MapboxAddressAutofill class
+const autofillElement = new MapboxAddressAutofill()
+
+autofillElement.accessToken = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcQ'
+
+// set the <mapbox-address-autofill> element's options
+autofillElement.options = {
+    country: 'us',
+}
+
+const the_input = document.getElementById('address-input');
+const the_form = the_input.parentElement
+
+// append the <input> to <mapbox-address-autofill>
+autofillElement.appendChild(the_input);
+// append <mapbox-address-autofill> to the <form>
+the_form.appendChild(autofillElement);
+Address Confirmation
+Address confirmation lets users match their address against our comprehensive database and presents a confirmation dialog. This workflow is usually triggered during form submission, providing a higher quality address to match the user's input if one can be found.
+
+did-you-mean
+With the minimap option, a small map image is presented with a pin for visual confirmation of an address. The user can move the pin to provide details about the physical delivery location that matches the address.
+
+To implement Address Confirmation, intercept the form submission and call the asynchronous function confirmAddress(), passing in the form element. confirmAddress() returns an object with the type property set to either 'change', 'nochange', or 'cancel' based on the user's actions. You can then continue with form submission using the original address or the suggested address.
+
+'change' indicates that the Autofill API found a better match and the user selected it for use. In this case, a feature property is also included in the returned object which includes the suggested match. 'nochange' indicates that the user chose to use the address they provided instead of the suggested address. 'cancel' indicates that the user closed the confirmation dialog.
+
+const form = document.querySelector("form");
+
+form.addEventListener("submit", async (e) => {
+  // do not submit the form
+  e.preventDefault();
+  const result = await confirmAddress(form, {
+    minimap: true
+  });
+
+  // submit the original address if the user did not select a better match
+  if (result.type === 'nochange') submitForm();
+  // submit the address data from the better match chosen by the user
+  if (result.type === 'change') {
+    submitFormWithChanges(result.feature)
+  };
+});
+The Minimap can also be implemented on its own via the MapboxAddressMinimap HTML custom element.
+
+EXAMPLE
+Address Confirmation example
+Try out the Mapbox Search JS Address Confirmation workflow with a working address form.
+
+Autocomplete Attributes
+Address Autofill requires HTML autocomplete tags, a standard browser feature. Google Chrome, Mozilla Firefox, and Safari use autocomplete to autofill addresses and credit cards. You may already have autocomplete tags.
+
+You can test this on your website with using the JavaScript Console. After opening the Console, run the following command:
+
+document.querySelector('[autocomplete~="street-address"], [autocomplete~="address-line1"]') != null
+The output will read true if autocomplete tags are present.
+
+Add autocomplete tags
+If autocomplete tags are not present, you'll have to add them to each HTML input you'd like to autofill.
+
+Here are common autocomplete tags for addresses. This is a non-exhaustive list.
+
+Autocomplete tag	Description	Example
+autocomplete="address-line1"	The first line of an address, usually includes the street number and street.	740 15th St NW
+autocomplete="address-line2"	The second line of an address, usually an apartment number.	Apartment 700
+autocomplete="address-level1"	The least specific administrative level. In the United States, this is the state or territory.	District of Columbia
+autocomplete="address-level2"	The second least specific administrative level. In the United States, this is the city.	Washington
+autocomplete="address-level3"	In countries with more than two administrative levels.	
+autocomplete="postal-code"	The postal code of the administrative level.	20005
+autocomplete="country"	The standardized country code.	us
+autocomplete="country-name"	The country name. Note: These are non-standardized.	United States
