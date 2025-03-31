@@ -1,157 +1,229 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Star, CheckCircle2 } from "lucide-react";
 
-type ServiceCategory = "all" | "exterior" | "interior" | "protection" | "packages";
+interface ServiceFeature {
+  text: string;
+}
+
+interface ServiceBonus {
+  text: string;
+  value?: string;
+}
 
 interface Service {
   id: number;
   title: string;
-  price: string;
+  originalPrice: string;
+  salePrice: string;
+  discount: string;
   duration: string;
-  description: string;
-  category: ServiceCategory;
-  image: string;
+  features: ServiceFeature[];
+  bonuses: ServiceBonus[];
+  bgColor: string;
 }
 
+// Based on the provided pricing sheet
 const services: Service[] = [
   {
     id: 1,
-    title: "Exterior Wash & Wax",
-    price: "$89",
-    duration: "60-90 min",
-    description: "Complete exterior cleaning including wheels and tires, followed by a hand-applied premium wax for lasting protection and shine.",
-    category: "exterior",
-    image: "https://images.unsplash.com/photo-1635260409814-a2efd3855664?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+    title: "Express Detail",
+    originalPrice: "$160-$220",
+    salePrice: "$125-175",
+    discount: "20% OFF",
+    duration: "2 Hour Job",
+    features: [
+      { text: "A comprehensive surface-level interior vacuum" },
+      { text: "Exterior pressure wash pre-foam rinse and contact wash foam bath for a spotless finish" },
+      { text: "Microfiber towel dry with full wax spray" }
+    ],
+    bonuses: [
+      { text: "Key Fob Refurbishment/Cleaning", value: "$30 Value" },
+      { text: "Dashboard and Infotainment Detail", value: "$15 Value" },
+      { text: "Streak-free Window Detail", value: "$15 Value" }
+    ],
+    bgColor: "bg-gradient-to-br from-orange-200 to-orange-300"
   },
   {
     id: 2,
-    title: "Interior Deep Clean",
-    price: "$129",
-    duration: "2-3 hours",
-    description: "Thorough interior cleaning including steam cleaning of upholstery, conditioning of leather surfaces, and detailed cleaning of all interior components.",
-    category: "interior",
-    image: "https://images.unsplash.com/photo-1510903117036-f2c66bbcbae2?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+    title: "Interior Detail Deep Clean",
+    originalPrice: "$190-$440",
+    salePrice: "$150-350",
+    discount: "20% OFF",
+    duration: "2-4 Hour Job",
+    features: [
+      { text: "Deep surface vacuuming to remove dirt and debris from all areas of your car" },
+      { text: "Your choice of carpet or leather conditioning to restore and protect interior surfaces" },
+      { text: "Spot stain removal to eliminate unsightly blemishes and refresh your car's interior" }
+    ],
+    bonuses: [
+      { text: "All previous bonuses", value: "$40 Value" },
+      { text: "Trunk and spot cleaning", value: "$15 Value" },
+      { text: "Air vent dusting and cleaning", value: "$10 Value" },
+      { text: "Door jams and door panel detailing", value: "$15 Value" }
+    ],
+    bgColor: "bg-gradient-to-br from-orange-200 to-orange-300"
   },
   {
     id: 3,
-    title: "Ceramic Coating",
-    price: "$599+",
-    duration: "Full Day",
-    description: "Professional-grade ceramic coating application for long-lasting protection against environmental contaminants with 2-5 year durability.",
-    category: "protection",
-    image: "https://images.unsplash.com/photo-1570198588544-7ca0b4b5c383?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+    title: "Exterior Wash & Wax",
+    originalPrice: "$250-$500",
+    salePrice: "$200-400",
+    discount: "20% OFF",
+    duration: "2-4 Hour Job",
+    features: [
+      { text: "Machine buffer Ceramic Wax application to protect your paint for 6-12 months and leave a stunning mirror-shine finish" },
+      { text: "Iron-embedded paint decontamination to ensure a smooth, clean surface before waxing" },
+      { text: "Pre-contact wash foam treatment for thorough dirt removal and paint preparation" }
+    ],
+    bonuses: [
+      { text: "Wheel and wheel barrel cleaning", value: "$20 value" },
+      { text: "Tire cleaning and dressing", value: "$15 value" },
+      { text: "Full Contact wash with microfiber towel", value: "$35 value" }
+    ],
+    bgColor: "bg-gradient-to-br from-orange-200 to-orange-300"
   },
   {
     id: 4,
-    title: "Paint Correction",
-    price: "$349+",
-    duration: "4-8 hours",
-    description: "Multi-step paint correction process to remove swirls, scratches, and oxidation, restoring your vehicle's paint to a mirror-like finish.",
-    category: "exterior",
-    image: "https://images.unsplash.com/photo-1606048598544-d0d31f2f159a?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+    title: "Exterior Detail Polish & Wax",
+    originalPrice: "$440-$560",
+    salePrice: "$350-450",
+    discount: "20% OFF",
+    duration: "3-6 Hour Job",
+    features: [
+      { text: "Machine buffer Ceramic Wax: Protects your paint for 6-12 months and leaves a mirror-shine finish" },
+      { text: "Machine buffer compound polish: Removes scratches and swirls, restoring your car's paint" },
+      { text: "Iron-embedded paint decontamination" },
+      { text: "Contact wash with microfiber towel dry: Ensures a streak-free, professional finish" }
+    ],
+    bonuses: [
+      { text: "Includes ALL previous Express Detail & Exterior Wax Key Fob Refurbishment/Cleaning, Pre-contact wash foam treatment, wheels and wheel barrel cleaning, tire cleaning and dressing, door jams and door panel detailing", value: "$100 Value" }
+    ],
+    bgColor: "bg-gradient-to-br from-orange-200 to-orange-300"
   },
   {
     id: 5,
-    title: "Complete Detail Package",
-    price: "$249",
-    duration: "4-5 hours",
-    description: "Our most popular service combining exterior wash, wax, interior deep clean, and tire/trim treatment for a comprehensive refresh.",
-    category: "packages",
-    image: "https://images.unsplash.com/photo-1550355291-bbee04a92027?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
-  },
-  {
-    id: 6,
-    title: "Leather Conditioning",
-    price: "$79",
-    duration: "1-2 hours",
-    description: "Specialized cleaning and conditioning treatment for all leather surfaces to prevent cracking and restore supple texture.",
-    category: "interior",
-    image: "https://images.unsplash.com/photo-1592853625597-7d17be820d0c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+    title: "Luxury Full Detail: Interior & Exterior Perfection",
+    originalPrice: "$690-$1060",
+    salePrice: "$550-850",
+    discount: "20% OFF",
+    duration: "4-8 Hour Job",
+    features: [
+      { text: "Machine buffer Ceramic Wax to protect your paint for 6-12 months and leave a mirror-shine finish" },
+      { text: "Deep surface vacuuming to remove dirt and debris" },
+      { text: "Carpet or leather conditioning to restore and protect your surfaces" },
+      { text: "Spot stain removal for a refreshed and flawless interior" },
+      { text: "Dashboard and infotainment detailing" },
+      { text: "Door jams and panels deep clean" },
+      { text: "Entire Machine buffer compound polish" }
+    ],
+    bonuses: [
+      { text: "Includes ALL previous bonuses: iron-embedded paint decontamination, pre-contact wash foam treatment, wheels and wheel barrel cleaning, tire cleaning and dressing, contact wash with microfiber towel dry, air vent cleaning, and trunk cleaning with spot removal", value: "$150 Value" }
+    ],
+    bgColor: "bg-gradient-to-br from-orange-200 to-orange-300"
   }
 ];
 
-const categories = [
-  { id: "all", label: "All Services" },
-  { id: "exterior", label: "Exterior" },
-  { id: "interior", label: "Interior" },
-  { id: "protection", label: "Protection" },
-  { id: "packages", label: "Packages" }
-];
-
 export default function ServiceList() {
-  const [activeCategory, setActiveCategory] = useState<ServiceCategory>("all");
-  
-  const filteredServices = activeCategory === "all" 
-    ? services 
-    : services.filter(service => service.category === activeCategory);
+  const [hoveredService, setHoveredService] = useState<number | null>(null);
   
   return (
-    <div className="bg-white py-16">
+    <div className="bg-gradient-to-b from-slate-50 to-white py-16">
       <div className="container mx-auto px-4">
-        {/* Category Filter */}
-        <div className="flex flex-wrap justify-center mb-12 gap-4">
-          {categories.map(category => (
-            <Button
-              key={category.id}
-              variant={activeCategory === category.id ? "default" : "outline"}
-              className={`px-5 py-2 rounded-full ${
-                activeCategory === category.id 
-                  ? "bg-primary text-white" 
-                  : "bg-gray-50 text-gray-800"
-              }`}
-              onClick={() => setActiveCategory(category.id as ServiceCategory)}
-            >
-              {category.label}
-            </Button>
-          ))}
+        <div className="max-w-3xl mx-auto text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold font-heading text-gray-900 mb-4">Our Premium Mobile Detailing Services</h2>
+          <p className="text-gray-600 max-w-xl mx-auto">
+            We bring the full professional detailing experience right to your door, with packages designed for every need and vehicle type.
+          </p>
+          <div className="flex justify-center mt-4">
+            <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              Pricing varies by overall condition and vehicle type (Sedan/Coupe vs. Truck/SUV)
+            </div>
+          </div>
         </div>
         
-        {/* Service Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {filteredServices.map(service => (
+        {/* Service Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          {services.map((service) => (
             <div 
-              key={service.id} 
-              className="bg-gray-50 rounded-lg overflow-hidden shadow-md flex flex-col md:flex-row"
+              key={service.id}
+              className={`relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 transform ${
+                hoveredService === service.id ? 'scale-102 -translate-y-1' : ''
+              }`}
+              onMouseEnter={() => setHoveredService(service.id)}
+              onMouseLeave={() => setHoveredService(null)}
             >
-              <div className="md:w-2/5">
-                <img 
-                  src={service.image} 
-                  alt={service.title} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-6 md:w-3/5">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-xl font-bold font-heading text-gray-900">{service.title}</h3>
-                  <span className="text-primary font-bold">{service.price}</span>
+              {/* Card Background with Gradient */}
+              <div className={`${service.bgColor} p-6 pb-4`}>
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">{service.title}</h3>
+                  <div className="flex items-center text-gray-600 space-x-2 text-sm">
+                    <span className="line-through">{service.originalPrice}</span>
+                    <span className="font-medium text-red-600 bg-white/30 px-2 py-0.5 rounded-full">{service.discount}</span>
+                  </div>
+                  <div className="text-2xl font-bold mt-1">
+                    {service.salePrice}
+                  </div>
                 </div>
-                <div className="mt-1 mb-4">
-                  <span className="inline-block bg-primary/10 text-primary text-xs px-2 py-1 rounded-full mr-2">
-                    {categories.find(c => c.id === service.category)?.label}
-                  </span>
-                  <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                    {service.duration}
-                  </span>
+                
+                <div className="bg-white/50 backdrop-blur-sm px-4 py-2 rounded-md text-center text-xs font-medium text-gray-600 mb-4">
+                  {service.duration}
                 </div>
-                <p className="text-gray-600 mb-4">{service.description}</p>
-                <Link 
-                  href="/booking" 
-                  className="text-primary font-medium hover:text-red-600 transition-colors inline-flex items-center mt-auto"
-                >
-                  Book This Service <ArrowRight className="ml-2 h-4 w-4" />
+                
+                <Link href="/booking">
+                  <Button 
+                    className="w-full bg-red-600 hover:bg-red-700 text-white border-0 py-2 rounded-md transition-all duration-300"
+                  >
+                    Book Now
+                  </Button>
                 </Link>
               </div>
+              
+              {/* Service Features */}
+              <div className="bg-white p-6">
+                <ul className="space-y-3 mb-6">
+                  {service.features.map((feature, index) => (
+                    <li key={index} className="flex items-start text-sm">
+                      <CheckCircle2 className="text-primary shrink-0 mr-2 mt-0.5 h-4 w-4" />
+                      <span>{feature.text}</span>
+                    </li>
+                  ))}
+                </ul>
+                
+                {/* Bonuses Section */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="font-bold text-gray-900 mb-2">FREE BONUS</div>
+                  <ul className="space-y-2">
+                    {service.bonuses.map((bonus, index) => (
+                      <li key={index} className="flex justify-between items-center text-xs text-gray-600">
+                        <span>{bonus.text}</span>
+                        {bonus.value && <span className="text-primary font-semibold">{bonus.value}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              
+              {/* Highlight Border on Hover */}
+              <div className={`absolute inset-0 border-2 border-transparent rounded-xl pointer-events-none transition-all duration-300 ${
+                hoveredService === service.id ? 'border-primary' : ''
+              }`}></div>
             </div>
           ))}
         </div>
         
-        {/* CTA Button */}
-        <div className="text-center">
-          <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-white">
-            <Link href="/booking">Schedule Your Service</Link>
-          </Button>
+        {/* CTA Section */}
+        <div className="max-w-2xl mx-auto p-8 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 text-center">
+          <h3 className="text-2xl font-bold mb-3">Ready for the Ultimate Car Care Experience?</h3>
+          <p className="text-gray-600 mb-6">
+            Remember, all our services come to your location—no need to disrupt your day. Our satisfaction guarantee ensures your car will look its best or your service is free.
+          </p>
+          <Link href="/booking">
+            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white px-8">
+              Book Your Mobile Detail Now <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

@@ -55,19 +55,22 @@ const timeSlots = [
 ];
 
 const services = [
-  { value: "express", label: "Express Detail", price: "$99", description: "Hand wash, wheel cleaning, interior vacuum & wipe down (1 hour)" },
-  { value: "essential", label: "Essential Detail", price: "$159", description: "Express + door jambs, windows, dash & console deep clean (2 hours)" },
-  { value: "luxury", label: "Luxury Detail", price: "$249", description: "Essential + premium wax, full interior conditioning, & stain removal (3 hours)" },
-  { value: "ultimate", label: "Ultimate Detail + Paint Correction", price: "$399", description: "Our flagship service with paint decontamination & correction (5+ hours)" }
+  { value: "express", label: "Express Detail", price: "$125-$175", description: "Surface-level interior vacuum, exterior wash, microfiber towel dry, wax spray (2 hours)" },
+  { value: "interior", label: "Interior Detail Deep Clean", price: "$150-$350", description: "Deep vacuum, carpet/leather conditioning, spot stain removal, air vents & door panels cleaning (2-4 hours)" },
+  { value: "exterior", label: "Exterior Wash & Wax", price: "$200-$400", description: "Ceramic wax, paint decontamination, contact wash, wheel & tire cleaning (2-4 hours)" },
+  { value: "polish", label: "Exterior Detail Polish & Wax", price: "$350-$450", description: "Machine buffer ceramic wax, compound polish, scratch/swirl removal (3-6 hours)" },
+  { value: "luxury", label: "Luxury Full Detail", price: "$550-$850", description: "Complete interior & exterior perfection with ALL premium services included (4-8 hours)" }
 ];
 
 const addOns = [
-  { id: "ceramic", label: "Express Ceramic Coating (3-month)", price: "+$79" },
-  { id: "headlight", label: "Headlight Restoration", price: "+$59" },
-  { id: "engine", label: "Engine Bay Detailing", price: "+$49" },
-  { id: "leather", label: "Premium Leather Conditioning", price: "+$69" },
-  { id: "pet", label: "Pet Hair & Odor Treatment", price: "+$45" },
-  { id: "sanitize", label: "Interior Sanitization", price: "+$35" }
+  { id: "ceramic", label: "Premium Ceramic Coating (12-month protection)", price: "+$150" },
+  { id: "headlight", label: "Headlight Restoration & Protection", price: "+$75" },
+  { id: "engine", label: "Engine Bay Detail & Dressing", price: "+$85" },
+  { id: "leather", label: "Premium Leather Deep Conditioning", price: "+$95" },
+  { id: "pet", label: "Pet Hair Extraction & Odor Neutralizing", price: "+$65" },
+  { id: "sanitize", label: "Complete Interior Sanitization & Disinfection", price: "+$55" },
+  { id: "paint", label: "Paint Correction (Medium-Heavy Swirl Removal)", price: "+$120" },
+  { id: "clay", label: "Clay Bar Treatment", price: "+$45" }
 ];
 
 export default function BookingForm() {
