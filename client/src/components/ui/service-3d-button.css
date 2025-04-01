@@ -25,20 +25,21 @@
   height: 100%;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
-  background-color: white;
-  color: var(--primary);
+  background-color: #EE432C;
+  color: white;
   box-shadow: 
     0 1px 1px rgba(0, 0, 0, 0.1),
     0 2px 3px rgba(0, 0, 0, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transform: translateZ(0);
   transition: all 0.15s ease;
   z-index: 1;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
 .service-3d-button:hover .service-3d-button-face {
-  color: white;
-  background-image: linear-gradient(135deg, var(--red-primary), var(--orange-primary));
+  background-color: #D43D29;
 }
 
 .service-3d-button:active {
@@ -56,7 +57,7 @@
   width: 100%;
   height: 100%;
   border-radius: 0.5rem;
-  background-color: var(--red-primary-darker, #c83823);
+  background-color: #B32E1D;
   transform: translateY(4px) translateZ(-1px);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }

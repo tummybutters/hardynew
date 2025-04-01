@@ -44,7 +44,7 @@ const services: Service[] = [
       { text: "Dashboard and Infotainment Detail", value: "$15 Value" },
       { text: "Streak-free Window Detail", value: "$15 Value" }
     ],
-    bgColor: "bg-gradient-to-br from-orange-primary to-orange-light"
+    bgColor: "bg-[#FFAA75]"
   },
   {
     id: 2,
@@ -64,7 +64,7 @@ const services: Service[] = [
       { text: "Air vent dusting and cleaning", value: "$10 Value" },
       { text: "Door jams and door panel detailing", value: "$15 Value" }
     ],
-    bgColor: "bg-gradient-to-br from-orange-light to-orange-primary"
+    bgColor: "bg-[#FFAA75]"
   },
   {
     id: 3,
@@ -83,7 +83,7 @@ const services: Service[] = [
       { text: "Tire cleaning and dressing", value: "$15 value" },
       { text: "Full Contact wash with microfiber towel", value: "$35 value" }
     ],
-    bgColor: "bg-gradient-to-br from-red-primary to-orange-primary"
+    bgColor: "bg-[#FFAA75]"
   },
   {
     id: 4,
@@ -101,7 +101,7 @@ const services: Service[] = [
     bonuses: [
       { text: "Includes ALL previous Express Detail & Exterior Wax Key Fob Refurbishment/Cleaning, Pre-contact wash foam treatment, wheels and wheel barrel cleaning, tire cleaning and dressing, door jams and door panel detailing", value: "$100 Value" }
     ],
-    bgColor: "bg-gradient-to-br from-orange-primary to-red-primary"
+    bgColor: "bg-[#FFAA75]"
   },
   {
     id: 5,
@@ -122,7 +122,7 @@ const services: Service[] = [
     bonuses: [
       { text: "Includes ALL previous bonuses: iron-embedded paint decontamination, pre-contact wash foam treatment, wheels and wheel barrel cleaning, tire cleaning and dressing, contact wash with microfiber towel dry, air vent cleaning, and trunk cleaning with spot removal", value: "$150 Value" }
     ],
-    bgColor: "bg-gradient-to-br from-red-primary to-orange-primary"
+    bgColor: "bg-[#FFAA75]"
   }
 ];
 
@@ -157,18 +157,18 @@ export default function ServiceList() {
             >
               {/* Card Background with Gradient */}
               <div className={`${service.bgColor} p-6 pb-4`}>
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{service.title}</h3>
-                  <div className="flex items-center text-gray-600 space-x-2 text-sm">
-                    <span className="line-through">{service.originalPrice}</span>
-                    <span className="font-medium text-red-600 bg-white/30 px-2 py-0.5 rounded-full">{service.discount}</span>
+                <div className="mb-6 text-center">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-1">{service.title}</h3>
+                  <div className="flex items-center justify-center space-x-3 text-sm mb-2">
+                    <span className="line-through text-gray-700">{service.originalPrice}</span>
+                    <span className="font-bold text-red-600 bg-white/30 px-2 py-0.5 rounded-full">{service.discount}</span>
                   </div>
-                  <div className="text-2xl font-bold mt-1">
+                  <div className="text-3xl font-black mt-1">
                     {service.salePrice}
                   </div>
                 </div>
                 
-                <div className="bg-white/50 backdrop-blur-sm px-4 py-2 rounded-md text-center text-xs font-medium text-gray-600 mb-4">
+                <div className="bg-white/40 px-4 py-2 rounded-md text-center text-xs font-bold text-gray-700 mb-5">
                   {service.duration}
                 </div>
                 
@@ -192,12 +192,12 @@ export default function ServiceList() {
                 
                 {/* Bonuses Section */}
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="font-bold text-gray-900 mb-2">FREE BONUS</div>
-                  <ul className="space-y-2">
+                  <div className="font-bold text-xl text-gray-900 mb-2">FREE BONUS</div>
+                  <ul className="space-y-3">
                     {service.bonuses.map((bonus, index) => (
-                      <li key={index} className="flex justify-between items-center text-xs text-gray-600">
+                      <li key={index} className="flex justify-between items-center text-sm text-gray-700">
                         <span>{bonus.text}</span>
-                        {bonus.value && <span className="text-primary font-semibold">{bonus.value}</span>}
+                        {bonus.value && <span className="text-red-600 font-bold">{bonus.value}</span>}
                       </li>
                     ))}
                   </ul>
@@ -213,8 +213,8 @@ export default function ServiceList() {
         </div>
         
         {/* CTA Section */}
-        <div className="max-w-2xl mx-auto p-8 rounded-xl bg-gradient-to-r from-orange-light to-orange-primary/30 text-center shadow-lg">
-          <h3 className="text-2xl font-bold mb-3 text-gray-800">Ready for the Ultimate Car Care Experience?</h3>
+        <div className="max-w-2xl mx-auto p-8 rounded-xl bg-[#FFAA75] text-center shadow-lg">
+          <h3 className="text-2xl font-bold mb-3 text-gray-900">Ready for the Ultimate Car Care Experience?</h3>
           <p className="text-gray-700 mb-6">
             Remember, all our services come to your location—no need to disrupt your day. Our satisfaction guarantee ensures your car will look its best or your service is free.
           </p>
