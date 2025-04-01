@@ -3,6 +3,7 @@ import { Shield, Clock, Sparkles } from "lucide-react";
 import HeroLocationSearch from "./HeroLocationSearch";
 import { ThreeDButton } from "@/components/ui/3d-button";
 import '../ui/custom-3d-button.css';
+import hardyLogoPath from "@assets/hardy logo-Photoroom.png";
 
 export default function Hero() {
   return (
@@ -18,7 +19,7 @@ export default function Hero() {
         {/* Company logo */}
         <div className="flex justify-center mb-8">
           <img 
-            src="/images/hardy-logo.png" 
+            src={hardyLogoPath} 
             alt="Hardys Wash N' Wax" 
             className="h-24" 
           />

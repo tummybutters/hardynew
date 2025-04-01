@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
+import hardyLogoPath from "@assets/hardy logo-Photoroom.png";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -27,7 +28,7 @@ export default function Header() {
           <Link href="/" className="flex items-center">
             <div className="flex items-center">
               <img 
-                src="/images/hardy-logo.png" 
+                src={hardyLogoPath} 
                 alt="Hardys Wash N' Wax" 
                 className="h-12 mr-3" 
               />
