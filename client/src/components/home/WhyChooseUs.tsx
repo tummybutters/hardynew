@@ -44,11 +44,11 @@ const whyItWorks = [
 export default function WhyChooseUs() {
   return (
     <>
-      <div className="bg-primary text-white py-16">
+      <div className="bg-[#FFB375] text-gray-900 py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold font-heading mb-4">What You'll Gain</h2>
-            <p className="text-gray-100/90 max-w-2xl mx-auto">
+            <p className="text-gray-800 max-w-2xl mx-auto">
               Why let luxury car care be anything less than luxurious itself? Our mobile service brings convenience and quality together.
             </p>
           </div>
@@ -56,34 +56,34 @@ export default function WhyChooseUs() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {whatYouGain.map((feature, index) => (
               <div key={index} className="text-center">
-                <div className="bg-white/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  {feature.icon}
+                <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
+                  <div className="text-[#EE432C]">{feature.icon}</div>
                 </div>
                 <h3 className="text-xl font-bold font-heading mb-2">{feature.title}</h3>
-                <p className="text-gray-100/80">{feature.description}</p>
+                <p className="text-gray-800">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
       
-      <div className="bg-gray-50 text-gray-900 py-16">
+      <div className="bg-[#F3F4E6] text-gray-900 py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold font-heading mb-4">Why It Works</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-gray-700 max-w-2xl mx-auto">
               Our approach is designed around what luxury car owners truly want: exceptional results with zero inconvenience.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {whyItWorks.map((item, index) => (
-              <div key={index} className="text-center bg-white p-8 rounded-lg shadow-sm">
-                <div className="bg-primary/10 text-primary rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+              <div key={index} className="text-center bg-white p-8 rounded-lg shadow-md border border-[#FFD7B5]">
+                <div className="bg-[#FFD7B5] text-[#EE432C] rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                   {item.icon}
                 </div>
                 <h3 className="text-xl font-bold font-heading mb-3">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
+                <p className="text-gray-700">{item.description}</p>
               </div>
             ))}
           </div>

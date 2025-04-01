@@ -94,7 +94,7 @@ function BeforeAfterSlider({ beforeImage, afterImage, beforeAlt, afterAlt, label
         onTouchStart={handleMouseDown}
       >
         <div className="absolute w-8 h-8 rounded-full bg-white -ml-4 top-1/2 -translate-y-1/2 shadow-md flex items-center justify-center">
-          <div className="w-4 h-4 rounded-full bg-primary"></div>
+          <div className="w-4 h-4 rounded-full bg-[#EE432C]"></div>
         </div>
       </div>
       
@@ -108,12 +108,12 @@ function BeforeAfterSlider({ beforeImage, afterImage, beforeAlt, afterAlt, label
 
 export default function BeforeAfter() {
   return (
-    <div className="py-16 bg-white">
+    <div className="py-16 bg-[#F3F4E6]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold font-heading text-gray-900 mb-4">Before & After</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            See the PremiumShine difference with these real transformations.
+          <p className="text-gray-700 max-w-2xl mx-auto">
+            See the Hardys Wash N' Wax difference with these real transformations.
           </p>
         </div>
         

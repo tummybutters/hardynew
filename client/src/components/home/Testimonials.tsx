@@ -44,15 +44,15 @@ export default function Testimonials() {
     
     // Full stars
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={`full-${i}`} className="fill-red-600 text-red-600" />);
+      stars.push(<Star key={`full-${i}`} className="fill-[#EE432C] text-[#EE432C]" />);
     }
     
     // Half star
     if (hasHalfStar) {
       stars.push(
         <div key="half" className="relative">
-          <Star className="text-red-600" />
-          <Star className="absolute top-0 left-0 fill-red-600 text-red-600 overflow-hidden w-[50%]" />
+          <Star className="text-[#EE432C]" />
+          <Star className="absolute top-0 left-0 fill-[#EE432C] text-[#EE432C] overflow-hidden w-[50%]" />
         </div>
       );
     }
@@ -60,18 +60,18 @@ export default function Testimonials() {
     // Empty stars
     const emptyStars = 5 - Math.ceil(rating);
     for (let i = 0; i < emptyStars; i++) {
-      stars.push(<Star key={`empty-${i}`} className="text-red-600" />);
+      stars.push(<Star key={`empty-${i}`} className="text-[#EE432C]" />);
     }
     
     return stars;
   };
   
   return (
-    <div className="bg-gray-50 py-16">
+    <div className="bg-white py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold font-heading text-gray-900 mb-4">What Our Clients Say</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-gray-700 max-w-2xl mx-auto">
             Transformative results, delivered at your doorstep—see why our clients keep coming back.
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function Testimonials() {
             >
               <CardContent className="p-0 flex flex-col h-full">
                 <div className="flex items-center mb-4">
-                  <div className="flex space-x-1 text-red-600">
+                  <div className="flex space-x-1">
                     {renderStars(testimonial.rating)}
                   </div>
                 </div>
@@ -102,7 +102,7 @@ export default function Testimonials() {
             {testimonials.map((_, index) => (
               <button
                 key={index}
-                className={`w-3 h-3 rounded-full ${index === activeTestimonial ? 'bg-primary' : 'bg-primary/30'}`}
+                className={`w-3 h-3 rounded-full ${index === activeTestimonial ? 'bg-[#EE432C]' : 'bg-[#FFB375]/50'}`}
                 onClick={() => setActiveTestimonial(index)}
                 aria-label={`View testimonial ${index + 1}`}
               />
@@ -111,7 +111,7 @@ export default function Testimonials() {
           
           {/* Navigation Arrows */}
           <button 
-            className="absolute top-1/2 -left-4 -translate-y-1/2 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md focus:outline-none text-primary hover:text-red-600 transition-colors"
+            className="absolute top-1/2 -left-4 -translate-y-1/2 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md focus:outline-none text-[#EE432C] hover:text-[#FFB375] transition-colors"
             onClick={handlePrev}
             aria-label="Previous testimonial"
           >
@@ -119,7 +119,7 @@ export default function Testimonials() {
           </button>
           
           <button 
-            className="absolute top-1/2 -right-4 -translate-y-1/2 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md focus:outline-none text-primary hover:text-red-600 transition-colors"
+            className="absolute top-1/2 -right-4 -translate-y-1/2 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md focus:outline-none text-[#EE432C] hover:text-[#FFB375] transition-colors"
             onClick={handleNext}
             aria-label="Next testimonial"
           >

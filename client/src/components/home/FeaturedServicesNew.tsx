@@ -1,27 +1,30 @@
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
+import expressImage from "@assets/express.jpg";
+import extImage from "@assets/ext.jpg";
+import luxImage from "@assets/lux.jpg";
 
 const services = [
   {
     id: 1,
     title: "Express Detail",
     description: "From gentle hand wash to wheel cleaning—restoring your vehicle's exterior to a showroom-worthy finish.",
-    image: "/images/express-detail.jpg",
+    image: expressImage,
     link: "/services",
   },
   {
     id: 2,
     title: "Exterior Wash & Wax",
     description: "Professional ceramic coating application providing up to 5 years of protection while enhancing your paint's depth and mirror finish.",
-    image: "/images/blue-car.jpg",
+    image: extImage,
     link: "/services",
   },
   {
     id: 3,
     title: "Luxury Full Detail",
     description: "Professional machine buffing and ceramic coating providing years of protection while enhancing your paint's depth and perfect mirror finish.",
-    image: "/images/luxury-detail.jpg",
+    image: luxImage,
     link: "/services",
   },
 ];
@@ -30,7 +33,7 @@ export default function FeaturedServicesNew() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   
   return (
-    <div className="bg-cream py-20">
+    <div className="bg-[#F3F4E6] py-20">
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Premium Services, Delivered at Your Door</h2>
