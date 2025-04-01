@@ -50,8 +50,8 @@ export default function Contact() {
     setIsSubmitting(true);
     
     try {
-      // First, add the person to our mailing list via Mailchimp
-      const subscribeResponse = await fetch('/api/subscribe', {
+      // Send all contact form data to our API endpoint
+      const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,26 +61,33 @@ export default function Contact() {
           firstName: data.name.split(' ')[0],
           lastName: data.name.includes(' ') ? data.name.split(' ').slice(1).join(' ') : '',
           phone: data.phone || '',
+          subject: data.subject,
+          message: data.message,
         }),
       });
       
-      if (!subscribeResponse.ok) {
-        // If subscription fails, log it but continue with form processing
-        console.warn('Failed to subscribe user to mailing list:', await subscribeResponse.json());
-      } else {
-        console.log('User subscribed to mailing list successfully');
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to send message');
       }
       
-      // In a real application, we would store the message in a database
-      console.log("Contact form submission:", data);
+      console.log("Contact form submission successful:", result);
       
-      // Simulate API call for message storage
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Check Mailchimp status and show appropriate message
+      const mailchimpStatus = result.mailchimpStatus;
       
-      toast({
-        title: "Message Sent",
-        description: "We've received your message and will respond shortly.",
-      });
+      if (mailchimpStatus === 'subscribed') {
+        toast({
+          title: "Message Sent",
+          description: "We've received your message and added you to our mailing list.",
+        });
+      } else {
+        toast({
+          title: "Message Sent",
+          description: "We've received your message and will respond shortly.",
+        });
+      }
       
       setIsSuccess(true);
       form.reset();
@@ -88,7 +95,7 @@ export default function Contact() {
       console.error('Error submitting contact form:', error);
       toast({
         title: "Error",
-        description: "There was a problem sending your message. Please try again.",
+        description: error instanceof Error ? error.message : "There was a problem sending your message. Please try again.",
         variant: "destructive",
       });
     } finally {

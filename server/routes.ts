@@ -181,30 +181,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Subscribe to mailing list endpoint for contact form
+  // Contact form & mailing list subscription endpoint
   app.post('/api/subscribe', async (req, res) => {
     try {
-      const { email, firstName, lastName, phone } = req.body;
+      const { email, firstName, lastName, phone, subject, message } = req.body;
       
-      if (!email || !firstName || !lastName) {
+      if (!email || !firstName) {
         return res.status(400).json({ 
           error: 'Missing required fields',
-          message: 'Email, first name, and last name are required'
+          message: 'Email and name are required'
         });
       }
       
-      // Add the subscriber to Mailchimp
-      const response = await addSubscriberToMailchimp(email, firstName, lastName, phone);
+      // Store the contact form submission locally
+      const contactSubmission = {
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        email,
+        firstName,
+        lastName: lastName || '',
+        phone: phone || '',
+        subject: subject || '',
+        message: message || '',
+        mailchimpStatus: 'pending'
+      };
+      
+      console.log('Contact form submission received:', contactSubmission);
+      
+      // Try to add to Mailchimp but don't fail the whole request if it doesn't work
+      let mailchimpStatus = 'error';
+      try {
+        const response = await addSubscriberToMailchimp(email, firstName, lastName || '', phone);
+        mailchimpStatus = 'subscribed';
+        console.log(`Successfully added contact to Mailchimp: ${email}`);
+        contactSubmission.mailchimpStatus = 'subscribed';
+      } catch (mailchimpError: any) {
+        console.warn(`Mailchimp subscription failed but continuing: ${mailchimpError.message}`);
+        // We're intentionally not re-throwing this error so the contact form still works
+      }
       
       return res.status(200).json({
         success: true,
-        message: 'Successfully subscribed to the mailing list',
-        data: response
+        message: 'Your message has been received successfully',
+        mailchimpStatus,
+        contactSubmission
       });
     } catch (error: any) {
-      console.error('Error subscribing to mailing list:', error);
+      console.error('Error processing contact form:', error);
       return res.status(500).json({
-        error: 'Failed to subscribe',
+        error: 'Failed to process your request',
         message: error.message || 'An unexpected error occurred'
       });
     }
