@@ -9,8 +9,10 @@ import "../ui/custom-nav-button.css";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
+  { href: "/subscriptions", label: "Subscriptions" },
   { href: "/booking", label: "Book Now" },
-  { href: "/about", label: "About Us" }
+  { href: "/about", label: "About Us" },
+  { href: "/contact", label: "Contact" }
 ];
 
 export default function Header() {
