@@ -1,20 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { MapPin, Check, X } from 'lucide-react';
+import { MapPin, Check, X, Info } from 'lucide-react';
+import { 
+  CENTER_POINT, 
+  CALIFORNIA_BOUNDS, 
+  SERVICE_LOCATIONS,
+  validateServiceLocation,
+  filterMapboxResults,
+  getGeocoderConfig
+} from '@/lib/locationUtils';
 
-// Set your Mapbox access token
-const MAPBOX_TOKEN = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcQ';
-
-// Service area bounds - covering Sacramento to SoCal
-const CALIFORNIA_BOUNDS = {
-  north: 39.5, // Sacramento area
-  south: 32.5, // San Diego area
-  west: -124.4, // Pacific Coast
-  east: -114.1 // Eastern California
-};
-
-// Service area center
-const CENTER_POINT = [-119.4179, 36.7783]; // Central California coordinates
+// Set your Mapbox access token - store in env for production
+const MAPBOX_TOKEN = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcA';
 
 interface LocationSearchProps {
   value: string;
@@ -39,6 +36,7 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
   const [isInServiceArea, setIsInServiceArea] = useState<boolean | null>(null);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
   const [geocoderInitialized, setGeocoderInitialized] = useState(false);
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
   
   // Initialize Mapbox Geocoder
   useEffect(() => {
@@ -82,127 +80,135 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
     };
     
     const initGeocoder = async () => {
-      const scriptsLoaded = await loadMapboxScripts();
-      if (!scriptsLoaded) return;
-      
-      // Set access token
-      window.mapboxgl.accessToken = MAPBOX_TOKEN;
-      
-      // Initialize the map
-      const mapInstance = new window.mapboxgl.Map({
-        container: mapContainerRef.current!,
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [CENTER_POINT[0], CENTER_POINT[1]],
-        zoom: 5.5
-      });
-      
-      // Add navigation controls
-      mapInstance.addControl(new window.mapboxgl.NavigationControl(), 'bottom-right');
-      
-      // Initialize the geocoder
-      const geocoder = new window.MapboxGeocoder({
-        accessToken: MAPBOX_TOKEN,
-        countries: 'us',
-        bbox: [-124.409591, 32.534156, -114.131211, 39.5], // Bounding box for California
-        placeholder: 'Enter your address',
-        proximity: {
-          longitude: CENTER_POINT[0],
-          latitude: CENTER_POINT[1]
-        },
-        types: 'address,neighborhood,locality,place',
-        mapboxgl: window.mapboxgl
-      });
-      
-      // Add the geocoder to the container
-      if (geocoderContainerRef.current) {
-        geocoder.addTo(geocoderContainerRef.current);
-      }
-      
-      // Prefill with any existing value
-      if (value) {
-        geocoder.setInput(value);
-      }
-      
-      // When a result is selected, extract coordinates and check service area
-      geocoder.on('result', (e: any) => {
-        const result = e.result;
-        if (result && result.geometry && result.geometry.coordinates) {
-          const coords = result.geometry.coordinates as [number, number];
-          const placeName = result.place_name;
+      try {
+        const scriptsLoaded = await loadMapboxScripts();
+        if (!scriptsLoaded) return;
+        
+        // Set access token
+        window.mapboxgl.accessToken = MAPBOX_TOKEN;
+        
+        // Initialize the map
+        const mapInstance = new window.mapboxgl.Map({
+          container: mapContainerRef.current!,
+          style: 'mapbox://styles/mapbox/streets-v12',
+          center: [CENTER_POINT[0], CENTER_POINT[1]],
+          zoom: 5.5
+        });
+        
+        // Add navigation controls
+        mapInstance.addControl(new window.mapboxgl.NavigationControl(), 'bottom-right');
+        
+        // Initialize the geocoder with our configuration
+        const geocoderConfig = getGeocoderConfig(window.mapboxgl);
+        const geocoder = new window.MapboxGeocoder(geocoderConfig);
+        
+        // Add the geocoder to the container
+        if (geocoderContainerRef.current) {
+          geocoder.addTo(geocoderContainerRef.current);
+        }
+        
+        // Prefill with any existing value
+        if (value) {
+          geocoder.setInput(value);
+        }
+        
+        // When a result is selected, extract coordinates and check service area
+        geocoder.on('result', (e: any) => {
+          const result = e.result;
+          if (result && result.geometry && result.geometry.coordinates) {
+            const coords = result.geometry.coordinates as [number, number];
+            const placeName = result.place_name;
+            
+            // Update state
+            onChange(placeName);
+            setCoordinates(coords);
+            
+            // Validate using our location utilities
+            const validation = validateServiceLocation(placeName, coords);
+            setIsInServiceArea(validation.isValid);
+            setValidationMessage(validation.reason || null);
+            onAddressValidated(validation.isValid, coords);
+            
+            // Update marker
+            if (marker) {
+              marker.remove();
+            }
+            
+            const newMarker = new window.mapboxgl.Marker({
+              color: validation.isValid ? '#22c55e' : '#ef4444'
+            })
+              .setLngLat(coords)
+              .addTo(mapInstance);
+            
+            setMarker(newMarker);
+            mapInstance.flyTo({ center: coords, zoom: 14 });
+          }
+        });
+        
+        // Add California service area
+        mapInstance.on('load', () => {
+          // Create a bounding box for California
+          mapInstance.addSource('california-area', {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              geometry: {
+                type: 'Polygon',
+                coordinates: [[
+                  [CALIFORNIA_BOUNDS.west, CALIFORNIA_BOUNDS.north], // Northwest
+                  [CALIFORNIA_BOUNDS.east, CALIFORNIA_BOUNDS.north], // Northeast
+                  [CALIFORNIA_BOUNDS.east, CALIFORNIA_BOUNDS.south], // Southeast
+                  [CALIFORNIA_BOUNDS.west, CALIFORNIA_BOUNDS.south], // Southwest
+                  [CALIFORNIA_BOUNDS.west, CALIFORNIA_BOUNDS.north]  // Back to Northwest to close the polygon
+                ]]
+              },
+              properties: {}
+            }
+          });
           
-          // Update state
-          onChange(placeName);
-          setCoordinates(coords);
+          mapInstance.addLayer({
+            id: 'california-area-fill',
+            type: 'fill',
+            source: 'california-area',
+            paint: {
+              'fill-color': '#FFB375',
+              'fill-opacity': 0.2,
+              'fill-outline-color': '#EE432C'
+            }
+          });
           
-          // Check if in service area
-          const inServiceArea = checkServiceArea(coords);
-          setIsInServiceArea(inServiceArea);
-          onAddressValidated(inServiceArea, coords);
+          // Add service cities as points on the map
+          const serviceCityFeatures = SERVICE_LOCATIONS.map(location => {
+            return {
+              type: 'Feature',
+              properties: {
+                name: location.name
+              },
+              // These are placeholder coordinates - in production you'd fetch actual coordinates for each city
+              // For now, we'll skip adding points since we don't have the exact coordinates
+            };
+          });
+        });
+        
+        // Handle clear event
+        geocoder.on('clear', () => {
+          onChange("");
+          setCoordinates(null);
+          setIsInServiceArea(null);
+          setValidationMessage(null);
+          onAddressValidated(false);
           
-          // Update marker
           if (marker) {
             marker.remove();
-          }
-          
-          const newMarker = new window.mapboxgl.Marker({
-            color: inServiceArea ? '#22c55e' : '#ef4444'
-          })
-            .setLngLat(coords)
-            .addTo(mapInstance);
-          
-          setMarker(newMarker);
-          mapInstance.flyTo({ center: coords, zoom: 14 });
-        }
-      });
-      
-      // Add California service area
-      mapInstance.on('load', () => {
-        // Create a bounding box for California
-        mapInstance.addSource('california-area', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            geometry: {
-              type: 'Polygon',
-              coordinates: [[
-                [CALIFORNIA_BOUNDS.west, CALIFORNIA_BOUNDS.north], // Northwest
-                [CALIFORNIA_BOUNDS.east, CALIFORNIA_BOUNDS.north], // Northeast
-                [CALIFORNIA_BOUNDS.east, CALIFORNIA_BOUNDS.south], // Southeast
-                [CALIFORNIA_BOUNDS.west, CALIFORNIA_BOUNDS.south], // Southwest
-                [CALIFORNIA_BOUNDS.west, CALIFORNIA_BOUNDS.north]  // Back to Northwest to close the polygon
-              ]]
-            },
-            properties: {}
+            setMarker(null);
           }
         });
         
-        mapInstance.addLayer({
-          id: 'california-area-fill',
-          type: 'fill',
-          source: 'california-area',
-          paint: {
-            'fill-color': 'var(--primary-orange)',
-            'fill-opacity': 0.2,
-            'fill-outline-color': 'var(--primary-red)'
-          }
-        });
-      });
-      
-      // Handle clear event
-      geocoder.on('clear', () => {
-        onChange("");
-        setCoordinates(null);
-        setIsInServiceArea(null);
-        onAddressValidated(false);
-        
-        if (marker) {
-          marker.remove();
-          setMarker(null);
-        }
-      });
-      
-      setMap(mapInstance);
-      setGeocoderInitialized(true);
+        setMap(mapInstance);
+        setGeocoderInitialized(true);
+      } catch (error) {
+        console.error("Error initializing Mapbox:", error);
+      }
     };
     
     initGeocoder();
@@ -213,26 +219,12 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
       }
     };
   }, [onChange, onAddressValidated, geocoderInitialized, value]);
-  
-  // Function to check if coordinates are within California service area
-  const checkServiceArea = (coords: [number, number]): boolean => {
-    const lon = coords[0];
-    const lat = coords[1];
-    
-    // Check if coordinates are within California bounds
-    return (
-      lat >= CALIFORNIA_BOUNDS.south &&
-      lat <= CALIFORNIA_BOUNDS.north &&
-      lon >= CALIFORNIA_BOUNDS.west &&
-      lon <= CALIFORNIA_BOUNDS.east
-    );
-  };
 
   return (
     <div className="space-y-4">
       <FormItem className="relative">
         <FormLabel className="flex items-center">
-          <MapPin className="h-4 w-4 mr-2 text-primary-red" />
+          <MapPin className="h-4 w-4 mr-2 text-[#EE432C]" />
           Your Location
         </FormLabel>
         <FormControl>
@@ -243,7 +235,7 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
               className={`mapboxgl-geocoder-container ${
                 isInServiceArea === false ? 'border-red-500' : 
                 isInServiceArea === true ? 'border-green-500' : 
-                'border-primary-orange'
+                'border-[#FFAA75]'
               }`}
             />
             
@@ -259,9 +251,14 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
           </div>
         </FormControl>
         
-        {isInServiceArea === false && (
-          <div className="text-xs text-red-500 mt-1">
-            This address is outside our service area in California.
+        {validationMessage && (
+          <div className={`text-xs flex items-start gap-1 mt-1 ${isInServiceArea ? 'text-amber-600' : 'text-red-500'}`}>
+            {isInServiceArea ? (
+              <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
+            ) : (
+              <X className="h-3 w-3 mt-0.5 flex-shrink-0" />
+            )}
+            <span>{validationMessage}</span>
           </div>
         )}
         
@@ -271,15 +268,16 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
       </FormItem>
       
       <div className="flex items-center justify-between">
-        <div className="text-xs text-gray-500">
-          We service all California locations from Sacramento to San Diego.
+        <div className="text-xs text-gray-600">
+          We currently service Davis, Irvine, Bonita, Costa Mesa, Tustin, Alameda, Mission Viejo, 
+          Newport Beach, Dixon, Woodland, Sacramento, and Galt.
         </div>
       </div>
       
       {/* Map container */}
       <div 
         ref={mapContainerRef} 
-        className="h-[350px] w-full rounded-md border border-primary-orange overflow-hidden transition-all duration-300 mt-4"
+        className="h-[350px] w-full rounded-md border border-[#FFAA75] overflow-hidden transition-all duration-300 mt-4"
       />
     </div>
   );

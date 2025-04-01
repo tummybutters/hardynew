@@ -1,7 +1,6 @@
 import Hero from "@/components/home/Hero";
 import FeaturedServicesNew from "@/components/home/FeaturedServicesNew";
 import WhyChooseUs from "@/components/home/WhyChooseUs";
-import BeforeAfter from "@/components/home/BeforeAfter";
 import Testimonials from "@/components/home/Testimonials";
 import CallToAction from "@/components/home/CallToAction";
 
@@ -11,7 +10,6 @@ export default function Home() {
       <Hero />
       <FeaturedServicesNew />
       <WhyChooseUs />
-      <BeforeAfter />
       <Testimonials />
       <CallToAction />
     </>

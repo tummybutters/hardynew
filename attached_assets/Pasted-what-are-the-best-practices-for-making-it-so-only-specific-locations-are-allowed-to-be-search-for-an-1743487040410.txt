@@ -1,0 +1,37 @@
+what are the best practices for making it so only specific locations are allowed to be search for and whats the proxy, like is there a white list of city names or something else
+Based on the knowledge sources, there are several ways to limit geocoding search results to specific locations in Mapbox. Here are the best practices:
+Limiting Search Results to Specific Regions
+You can restrict search results using several parameters in the Mapbox Geocoding API:
+Country Limitation: Use the countries parameter to limit results to specific countries.
+Bounding Box: Use the bbox parameter to restrict results to a specific geographic area.
+Filter Function: Apply a client-side filter to further refine results based on specific criteria.
+For example, as shown in the Limit geocoder results to a named region example, you can combine these approaches:
+
+map.addControl(
+    new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        // Limit search results to Australia
+        countries: 'au',
+        // Use a bounding box to further limit results
+        // to the geographic bounds representing the
+        // region of New South Wales
+        bbox: [139.965, -38.03, 155.258, -27.839],
+        // Apply a client-side filter to further limit results
+        // to those strictly within the New South Wales region
+        filter: function (item) {
+            // returns true if item contains New South Wales region
+            return item.context.some((i) => {
+                return (
+                    i.id.split('.').shift() === 'region' &&
+                    i.text === 'New South Wales'
+                );
+            });
+        },
+        mapboxgl: mapboxgl
+    })
+);
+This approach allows you to:
+Limit to a specific country
+Further restrict to a geographic bounding box
+Apply additional filtering based on region names or other attributes
+Rather than a whitelist of city names, Mapbox uses these geographic constraints and filters to limit search results to specific areas. The filter function is particularly powerful as it allows you to examine each potential result and only show those that match your specific criteria.

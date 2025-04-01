@@ -1,20 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { MapPin, Check, X, ArrowRight } from 'lucide-react';
+import { MapPin, Check, X, ArrowRight, Info } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { 
+  validateServiceLocation,
+  getGeocoderConfig
+} from '@/lib/locationUtils';
 
-// Set your Mapbox access token
-const MAPBOX_TOKEN = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcQ';
-
-// Service area bounds - covering Sacramento to SoCal
-const CALIFORNIA_BOUNDS = {
-  north: 39.5, // Sacramento area
-  south: 32.5, // San Diego area
-  west: -124.4, // Pacific Coast
-  east: -114.1 // Eastern California
-};
+// Set your Mapbox access token - in production, use environment variables
+const MAPBOX_TOKEN = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcA';
 
 declare global {
   interface Window {
@@ -31,6 +26,7 @@ export default function HeroLocationSearch() {
   const [isInServiceArea, setIsInServiceArea] = useState<boolean | null>(null);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
   const [geocoderInitialized, setGeocoderInitialized] = useState(false);
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
   
   // Initialize Mapbox Geocoder
   useEffect(() => {
@@ -74,88 +70,75 @@ export default function HeroLocationSearch() {
     };
     
     const initGeocoder = async () => {
-      const scriptsLoaded = await loadMapboxScripts();
-      if (!scriptsLoaded) return;
-      
-      // Set access token
-      window.mapboxgl.accessToken = MAPBOX_TOKEN;
-      
-      // Initialize the geocoder
-      const geocoder = new window.MapboxGeocoder({
-        accessToken: MAPBOX_TOKEN,
-        countries: 'us',
-        bbox: [-124.409591, 32.534156, -114.131211, 37.0], // Bounding box for California
-        placeholder: 'Enter your address',
-        proximity: {
-          longitude: -119.4179,
-          latitude: 36.7783
-        },
-        types: 'address,neighborhood,locality,place',
-        marker: false
-      });
-      
-      // Add the geocoder to the container
-      if (geocoderContainerRef.current) {
-        geocoder.addTo(geocoderContainerRef.current);
-      }
-      
-      // When a result is selected, extract coordinates and check service area
-      geocoder.on('result', (e: any) => {
-        const result = e.result;
-        if (result && result.geometry && result.geometry.coordinates) {
-          const coords = result.geometry.coordinates as [number, number];
-          const placeName = result.place_name;
-          
-          // Update state
-          setAddress(placeName);
-          setCoordinates(coords);
-          
-          // Check if in service area
-          const inServiceArea = checkServiceArea(coords);
-          setIsInServiceArea(inServiceArea);
-          
-          // Show notification
-          if (inServiceArea) {
-            toast({
-              title: "Great News!",
-              description: "We service your area. Schedule your detailing now!",
-              variant: "default",
-            });
-          } else {
-            toast({
-              title: "Outside Service Area",
-              description: "We currently only service California locations from Sacramento to San Diego.",
-              variant: "destructive",
-            });
-          }
+      try {
+        const scriptsLoaded = await loadMapboxScripts();
+        if (!scriptsLoaded) return;
+        
+        // Set access token
+        window.mapboxgl.accessToken = MAPBOX_TOKEN;
+        
+        // Initialize the geocoder with our utility configuration
+        const geocoderConfig = {
+          ...getGeocoderConfig(window.mapboxgl),
+          marker: false
+        };
+        
+        const geocoder = new window.MapboxGeocoder(geocoderConfig);
+        
+        // Add the geocoder to the container
+        if (geocoderContainerRef.current) {
+          geocoder.addTo(geocoderContainerRef.current);
         }
-      });
-      
-      // Handle clear event
-      geocoder.on('clear', () => {
-        setAddress("");
-        setCoordinates(null);
-        setIsInServiceArea(null);
-      });
-      
-      setGeocoderInitialized(true);
+        
+        // When a result is selected, extract coordinates and check service area
+        geocoder.on('result', (e: any) => {
+          const result = e.result;
+          if (result && result.geometry && result.geometry.coordinates) {
+            const coords = result.geometry.coordinates as [number, number];
+            const placeName = result.place_name;
+            
+            // Update state
+            setAddress(placeName);
+            setCoordinates(coords);
+            
+            // Use our validation utility for more accurate results
+            const validation = validateServiceLocation(placeName, coords);
+            setIsInServiceArea(validation.isValid);
+            setValidationMessage(validation.reason || null);
+            
+            // Show notification
+            if (validation.isValid) {
+              toast({
+                title: "Great News!",
+                description: validation.reason || "We service your area. Schedule your detailing now!",
+                variant: "default",
+              });
+            } else {
+              toast({
+                title: "Outside Service Area",
+                description: validation.reason || "We currently only service select locations in California.",
+                variant: "destructive",
+              });
+            }
+          }
+        });
+        
+        // Handle clear event
+        geocoder.on('clear', () => {
+          setAddress("");
+          setCoordinates(null);
+          setIsInServiceArea(null);
+          setValidationMessage(null);
+        });
+        
+        setGeocoderInitialized(true);
+      } catch (error) {
+        console.error("Error initializing Mapbox:", error);
+      }
     };
     
     initGeocoder();
-  }, [toast, geocoderInitialized]);
-  
-  // Function to check if coordinates are within California service area
-  const checkServiceArea = (coords: [number, number]): boolean => {
-    const lon = coords[0];
-    const lat = coords[1];
-    
-    return (
-      lat >= CALIFORNIA_BOUNDS.south &&
-      lat <= CALIFORNIA_BOUNDS.north &&
-      lon >= CALIFORNIA_BOUNDS.west &&
-      lon <= CALIFORNIA_BOUNDS.east
-    );
-  };
+  }, [toast]);
   
   // Handle submission - redirect to booking page with location
   const handleGetQuote = () => {
@@ -216,14 +199,20 @@ export default function HeroLocationSearch() {
             )}
           </div>
           
-          {isInServiceArea === false && (
-            <p className="text-xs text-red-500">
-              This address is outside our service area in California.
+          {validationMessage && (
+            <p className={`text-xs flex items-start gap-1 ${isInServiceArea ? 'text-amber-600' : 'text-red-500'}`}>
+              {isInServiceArea ? (
+                <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
+              ) : (
+                <X className="h-3 w-3 mt-0.5 flex-shrink-0" />
+              )}
+              <span>{validationMessage}</span>
             </p>
           )}
           
           <p className="text-xs text-gray-500 mt-1">
-            We service all California locations from Sacramento to San Diego.
+            We currently service Davis, Irvine, Bonita, Costa Mesa, Tustin, Alameda, Mission Viejo, 
+            Newport Beach, Dixon, Woodland, Sacramento, and Galt.
           </p>
         </div>
         
