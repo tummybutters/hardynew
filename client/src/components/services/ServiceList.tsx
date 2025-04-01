@@ -144,15 +144,16 @@ export default function ServiceList() {
           </div>
         </div>
         
-        {/* Service Cards Grid */}
+        {/* Service Cards Grid - Set to height equal cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {services.map((service) => (
             <div 
               key={service.id}
-              className="relative overflow-hidden rounded-lg shadow-lg"
+              className="relative overflow-hidden rounded-lg shadow-lg flex flex-col h-full"
+              style={{ height: "650px" }} // Fixed total card height
             >
-              {/* Card Header (Orange Section) */}
-              <div className={`${service.bgColor} p-5 text-center`}>
+              {/* Card Header (Orange Section) - Fixed height */}
+              <div className={`${service.bgColor} p-5 text-center`} style={{ height: "220px" }}>
                 <h3 className="text-2xl font-bold text-gray-900 mb-1">{service.title}</h3>
                 <div className="flex items-center justify-center space-x-2 text-sm">
                   <span className="line-through text-gray-700">{service.originalPrice}</span>
@@ -173,10 +174,10 @@ export default function ServiceList() {
                 </Link>
               </div>
               
-              {/* Card Body (White Section) */}
-              <div className="bg-white p-5 flex flex-col" style={{minHeight: "350px"}}>
+              {/* Card Body (White Section) - Fills remaining height */}
+              <div className="bg-white p-5 flex flex-col flex-grow">
                 {/* Service Features */}
-                <div className="flex-1">
+                <div className="mb-6">
                   <ul className="space-y-3">
                     {service.features.map((feature, index) => (
                       <li key={index} className="flex items-start text-sm">
@@ -187,7 +188,7 @@ export default function ServiceList() {
                   </ul>
                 </div>
                 
-                {/* Bonuses Section - fixed to bottom of card */}
+                {/* Bonuses Section - at bottom of card */}
                 <div className="mt-auto pt-4 border-t border-gray-200">
                   <div className="font-bold text-xl text-gray-900 mb-2">FREE BONUS</div>
                   <ul className="space-y-3">
