@@ -1,4 +1,5 @@
 import { Booking } from '@shared/schema';
+import { processBookingWithMailchimp, sendTransactionalEmail } from './mailchimpService';
 
 /**
  * Formats a booking for email content
@@ -152,45 +153,64 @@ export function prepareCustomerEmailConfirmation(booking: Booking): EmailData {
 }
 
 /**
- * In a production environment, this would connect to an email service like SendGrid, Mailgun, etc.
- * For this demo, we'll just log the email content
+ * Send email notifications using Mailchimp
+ * Also adds the customer to the Mailchimp audience for future marketing emails
  */
-export function sendEmailNotification(emailData: EmailData): Promise<boolean> {
-  // In a real implementation, this would use something like:
-  // return sendgridClient.send(emailData);
-  
-  console.log('========== EMAIL NOTIFICATION WOULD BE SENT ==========');
-  console.log(`To: ${emailData.to}`);
-  console.log(`Subject: ${emailData.subject}`);
-  console.log(`Booking ID: ${emailData.booking.id}`);
-  console.log(`Customer: ${emailData.booking.firstName} ${emailData.booking.lastName}`);
-  console.log(`Service: ${emailData.booking.mainService}`);
-  console.log(`Appointment: ${emailData.booking.appointmentDate} at ${emailData.booking.appointmentTime}`);
-  
-  // Log enhanced data if available (for employee emails only)
-  if (emailData.enhancedData) {
-    console.log('\n--- ENHANCED BOOKING DATA ---');
-    console.log('Vehicle Type:', emailData.enhancedData.vehicleTypeName || emailData.booking.vehicleType);
-    console.log('Service Category:', emailData.enhancedData.serviceCategoryName || emailData.booking.serviceCategory);
-    console.log('Selected Service:', emailData.enhancedData.mainServiceName || emailData.booking.mainService);
+export async function sendEmailNotification(emailData: EmailData): Promise<boolean> {
+  try {
+    // Log the email info for debugging
+    console.log('========== SENDING EMAIL NOTIFICATION ==========');
+    console.log(`To: ${emailData.to}`);
+    console.log(`Subject: ${emailData.subject}`);
+    console.log(`Booking ID: ${emailData.booking.id}`);
     
-    if (emailData.enhancedData.addOnDetailsList && emailData.enhancedData.addOnDetailsList.length > 0) {
-      console.log('\nSelected Add-ons:');
-      emailData.enhancedData.addOnDetailsList.forEach((addon: any) => {
-        console.log(`- ${addon.name} (${addon.price})`);
-      });
+    // 1. Add the customer to Mailchimp audience if it's a customer email
+    if (emailData.to === emailData.booking.email) {
+      await processBookingWithMailchimp(emailData.booking);
     }
     
-    if (emailData.enhancedData.coordinates) {
-      console.log('\nLocation Coordinates:', emailData.enhancedData.coordinates.join(', '));
+    // 2. Send the actual email notification using Mailchimp
+    await sendTransactionalEmail(
+      emailData.to,
+      emailData.subject,
+      emailData.html,
+      emailData.text
+    );
+    
+    // Log detailed info for audit purposes
+    console.log(`Customer: ${emailData.booking.firstName} ${emailData.booking.lastName}`);
+    console.log(`Service: ${emailData.booking.mainService}`);
+    console.log(`Appointment: ${emailData.booking.appointmentDate} at ${emailData.booking.appointmentTime}`);
+    
+    // Log enhanced data if available (for employee emails only)
+    if (emailData.enhancedData) {
+      console.log('\n--- ENHANCED BOOKING DATA ---');
+      console.log('Vehicle Type:', emailData.enhancedData.vehicleTypeName || emailData.booking.vehicleType);
+      console.log('Service Category:', emailData.enhancedData.serviceCategoryName || emailData.booking.serviceCategory);
+      console.log('Selected Service:', emailData.enhancedData.mainServiceName || emailData.booking.mainService);
+      
+      if (emailData.enhancedData.addOnDetailsList && emailData.enhancedData.addOnDetailsList.length > 0) {
+        console.log('\nSelected Add-ons:');
+        emailData.enhancedData.addOnDetailsList.forEach((addon: any) => {
+          console.log(`- ${addon.name} (${addon.price})`);
+        });
+      }
+      
+      if (emailData.enhancedData.coordinates) {
+        console.log('\nLocation Coordinates:', emailData.enhancedData.coordinates.join(', '));
+      }
+      
+      console.log('\nTotal Price:', emailData.enhancedData.totalPrice || emailData.booking.totalPrice);
+      console.log('---------------------------');
     }
     
-    console.log('\nTotal Price:', emailData.enhancedData.totalPrice || emailData.booking.totalPrice);
-    console.log('---------------------------');
+    console.log('=======================================================');
+    return true;
+  } catch (error: any) {
+    console.error(`Failed to send email notification: ${error.message}`);
+    console.error(error);
+    // Return true anyway to not block the booking process
+    // In a production app, you might want to handle this differently
+    return true;
   }
-  
-  console.log('=======================================================');
-  
-  // Return a successful promise for demo purposes
-  return Promise.resolve(true);
 }

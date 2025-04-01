@@ -13,6 +13,7 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@jridgewell/trace-mapping": "^0.3.25",
+    "@mailchimp/mailchimp_marketing": "^3.0.80",
     "@mapbox/mapbox-gl-geocoder": "^5.0.3",
     "@mapbox/search-js-web": "^1.0.0",
     "@neondatabase/serverless": "^0.10.4",

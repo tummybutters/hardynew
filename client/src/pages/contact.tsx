@@ -50,11 +50,32 @@ export default function Contact() {
     setIsSubmitting(true);
     
     try {
-      // In a real application, we would send this data to the server
+      // First, add the person to our mailing list via Mailchimp
+      const subscribeResponse = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: data.email,
+          firstName: data.name.split(' ')[0],
+          lastName: data.name.includes(' ') ? data.name.split(' ').slice(1).join(' ') : '',
+          phone: data.phone || '',
+        }),
+      });
+      
+      if (!subscribeResponse.ok) {
+        // If subscription fails, log it but continue with form processing
+        console.warn('Failed to subscribe user to mailing list:', await subscribeResponse.json());
+      } else {
+        console.log('User subscribed to mailing list successfully');
+      }
+      
+      // In a real application, we would store the message in a database
       console.log("Contact form submission:", data);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Simulate API call for message storage
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       toast({
         title: "Message Sent",
@@ -64,6 +85,7 @@ export default function Contact() {
       setIsSuccess(true);
       form.reset();
     } catch (error) {
+      console.error('Error submitting contact form:', error);
       toast({
         title: "Error",
         description: "There was a problem sending your message. Please try again.",

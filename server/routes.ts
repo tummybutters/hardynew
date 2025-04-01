@@ -9,6 +9,7 @@ import {
   prepareCustomerEmailConfirmation, 
   sendEmailNotification 
 } from "./emailService";
+import { addSubscriberToMailchimp } from "./mailchimpService";
 
 // Type for enhanced booking data
 interface EnhancedBookingData {
@@ -176,6 +177,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error updating booking status:', error);
       return res.status(500).json({
         message: 'An error occurred while updating the booking status'
+      });
+    }
+  });
+  
+  // Subscribe to mailing list endpoint for contact form
+  app.post('/api/subscribe', async (req, res) => {
+    try {
+      const { email, firstName, lastName, phone } = req.body;
+      
+      if (!email || !firstName || !lastName) {
+        return res.status(400).json({ 
+          error: 'Missing required fields',
+          message: 'Email, first name, and last name are required'
+        });
+      }
+      
+      // Add the subscriber to Mailchimp
+      const response = await addSubscriberToMailchimp(email, firstName, lastName, phone);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Successfully subscribed to the mailing list',
+        data: response
+      });
+    } catch (error: any) {
+      console.error('Error subscribing to mailing list:', error);
+      return res.status(500).json({
+        error: 'Failed to subscribe',
+        message: error.message || 'An unexpected error occurred'
       });
     }
   });
