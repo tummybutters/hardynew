@@ -1,0 +1,77 @@
+/* Custom Navigation Button Styles from Uiverse.io by WhiteNervosa */
+.nav-button {
+  font-size: 18px;
+  color: #333333;
+  font-family: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  position: relative;
+  border: none;
+  background: none;
+  text-transform: uppercase;
+  transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition-duration: 400ms;
+  transition-property: color;
+  padding: 0.5rem 0;
+  margin: 0 1rem;
+}
+
+.nav-button:focus,
+.nav-button:hover {
+  color: #EE432C;
+}
+
+.nav-button:focus:after,
+.nav-button:hover:after {
+  width: 100%;
+  left: 0%;
+}
+
+.nav-button:after {
+  content: "";
+  pointer-events: none;
+  bottom: -2px;
+  left: 50%;
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  background-color: #EE432C;
+  transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition-duration: 400ms;
+  transition-property: width, left;
+}
+
+.nav-button.active {
+  color: #EE432C;
+}
+
+.nav-button.active:after {
+  width: 100%;
+  left: 0%;
+}
+
+/* Mobile nav button styles */
+.mobile-nav-button {
+  font-size: 16px;
+  color: #333333;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  position: relative;
+  border: none;
+  background: none;
+  text-transform: uppercase;
+  padding: 0.75rem 0;
+  margin: 0.5rem 0;
+  width: 100%;
+  text-align: left;
+}
+
+.mobile-nav-button:focus,
+.mobile-nav-button:hover {
+  color: #EE432C;
+}
+
+.mobile-nav-button.active {
+  color: #EE432C;
+}

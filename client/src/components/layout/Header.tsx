@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import hardyLogoPath from "@assets/hardy logo-Photoroom.png";
+import "../ui/custom-nav-button.css";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -21,7 +22,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 bg-white shadow-md z-50">
+    <header className="sticky top-0 bg-[#FFD7B5] shadow-md z-50">
       <div className="container mx-auto px-4 py-3">
         <nav className="flex justify-between items-center">
           {/* Logo */}
@@ -30,25 +31,21 @@ export default function Header() {
               <img 
                 src={hardyLogoPath} 
                 alt="Hardys Wash N' Wax" 
-                className="h-12 mr-3" 
+                className="h-12" 
               />
-              <span className="text-[#EE432C] text-xl font-bold font-heading">
-                Hardys Wash N' Wax
-              </span>
             </div>
           </Link>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden md:flex items-center justify-end">
             {navLinks.map((link) => (
               <Link 
                 key={link.href}
                 href={link.href}
-                className={`font-medium transition-colors ${
-                  isActive(link.href) ? "text-[#EE432C]" : "text-gray-800 hover:text-[#FFB375]"
-                }`}
               >
-                {link.label}
+                <button className={`nav-button ${isActive(link.href) ? 'active' : ''}`}>
+                  {link.label}
+                </button>
               </Link>
             ))}
           </div>
@@ -56,23 +53,22 @@ export default function Header() {
           {/* Mobile Navigation Button */}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button variant="ghost" size="icon" className="md:hidden text-[#333333]">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent>
-              <div className="flex flex-col space-y-4 mt-6">
+            <SheetContent className="bg-[#FFD7B5]">
+              <div className="flex flex-col mt-12">
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`text-lg font-medium py-2 ${
-                      isActive(link.href) ? "text-[#EE432C]" : "text-gray-800 hover:text-[#FFB375]"
-                    }`}
                     onClick={() => setOpen(false)}
                   >
-                    {link.label}
+                    <button className={`mobile-nav-button ${isActive(link.href) ? 'active' : ''}`}>
+                      {link.label}
+                    </button>
                   </Link>
                 ))}
               </div>
