@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import HeroLocationSearch from "./HeroLocationSearch";
-import { ThreeDButton } from "@/components/ui/3d-button";
-import '../ui/custom-3d-button.css';
+import { HeroButton } from "@/components/ui/hero-button";
 import hardyLogoPath from "@assets/hardy logo-Photoroom.png";
 import carSunsetBg from "@assets/ChatGPT Image Mar 31, 2025, 05_35_46 PM.png";
 
@@ -17,7 +16,7 @@ export default function Hero() {
       
       <div className="relative container mx-auto px-4 py-16 md:py-24">
         {/* Company logo */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-start mb-8">
           <img 
             src={hardyLogoPath} 
             alt="Hardys Wash N' Wax" 
@@ -25,8 +24,8 @@ export default function Hero() {
           />
         </div>
         
-        {/* Main headline that spans both columns */}
-        <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-bold font-heading leading-tight text-center mb-12">
+        {/* Main headline - larger and left-aligned */}
+        <h1 className="text-white text-5xl md:text-6xl lg:text-7xl font-bold font-heading leading-tight text-left mb-10 max-w-5xl">
           Luxury Where It Matters Most:
         </h1>
         
@@ -44,14 +43,14 @@ export default function Hero() {
             
             <div className="flex flex-col sm:flex-row gap-6 mt-6">
               <Link href="/booking">
-                <ThreeDButton variant="primary" className="text-base sm:text-lg py-3 px-5">
+                <HeroButton className="text-base sm:text-lg">
                   🚗 Book Your Luxury Detail
-                </ThreeDButton>
+                </HeroButton>
               </Link>
               <Link href="/services">
-                <ThreeDButton variant="secondary" className="text-base sm:text-lg py-3 px-5">
+                <HeroButton className="text-base sm:text-lg" variant="secondary">
                   View Our Services
-                </ThreeDButton>
+                </HeroButton>
               </Link>
             </div>
           </div>
@@ -65,7 +64,7 @@ export default function Hero() {
         </div>
         
         {/* Stats section */}
-        <div className="grid grid-cols-3 gap-4 mt-8 max-w-3xl mx-auto">
+        <div className="grid grid-cols-3 gap-4 mt-12 max-w-3xl mx-auto">
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
             <div className="text-[#FFB375] font-bold text-3xl">5★</div>
             <div className="text-white text-sm mt-1">Rated Service</div>
