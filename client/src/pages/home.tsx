@@ -1,5 +1,5 @@
 import Hero from "@/components/home/Hero";
-import FeaturedServices from "@/components/home/FeaturedServices";
+import FeaturedServicesNew from "@/components/home/FeaturedServicesNew";
 import WhyChooseUs from "@/components/home/WhyChooseUs";
 import BeforeAfter from "@/components/home/BeforeAfter";
 import Testimonials from "@/components/home/Testimonials";
@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <FeaturedServices />
+      <FeaturedServicesNew />
       <WhyChooseUs />
       <BeforeAfter />
       <Testimonials />
