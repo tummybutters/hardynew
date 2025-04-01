@@ -10,12 +10,22 @@ import About from "@/pages/about";
 import CardDemo from "@/pages/card-demo";
 import Layout from "@/components/layout/Layout";
 
+// Import specialized service pages
+import InteriorDetailing from "@/pages/services/interior-detailing";
+import ExteriorDetailing from "@/pages/services/exterior-detailing";
+import CeramicCoating from "@/pages/services/ceramic-coating";
+import PaintCorrection from "@/pages/services/paint-correction";
+
 function Router() {
   return (
     <Layout>
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/services" component={Services} />
+        <Route path="/services/interior-detailing" component={InteriorDetailing} />
+        <Route path="/services/exterior-detailing" component={ExteriorDetailing} />
+        <Route path="/services/ceramic-coating" component={CeramicCoating} />
+        <Route path="/services/paint-correction" component={PaintCorrection} />
         <Route path="/booking" component={Booking} />
         <Route path="/about" component={About} />
         <Route path="/card-demo" component={CardDemo} />

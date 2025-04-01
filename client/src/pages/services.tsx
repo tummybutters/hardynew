@@ -4,12 +4,75 @@ import ServiceProcess from "@/components/services/ServiceProcess";
 import FAQs from "@/components/services/FAQs";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import { Helmet } from "react-helmet";
+import { ArrowRight } from "lucide-react";
 
 export default function Services() {
   return (
     <>
+      <Helmet>
+        <title>Mobile Car Detailing Services Irvine & Orange County | Hardys Wash N' Wax</title>
+        <meta name="description" content="Comprehensive mobile car detailing services in Irvine and throughout Orange County. Express detail, interior cleaning, exterior wash & wax, ceramic coating, and paint correction." />
+        <link rel="canonical" href="https://hardyswashnwax.com/services" />
+      </Helmet>
+      
       <ServicesHero />
       <ServiceList />
+      
+      {/* Specialized Services Section */}
+      <div className="bg-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold font-heading text-gray-900 mb-4">Specialized Detailing Services</h2>
+            <p className="text-gray-700 max-w-xl mx-auto">
+              Discover our specialized services tailored to address specific needs for your vehicle's appearance and protection.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <div className="bg-[#FFD7B5]/30 rounded-lg p-6 shadow-md">
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Interior Detailing</h3>
+              <p className="text-gray-700 mb-4">
+                Comprehensive interior cleaning, stain removal, and protection to refresh your vehicle's cabin and restore that new car feel.
+              </p>
+              <Link href="/services/interior-detailing" className="inline-flex items-center text-primary font-bold">
+                Learn More <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </div>
+            
+            <div className="bg-[#FFD7B5]/30 rounded-lg p-6 shadow-md">
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Exterior Detailing</h3>
+              <p className="text-gray-700 mb-4">
+                Professional washing, waxing, and exterior protection to restore your vehicle's showroom shine and preserve its finish.
+              </p>
+              <Link href="/services/exterior-detailing" className="inline-flex items-center text-primary font-bold">
+                Learn More <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </div>
+            
+            <div className="bg-[#FFD7B5]/30 rounded-lg p-6 shadow-md">
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Ceramic Coating</h3>
+              <p className="text-gray-700 mb-4">
+                Long-lasting paint protection with our professional ceramic coating services for superior gloss and durability.
+              </p>
+              <Link href="/services/ceramic-coating" className="inline-flex items-center text-primary font-bold">
+                Learn More <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </div>
+            
+            <div className="bg-[#FFD7B5]/30 rounded-lg p-6 shadow-md">
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Paint Correction</h3>
+              <p className="text-gray-700 mb-4">
+                Remove scratches, swirl marks, and imperfections to restore your vehicle's paint to a perfect, mirror-like finish.
+              </p>
+              <Link href="/services/paint-correction" className="inline-flex items-center text-primary font-bold">
+                Learn More <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <ServiceProcess />
       <FAQs />
       
