@@ -4,6 +4,11 @@ import { storage } from "./storage";
 import { bookingFormSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { 
+  prepareEmployeeEmailNotification, 
+  prepareCustomerEmailConfirmation, 
+  sendEmailNotification 
+} from "./emailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
@@ -15,8 +20,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate the request body
       const validatedData = bookingFormSchema.parse(req.body);
       
+      // Generate a unique booking reference (will be added by storage layer)
+      const bookingReference = `HWW-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
+      
       // Create the booking
       const booking = await storage.createBooking(validatedData);
+      
+      // Prepare and send employee notification email
+      const employeeEmailData = prepareEmployeeEmailNotification(booking);
+      await sendEmailNotification(employeeEmailData);
+      
+      // Prepare and send customer confirmation email
+      const customerEmailData = prepareCustomerEmailConfirmation(booking);
+      await sendEmailNotification(customerEmailData);
+      
+      // Log booking for tracking purposes
+      console.log(`New booking (${bookingReference}) created for ${booking.firstName} ${booking.lastName}`);
+      console.log(`Vehicle: ${booking.vehicleType}, Service: ${booking.mainService}`);
+      console.log(`Appointment: ${booking.appointmentDate} at ${booking.appointmentTime}`);
+      console.log(`Location: ${booking.location}`);
       
       // Return the created booking
       return res.status(201).json({

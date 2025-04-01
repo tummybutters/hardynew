@@ -55,7 +55,6 @@ export const insertBookingSchema = createInsertSchema(bookings).omit({
   id: true,
   createdAt: true,
   status: true,
-  bookingReference: true,
 });
 
 export const bookingFormSchema = insertBookingSchema.extend({
@@ -71,6 +70,7 @@ export const bookingFormSchema = insertBookingSchema.extend({
   totalDuration: z.string().min(1, "Total duration is required"),
   appointmentDate: z.string().min(1, "Date is required"),
   appointmentTime: z.string().min(1, "Time is required"),
+  bookingReference: z.string().optional(),
 });
 
 export type InsertBooking = z.infer<typeof insertBookingSchema>;

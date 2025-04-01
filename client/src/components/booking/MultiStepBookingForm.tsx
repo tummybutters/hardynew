@@ -202,6 +202,37 @@ export default function MultiStepBookingForm() {
     return `${prefix}-${timestamp}-${random}`;
   };
   
+  // Track user interactions for backend reporting
+  const [userInteractions, setUserInteractions] = useState<Array<{
+    action: string;
+    field?: string;
+    value?: string;
+    timestamp: number;
+  }>>([]);
+  
+  // Add interaction tracking
+  const trackInteraction = (action: string, field?: string, value?: string) => {
+    const newInteraction = {
+      action,
+      field,
+      value,
+      timestamp: Date.now()
+    };
+    
+    console.log("User interaction:", newInteraction);
+    setUserInteractions(prev => [...prev, newInteraction]);
+    
+    // In a real app, you might want to send this to analytics
+  };
+  
+  // Wrapper function to track form field changes
+  const trackFieldChange = (fieldName: string, onChange: any) => {
+    return (value: any) => {
+      trackInteraction('field_change', fieldName, String(value));
+      onChange(value);
+    };
+  };
+  
   // Initialize form with default values
   const form = useForm<FormValues>({
     resolver: zodResolver(bookingFormSchema),
@@ -255,14 +286,24 @@ export default function MultiStepBookingForm() {
   useEffect(() => {
     if (watchServiceCategory) {
       setSelectedCategory(watchServiceCategory);
+      
+      // Track category change
+      trackInteraction('select_service_category', 'serviceCategory', watchServiceCategory);
+      
       if (watchMainService) {
         // Find the selected service package details
         const selectedServices = servicePackages[watchServiceCategory as keyof typeof servicePackages];
         const selectedService = selectedServices.find(s => s.value === watchMainService);
         
+        // Track main service selection
+        trackInteraction('select_main_service', 'mainService', watchMainService);
+        
         if (selectedService) {
           // Calculate total price with add-ons
           const totalPrice = calculateTotalPrice(selectedService.price, selectedAddOnDetails);
+          
+          // Track total price calculation
+          trackInteraction('total_price_calculated', 'totalPrice', totalPrice);
           
           // Update form values
           form.setValue("totalPrice", totalPrice);
@@ -274,8 +315,15 @@ export default function MultiStepBookingForm() {
   
   // Handle add-on selection
   const handleAddOnChange = (addOnId: string, checked: boolean) => {
+    // Track user interaction
+    const selectedAddOn = addOnServices.find(addon => addon.id === addOnId);
+    trackInteraction(
+      checked ? 'addon_added' : 'addon_removed',
+      'addOns',
+      selectedAddOn?.label || addOnId
+    );
+    
     if (checked) {
-      const selectedAddOn = addOnServices.find(addon => addon.id === addOnId);
       if (selectedAddOn) {
         setSelectedAddOns(prev => [...prev, addOnId]);
         setSelectedAddOnDetails(prev => [...prev, {id: addOnId, price: selectedAddOn.price}]);
@@ -316,18 +364,38 @@ export default function MultiStepBookingForm() {
   // Handle next step and form submission
   const handleNext = async () => {
     const fields = getFieldsForStep(currentStep);
+    const stepName = steps[currentStep]?.id || `step_${currentStep}`;
+    
+    // Track step navigation attempt
+    trackInteraction('attempt_next_step', 'navigation', stepName);
     
     // Special handling for review step
     if (currentStep === 7) {
       try {
         setIsSubmitting(true);
-        setBookingReference(generateBookingReference());
+        const ref = generateBookingReference();
+        setBookingReference(ref);
+        
+        // Track booking submission
+        trackInteraction('booking_submission', 'form', ref);
+        
+        // Get current form data for tracking
+        const formData = form.getValues();
+        trackInteraction('complete_booking_data', 'form', JSON.stringify({
+          vehicle: formData.vehicleType,
+          service: formData.mainService,
+          date: formData.appointmentDate,
+          time: formData.appointmentTime,
+          addOns: selectedAddOns.length
+        }));
+        
         // Submit the form
         await form.handleSubmit((data) => {
           bookingMutation.mutate(data);
         })();
       } catch (error) {
         console.error("Error submitting form:", error);
+        trackInteraction('booking_submission_error', 'form', String(error));
         setIsSubmitting(false);
       }
       return;
@@ -337,9 +405,15 @@ export default function MultiStepBookingForm() {
     const isStepValid = await validateStepFields(fields);
     
     if (isStepValid && currentStep < steps.length - 1) {
+      // Track successful step completion
+      trackInteraction('complete_step', 'navigation', stepName);
+      
       setCurrentStep(prev => prev + 1);
       // Scroll to top when changing steps
       stepsRef.current?.scrollIntoView({ behavior: 'smooth' });
+    } else if (!isStepValid) {
+      // Track validation failure
+      trackInteraction('validation_failure', 'form', fields.join(', '));
     }
   };
   
@@ -374,9 +448,18 @@ export default function MultiStepBookingForm() {
 
   // Navigate to previous step
   const handlePrevious = () => {
+    const currentStepName = steps[currentStep]?.id || `step_${currentStep}`;
+    
+    // Track navigation back
+    trackInteraction('go_back', 'navigation', currentStepName);
+    
     if (currentStep > 0) {
       setCurrentStep(prev => prev - 1);
       stepsRef.current?.scrollIntoView({ behavior: 'smooth' });
+      
+      // Track which step they're returning to
+      const previousStepName = steps[currentStep-1]?.id || `step_${currentStep-1}`;
+      trackInteraction('return_to_step', 'navigation', previousStepName);
     }
   };
   
@@ -541,7 +624,11 @@ export default function MultiStepBookingForm() {
                           <FormLabel>Vehicle Type</FormLabel>
                           <FormControl>
                             <RadioGroup
-                              onValueChange={field.onChange}
+                              onValueChange={(value) => {
+                                // Track vehicle type selection
+                                trackInteraction('select_vehicle_type', 'vehicleType', value);
+                                field.onChange(value);
+                              }}
                               defaultValue={field.value}
                               className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                             >
@@ -784,7 +871,12 @@ export default function MultiStepBookingForm() {
                             <FormControl>
                               <Input 
                                 type="date" 
-                                {...field} 
+                                value={field.value}
+                                onChange={(e) => {
+                                  // Track date selection
+                                  trackInteraction('select_date', 'appointmentDate', e.target.value);
+                                  field.onChange(e);
+                                }}
                                 min={new Date().toISOString().split('T')[0]}
                                 className="border-gray-300"
                               />
@@ -801,7 +893,11 @@ export default function MultiStepBookingForm() {
                           <FormItem>
                             <FormLabel>Preferred Time</FormLabel>
                             <Select
-                              onValueChange={field.onChange}
+                              onValueChange={(value) => {
+                                // Track time selection
+                                trackInteraction('select_time', 'appointmentTime', value);
+                                field.onChange(value);
+                              }}
                               defaultValue={field.value}
                             >
                               <FormControl>
@@ -846,8 +942,17 @@ export default function MultiStepBookingForm() {
                           <FormControl>
                             <Textarea
                               placeholder="Examples: Pet hair in back seat, coffee stains on front seats, scratches on driver side door, heavy pollen on exterior, etc."
-                              {...field}
                               value={field.value || ''}
+                              onChange={(e) => {
+                                // Only track when they finish typing (on blur) to avoid excessive tracking
+                                field.onChange(e);
+                              }}
+                              onBlur={() => {
+                                if (field.value) {
+                                  // Track condition notes
+                                  trackInteraction('add_condition_notes', 'conditionNotes', 'provided');
+                                }
+                              }}
                               rows={4}
                               className="border-gray-300 resize-none"
                             />
@@ -877,7 +982,15 @@ export default function MultiStepBookingForm() {
                             <FormControl>
                               <Input 
                                 placeholder="First Name" 
-                                {...field} 
+                                value={field.value}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                }}
+                                onBlur={() => {
+                                  if (field.value) {
+                                    trackInteraction('provided_first_name', 'firstName', 'entered');
+                                  }
+                                }}
                                 className="border-gray-300"
                               />
                             </FormControl>
@@ -895,7 +1008,15 @@ export default function MultiStepBookingForm() {
                             <FormControl>
                               <Input 
                                 placeholder="Last Name" 
-                                {...field} 
+                                value={field.value}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                }}
+                                onBlur={() => {
+                                  if (field.value) {
+                                    trackInteraction('provided_last_name', 'lastName', 'entered');
+                                  }
+                                }}
                                 className="border-gray-300"
                               />
                             </FormControl>
@@ -916,7 +1037,15 @@ export default function MultiStepBookingForm() {
                               <Input 
                                 placeholder="email@example.com" 
                                 type="email"
-                                {...field} 
+                                value={field.value}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                }}
+                                onBlur={() => {
+                                  if (field.value) {
+                                    trackInteraction('provided_email', 'email', 'entered');
+                                  }
+                                }}
                                 className="border-gray-300"
                               />
                             </FormControl>
@@ -933,8 +1062,16 @@ export default function MultiStepBookingForm() {
                             <FormLabel>Phone Number</FormLabel>
                             <FormControl>
                               <Input 
-                                placeholder="(555) 555-1234" 
-                                {...field} 
+                                placeholder="(555) 555-1234"
+                                value={field.value}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                }}
+                                onBlur={() => {
+                                  if (field.value) {
+                                    trackInteraction('provided_phone', 'phone', 'entered');
+                                  }
+                                }}
                                 className="border-gray-300"
                               />
                             </FormControl>

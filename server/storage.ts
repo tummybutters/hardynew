@@ -49,12 +49,25 @@ export class MemStorage implements IStorage {
   async createBooking(insertBooking: InsertBooking): Promise<Booking> {
     const id = this.currentBookingId++;
     const now = new Date();
+    
+    // Generate a booking reference if not provided
+    const bookingReference = insertBooking.bookingReference || 
+      `HWW-${now.getTime().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
+    
+    // Handle null values for optional fields
+    const addOns = insertBooking.addOns || null;
+    const conditionNotes = insertBooking.conditionNotes || null;
+    
     const booking: Booking = { 
-      ...insertBooking, 
+      ...insertBooking,
+      addOns,
+      conditionNotes, 
       id, 
       createdAt: now, 
-      status: "pending" 
+      status: "pending",
+      bookingReference
     };
+    
     this.bookingsStore.set(id, booking);
     return booking;
   }
