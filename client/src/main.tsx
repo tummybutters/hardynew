@@ -7,5 +7,6 @@ import "./components/ui/3d-button.css";
 import "./components/ui/custom-hero-button.css";
 import "./components/ui/custom-nav-button.css";
 import "./components/ui/service-3d-button.css";
+import "./components/ui/3d-step-icon.css";
 
 createRoot(document.getElementById("root")!).render(<App />);

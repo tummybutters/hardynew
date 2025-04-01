@@ -11,6 +11,7 @@ import { CheckCircle, ArrowRight, ArrowLeft, MapPin, Calendar, Car, Settings,
   Search, PenTool, Brush, ShieldCheck, Truck, Layers, ChevronsUp } from "lucide-react";
 import LocationSearch from "./LocationSearch";
 import { ThreeDButton } from "@/components/ui/3d-button";
+import { ThreeDStepIcon, BackButton } from "@/components/ui/3d-step-icon";
 
 import {
   Form,
@@ -405,16 +406,22 @@ export default function MultiStepBookingForm() {
                 }`}
                 style={{ width: `${100 / steps.length}%` }}
               >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 ${
-                  index <= currentStep ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'
-                }`}>
+                <ThreeDStepIcon 
+                  status={
+                    index < currentStep 
+                      ? 'completed' 
+                      : index === currentStep 
+                        ? 'active' 
+                        : 'upcoming'
+                  }
+                >
                   {index < currentStep ? (
                     <Check className="h-5 w-5" />
                   ) : (
                     step.icon
                   )}
-                </div>
-                <div className="text-xs mt-2 font-medium hidden md:block">{step.title}</div>
+                </ThreeDStepIcon>
+                <div className="text-xs mt-4 font-medium hidden md:block">{step.title}</div>
               </div>
             ))}
             
@@ -445,8 +452,10 @@ export default function MultiStepBookingForm() {
           </div>
           
           <div className="text-center md:hidden mb-4">
-            <div className="inline-flex items-center justify-center bg-primary text-white p-2 rounded-full mb-2">
-              {steps[currentStep].icon}
+            <div className="flex justify-center mb-2">
+              <ThreeDStepIcon status="active">
+                {steps[currentStep].icon}
+              </ThreeDStepIcon>
             </div>
             <h3 className="text-xl font-bold">{steps[currentStep].title}</h3>
             <p className="text-gray-600 text-sm">{steps[currentStep].description}</p>
@@ -1107,15 +1116,14 @@ export default function MultiStepBookingForm() {
                 {currentStep < 8 && (
                   <div className={`flex ${currentStep > 0 ? 'justify-between' : 'justify-end'} mt-8 pt-4 border-t border-gray-200`}>
                     {currentStep > 0 && (
-                      <ThreeDButton
+                      <BackButton
                         type="button"
                         onClick={handlePrevious}
-                        variant="secondary"
                         className="border-gray-300"
                       >
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Back
-                      </ThreeDButton>
+                      </BackButton>
                     )}
                     
                     <ThreeDButton
