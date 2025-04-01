@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { MapPin, Check, X } from 'lucide-react';
 
 // Set your Mapbox access token
 const MAPBOX_TOKEN = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcQ';
-mapboxgl.accessToken = MAPBOX_TOKEN;
 
 // Service area bounds - covering Sacramento to SoCal
 const CALIFORNIA_BOUNDS = {
@@ -30,115 +26,134 @@ interface LocationSearchProps {
 
 declare global {
   interface Window {
-    mapboxsearch?: any;
+    mapboxgl?: any;
+    MapboxGeocoder?: any;
   }
 }
 
 export default function LocationSearch({ value, onChange, onAddressValidated, field, formState }: LocationSearchProps) {
+  const geocoderContainerRef = useRef<HTMLDivElement>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-  const addressInputRef = useRef<HTMLInputElement>(null);
-  const addressContainerRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<mapboxgl.Map | null>(null);
-  const [marker, setMarker] = useState<mapboxgl.Marker | null>(null);
+  const [map, setMap] = useState<any>(null);
+  const [marker, setMarker] = useState<any>(null);
   const [isInServiceArea, setIsInServiceArea] = useState<boolean | null>(null);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
-  const [isAutofillInitialized, setIsAutofillInitialized] = useState(false);
+  const [geocoderInitialized, setGeocoderInitialized] = useState(false);
   
-  // Initialize Mapbox Address Autofill
+  // Initialize Mapbox Geocoder
   useEffect(() => {
-    if (!addressInputRef.current || !formRef.current || isAutofillInitialized) return;
-
-    // Wait for the Mapbox Search JS script to load
-    const initMapboxSearch = () => {
-      if (window.mapboxsearch && !isAutofillInitialized) {
-        window.mapboxsearch.config.accessToken = MAPBOX_TOKEN;
+    if (!geocoderContainerRef.current || geocoderInitialized) return;
+    
+    // Dynamically load Mapbox GL JS and Geocoder if needed
+    const loadMapboxScripts = async () => {
+      // Load Mapbox GL JS if not already loaded
+      if (!window.mapboxgl) {
+        const mapboxScript = document.createElement('script');
+        mapboxScript.src = 'https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js';
+        document.head.appendChild(mapboxScript);
         
-        // Create a custom address autofill
-        const autofillElement = new window.mapboxsearch.MapboxAddressAutofill({
-          accessToken: MAPBOX_TOKEN
+        const mapboxCss = document.createElement('link');
+        mapboxCss.rel = 'stylesheet';
+        mapboxCss.href = 'https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css';
+        document.head.appendChild(mapboxCss);
+        
+        await new Promise(resolve => {
+          mapboxScript.onload = resolve;
         });
-        
-        autofillElement.options = {
-          country: 'us',
-          language: 'en'
-        };
-
-        // Add event listener for retrieve event
-        autofillElement.addEventListener('retrieve', (event: any) => {
-          const feature = event.detail;
-          if (feature && feature.geometry && feature.geometry.coordinates) {
-            const coords: [number, number] = feature.geometry.coordinates;
-            handleCoordinates(coords);
-          }
-        });
-        
-        // Setup the existing input inside an autofill element
-        if (addressContainerRef.current && addressInputRef.current) {
-          // Create a temporary input with the correct attributes
-          const tempInput = document.createElement('input');
-          tempInput.type = 'text';
-          tempInput.placeholder = 'Enter your address';
-          tempInput.autocomplete = 'address-line1';
-          tempInput.className = addressInputRef.current.className;
-          
-          // Set the current value
-          tempInput.value = value;
-          
-          // Add event listener to sync with the React state
-          tempInput.addEventListener('input', (e) => {
-            const target = e.target as HTMLInputElement;
-            onChange(target.value);
-          });
-
-          // Replace the old input with the new one
-          if (addressInputRef.current.parentNode) {
-            addressInputRef.current.parentNode.replaceChild(tempInput, addressInputRef.current);
-          }
-          
-          // Add the input to the MapboxAddressAutofill element
-          autofillElement.appendChild(tempInput);
-          
-          // Add the autofill element to the container
-          addressContainerRef.current.appendChild(autofillElement);
-          
-          setIsAutofillInitialized(true);
-        }
       }
+      
+      // Load Mapbox Geocoder if not already loaded
+      if (!window.MapboxGeocoder) {
+        const geocoderScript = document.createElement('script');
+        geocoderScript.src = 'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js';
+        document.head.appendChild(geocoderScript);
+        
+        const geocoderCss = document.createElement('link');
+        geocoderCss.rel = 'stylesheet';
+        geocoderCss.href = 'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css';
+        document.head.appendChild(geocoderCss);
+        
+        await new Promise(resolve => {
+          geocoderScript.onload = resolve;
+        });
+      }
+      
+      return true;
     };
     
-    // Check if Mapbox Search JS is already loaded
-    if (window.mapboxsearch) {
-      initMapboxSearch();
-    } else {
-      // Wait for the script to load
-      const searchScript = document.getElementById('search-js');
-      if (searchScript) {
-        searchScript.addEventListener('load', initMapboxSearch);
-      }
-    }
-    
-    return () => {
-      const searchScript = document.getElementById('search-js');
-      if (searchScript) {
-        searchScript.removeEventListener('load', initMapboxSearch);
-      }
-    };
-  }, [value, onChange, isAutofillInitialized]);
-  
-  // Initialize map when container is ready
-  useEffect(() => {
-    if (!mapContainerRef.current) return;
-    
-    const initializeMap = () => {
-      const mapInstance = new mapboxgl.Map({
+    const initGeocoder = async () => {
+      const scriptsLoaded = await loadMapboxScripts();
+      if (!scriptsLoaded) return;
+      
+      // Set access token
+      window.mapboxgl.accessToken = MAPBOX_TOKEN;
+      
+      // Initialize the map
+      const mapInstance = new window.mapboxgl.Map({
         container: mapContainerRef.current!,
         style: 'mapbox://styles/mapbox/streets-v12',
-        center: [CENTER_POINT[0], CENTER_POINT[1]] as [number, number],
+        center: [CENTER_POINT[0], CENTER_POINT[1]],
         zoom: 5.5
       });
       
-      mapInstance.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+      // Add navigation controls
+      mapInstance.addControl(new window.mapboxgl.NavigationControl(), 'bottom-right');
+      
+      // Initialize the geocoder
+      const geocoder = new window.MapboxGeocoder({
+        accessToken: MAPBOX_TOKEN,
+        countries: 'us',
+        bbox: [-124.409591, 32.534156, -114.131211, 39.5], // Bounding box for California
+        placeholder: 'Enter your address',
+        proximity: {
+          longitude: CENTER_POINT[0],
+          latitude: CENTER_POINT[1]
+        },
+        types: 'address,neighborhood,locality,place',
+        mapboxgl: window.mapboxgl
+      });
+      
+      // Add the geocoder to the container
+      if (geocoderContainerRef.current) {
+        geocoder.addTo(geocoderContainerRef.current);
+      }
+      
+      // Prefill with any existing value
+      if (value) {
+        geocoder.setInput(value);
+      }
+      
+      // When a result is selected, extract coordinates and check service area
+      geocoder.on('result', (e: any) => {
+        const result = e.result;
+        if (result && result.geometry && result.geometry.coordinates) {
+          const coords = result.geometry.coordinates as [number, number];
+          const placeName = result.place_name;
+          
+          // Update state
+          onChange(placeName);
+          setCoordinates(coords);
+          
+          // Check if in service area
+          const inServiceArea = checkServiceArea(coords);
+          setIsInServiceArea(inServiceArea);
+          onAddressValidated(inServiceArea, coords);
+          
+          // Update marker
+          if (marker) {
+            marker.remove();
+          }
+          
+          const newMarker = new window.mapboxgl.Marker({
+            color: inServiceArea ? '#22c55e' : '#ef4444'
+          })
+            .setLngLat(coords)
+            .addTo(mapInstance);
+          
+          setMarker(newMarker);
+          mapInstance.flyTo({ center: coords, zoom: 14 });
+        }
+      });
       
       // Add California service area
       mapInstance.on('load', () => {
@@ -166,27 +181,38 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
           type: 'fill',
           source: 'california-area',
           paint: {
-            'fill-color': '#FFB375',
+            'fill-color': 'var(--primary-orange)',
             'fill-opacity': 0.2,
-            'fill-outline-color': '#EE432C'
+            'fill-outline-color': 'var(--primary-red)'
           }
         });
       });
       
+      // Handle clear event
+      geocoder.on('clear', () => {
+        onChange("");
+        setCoordinates(null);
+        setIsInServiceArea(null);
+        onAddressValidated(false);
+        
+        if (marker) {
+          marker.remove();
+          setMarker(null);
+        }
+      });
+      
       setMap(mapInstance);
+      setGeocoderInitialized(true);
     };
     
-    if (!map) {
-      initializeMap();
-    }
+    initGeocoder();
     
     return () => {
       if (map) {
         map.remove();
-        setMap(null);
       }
     };
-  }, []);
+  }, [onChange, onAddressValidated, geocoderInitialized, value]);
   
   // Function to check if coordinates are within California service area
   const checkServiceArea = (coords: [number, number]): boolean => {
@@ -202,54 +228,31 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
     );
   };
 
-  // Handle coordinates from Mapbox
-  const handleCoordinates = (coords: [number, number]) => {
-    setCoordinates(coords);
-    
-    // Check if the address is within our service area
-    const inServiceArea = checkServiceArea(coords);
-    setIsInServiceArea(inServiceArea);
-    onAddressValidated(inServiceArea, coords);
-    
-    // Update map and marker
-    if (map) {
-      if (marker) {
-        marker.remove();
-      }
-      
-      const newMarker = new mapboxgl.Marker({ color: inServiceArea ? '#4CAF50' : '#F44336' })
-        .setLngLat(coords)
-        .addTo(map);
-      
-      setMarker(newMarker);
-      map.flyTo({ center: coords, zoom: 14 });
-    }
-  };
-
   return (
-    <form ref={formRef} className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+    <div className="space-y-4">
       <FormItem className="relative">
         <FormLabel className="flex items-center">
-          <MapPin className="h-4 w-4 mr-2" />
+          <MapPin className="h-4 w-4 mr-2 text-primary-red" />
           Your Location
         </FormLabel>
         <FormControl>
-          <div ref={addressContainerRef} className="relative">
-            {/* This input will be replaced by the Mapbox Address Autofill */}
-            <Input
-              ref={addressInputRef}
-              placeholder="Enter your address"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              className={`pr-10 ${isInServiceArea === false ? 'border-red-500' : isInServiceArea === true ? 'border-green-500' : ''}`}
-              {...field}
+          <div className="relative">
+            {/* Geocoder container */}
+            <div 
+              ref={geocoderContainerRef} 
+              className={`mapboxgl-geocoder-container ${
+                isInServiceArea === false ? 'border-red-500' : 
+                isInServiceArea === true ? 'border-green-500' : 
+                'border-primary-orange'
+              }`}
             />
+            
             {isInServiceArea !== null && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10">
+              <div className="absolute right-3 top-[22px] transform -translate-y-1/2 z-10">
                 {isInServiceArea ? (
-                  <Check className="h-5 w-5 text-green-500" />
+                  <Check className="h-4 w-4 text-green-500" />
                 ) : (
-                  <X className="h-5 w-5 text-red-500" />
+                  <X className="h-4 w-4 text-red-500" />
                 )}
               </div>
             )}
@@ -273,11 +276,11 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
         </div>
       </div>
       
-      {/* Map is always visible */}
+      {/* Map container */}
       <div 
         ref={mapContainerRef} 
-        className="h-[350px] w-full rounded-md border border-gray-200 overflow-hidden transition-all duration-300 mt-4"
+        className="h-[350px] w-full rounded-md border border-primary-orange overflow-hidden transition-all duration-300 mt-4"
       />
-    </form>
+    </div>
   );
 }

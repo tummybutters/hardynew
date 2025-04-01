@@ -1,0 +1,155 @@
+whats the best way to condense how to use you into a prompt so i can put that into replit
+I'm designed to provide information specifically about Mapbox, which is a location data platform for developers. Your question seems to be about creating a prompt for a different AI system, which isn't related to Mapbox.
+If you're looking for information about how to use Mapbox in your Replit project, I'd be happy to help with that. Mapbox offers various SDKs and APIs for maps, navigation, search, and other location services that you could integrate into your Replit projects.
+Would you like me to provide information about getting started with Mapbox in a development environment like Replit? I can share resources about setting up Mapbox GL JS for web applications, using Mapbox with React, or other Mapbox integration options.
+All feedback is reviewed by the team.
+what are all the types of functions and calls and how to use them for code on a website to have a view of on the map of southern california and then you type in to search if we serve in that area if its not in certain area of north to socal then it says we dont serve here, and it autocompletes. 
+Based on your question, you're looking to create a website with a map of Southern California that includes a search feature with autocomplete functionality, which can determine if a location is within your service area. Here's how you can implement this using Mapbox's search and mapping tools:
+Map Setup and Search Implementation
+1. Interactive Map with Mapbox GL JS
+First, you'll need to set up a basic map centered on Southern California using Mapbox GL JS:
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Service Area Map</title>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css">
+  <style>
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    #result { position: absolute; top: 80px; right: 10px; padding: 10px; background: white; z-index: 1; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="result"></div>
+  <script>
+    // Your JavaScript code will go here
+  </script>
+</body>
+</html>
+2. Add Search with Autocomplete
+You can implement search with autocomplete using either the Mapbox Geocoding API or the Search Box API. Since you need autocomplete and want to check if locations are within a specific area, the Search Box API is more appropriate as it includes POIs and better autocomplete features Unlock faster, smarter search with Mapbox Search Box API.
+Here's how to implement it:
+
+mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
+
+// Initialize the map centered on Southern California
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/streets-v12',
+  center: [-118.2437, 34.0522], // Los Angeles coordinates
+  zoom: 8
+});
+
+// Define your service area boundary (simplified example - you would define your actual service area)
+const serviceAreaBoundary = {
+  type: 'Polygon',
+  coordinates: [[
+    // Define coordinates for Southern California boundary
+    // This is a simplified example - you would need actual boundary coordinates
+    [-119.5, 33.5],
+    [-117.0, 33.5],
+    [-117.0, 34.5],
+    [-119.5, 34.5],
+    [-119.5, 33.5]
+  ]]
+};
+
+// Add the geocoder (search box with autocomplete)
+const geocoder = new MapboxGeocoder({
+  accessToken: mapboxgl.accessToken,
+  mapboxgl: mapboxgl,
+  proximity: {
+    longitude: -118.2437,
+    latitude: 34.0522
+  }, // Bias results toward Southern California
+  countries: 'us',
+  bbox: [-124.409591, 32.534156, -114.131211, 37.0], // Bounding box for California
+  placeholder: 'Search for a location'
+});
+
+// Add the geocoder to the map
+map.addControl(geocoder);
+
+// When a result is selected, check if it's in your service area
+geocoder.on('result', function(e) {
+  const resultCoordinates = e.result.geometry.coordinates;
+  const point = turf.point(resultCoordinates);
+  
+  // Check if the point is within the service area
+  const isInServiceArea = turf.booleanPointInPolygon(point, turf.polygon(serviceAreaBoundary.coordinates));
+  
+  const resultDiv = document.getElementById('result');
+  if (isInServiceArea) {
+    resultDiv.innerHTML = '<h3>Good news!</h3><p>We serve this location.</p>';
+    resultDiv.style.backgroundColor = '#d4edda';
+  } else {
+    resultDiv.innerHTML = '<h3>Sorry!</h3><p>We don\'t currently serve this location.</p>';
+    resultDiv.style.backgroundColor = '#f8d7da';
+  }
+  
+  // Add a marker at the selected location
+  new mapboxgl.Marker()
+    .setLngLat(resultCoordinates)
+    .addTo(map);
+});
+
+// Add Turf.js for spatial analysis
+map.on('load', function() {
+  // Add your service area as a layer on the map
+  map.addSource('service-area', {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: serviceAreaBoundary
+    }
+  });
+  
+  map.addLayer({
+    id: 'service-area-fill',
+    type: 'fill',
+    source: 'service-area',
+    paint: {
+      'fill-color': '#088',
+      'fill-opacity': 0.3
+    }
+  });
+  
+  map.addLayer({
+    id: 'service-area-outline',
+    type: 'line',
+    source: 'service-area',
+    paint: {
+      'line-color': '#088',
+      'line-width': 2
+    }
+  });
+});
+Alternative: Using Mapbox Search JS
+For a more modern approach with better autocomplete, you can use the Mapbox Search JS library:
+
+<script id="search-js" defer src="https://api.mapbox.com/search-js/v1.0.0/web.js"></script>
+Then implement it with:
+
+// Initialize the search box
+const search = new MapboxSearchBox();
+search.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
+document.body.appendChild(search.onAdd(map));
+
+// Handle search results
+search.on('retrieve', (event) => {
+  const coordinates = event.features[0].geometry.coordinates;
+  // Check if coordinates are in service area and display message
+});
+Key Components to Implement
+Map Display: Use Mapbox GL JS to display a map centered on Southern California Web applications.
+Search with Autocomplete: Implement either:
+Mapbox GL Geocoder plugin Make your map interactive
+Mapbox Search Box API for better POI search and autocomplete Search Box API
+Address Autofill: For form-based searches, use Mapbox's Address Autofill Autofill suggestions.
+Service Area Check: Use Turf.js (a JavaScript library for spatial analysis) to check if a location is within your defined service area.
