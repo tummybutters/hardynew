@@ -1,17 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { MapPin, Check, X, Info } from 'lucide-react';
-import { 
-  CENTER_POINT, 
-  CALIFORNIA_BOUNDS, 
-  SERVICE_LOCATIONS,
-  validateServiceLocation,
-  filterMapboxResults,
-  getGeocoderConfig
-} from '@/lib/locationUtils';
 
-// Set your Mapbox access token - store in env for production
-const MAPBOX_TOKEN = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcA';
+// Set your Mapbox access token
+const MAPBOX_TOKEN = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcQ';
+
+// Service area bounds - covering Sacramento to SoCal
+const CALIFORNIA_BOUNDS = {
+  north: 39.5, // Sacramento area
+  south: 32.5, // San Diego area
+  west: -124.4, // Pacific Coast
+  east: -114.1 // Eastern California
+};
+
+// Service area center
+const CENTER_POINT = [-119.4179, 36.7783]; // Central California coordinates
+
+// List of service cities
+const SERVICE_LOCATIONS = [
+  'Davis, CA', 'Irvine, CA', 'Bonita, CA', 'Costa Mesa, CA', 
+  'Tustin, CA', 'Alameda, CA', 'Mission Viejo, CA', 
+  'Newport Beach, CA', 'Dixon, CA', 'Woodland, CA', 
+  'Sacramento, CA', 'Galt, CA'
+];
 
 interface LocationSearchProps {
   value: string;
@@ -38,6 +49,29 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
   const [geocoderInitialized, setGeocoderInitialized] = useState(false);
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   
+  // Check if placeName contains any of our service cities
+  const checkServiceCity = (placeName: string): boolean => {
+    if (!placeName) return false;
+    
+    const normalizedPlace = placeName.toLowerCase();
+    return SERVICE_LOCATIONS.some(location => 
+      normalizedPlace.includes(location.toLowerCase())
+    );
+  };
+  
+  // Check if coordinates are within California service area
+  const checkServiceArea = (coords: [number, number]): boolean => {
+    const lon = coords[0];
+    const lat = coords[1];
+    
+    return (
+      lat >= CALIFORNIA_BOUNDS.south &&
+      lat <= CALIFORNIA_BOUNDS.north &&
+      lon >= CALIFORNIA_BOUNDS.west &&
+      lon <= CALIFORNIA_BOUNDS.east
+    );
+  };
+
   // Initialize Mapbox Geocoder
   useEffect(() => {
     if (!geocoderContainerRef.current || geocoderInitialized) return;
@@ -98,9 +132,27 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
         // Add navigation controls
         mapInstance.addControl(new window.mapboxgl.NavigationControl(), 'bottom-right');
         
-        // Initialize the geocoder with our configuration
-        const geocoderConfig = getGeocoderConfig(window.mapboxgl);
-        const geocoder = new window.MapboxGeocoder(geocoderConfig);
+        // Initialize the geocoder
+        const geocoder = new window.MapboxGeocoder({
+          accessToken: MAPBOX_TOKEN,
+          countries: 'us',
+          bbox: [CALIFORNIA_BOUNDS.west, CALIFORNIA_BOUNDS.south, CALIFORNIA_BOUNDS.east, CALIFORNIA_BOUNDS.north],
+          placeholder: 'Enter your address',
+          proximity: {
+            longitude: CENTER_POINT[0],
+            latitude: CENTER_POINT[1]
+          },
+          types: 'address,neighborhood,locality,place',
+          mapboxgl: window.mapboxgl,
+          // Filter to California only
+          filter: function(item: any) {
+            // Check if result is in California
+            if (!item.context) return false;
+            return item.context.some((ctx: any) => 
+              (ctx.id.startsWith('region') && ctx.text === 'California')
+            );
+          }
+        });
         
         // Add the geocoder to the container
         if (geocoderContainerRef.current) {
@@ -123,11 +175,28 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
             onChange(placeName);
             setCoordinates(coords);
             
-            // Validate using our location utilities
-            const validation = validateServiceLocation(placeName, coords);
-            setIsInServiceArea(validation.isValid);
-            setValidationMessage(validation.reason || null);
-            onAddressValidated(validation.isValid, coords);
+            // Check if the location is in our service areas
+            const isInServiceCity = checkServiceCity(placeName);
+            const inCalBounds = checkServiceArea(coords);
+            
+            // Determine validation status and message
+            let isValid = false;
+            let message = null;
+            
+            if (isInServiceCity) {
+              isValid = true;
+            } else if (inCalBounds) {
+              isValid = true;
+              message = "Your area may have limited availability. We'll contact you to confirm service details.";
+            } else {
+              isValid = false;
+              message = "This location is outside our California service area.";
+            }
+            
+            // Update state with validation results
+            setIsInServiceArea(isValid);
+            setValidationMessage(message);
+            onAddressValidated(isValid, coords);
             
             // Update marker
             if (marker) {
@@ -135,7 +204,7 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
             }
             
             const newMarker = new window.mapboxgl.Marker({
-              color: validation.isValid ? '#22c55e' : '#ef4444'
+              color: isValid ? '#22c55e' : '#ef4444'
             })
               .setLngLat(coords)
               .addTo(mapInstance);
@@ -175,18 +244,6 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
               'fill-opacity': 0.2,
               'fill-outline-color': '#EE432C'
             }
-          });
-          
-          // Add service cities as points on the map
-          const serviceCityFeatures = SERVICE_LOCATIONS.map(location => {
-            return {
-              type: 'Feature',
-              properties: {
-                name: location.name
-              },
-              // These are placeholder coordinates - in production you'd fetch actual coordinates for each city
-              // For now, we'll skip adding points since we don't have the exact coordinates
-            };
           });
         });
         
