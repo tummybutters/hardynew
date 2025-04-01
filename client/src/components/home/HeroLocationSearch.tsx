@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { MapPin, Check, X, ArrowRight, Info } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Set your Mapbox access token - in production, use environment variables
 const MAPBOX_TOKEN = 'pk.eyJ1IjoidGJ1dGNoZXIzIiwiYSI6ImNtOHhpOW81YTA0OHYycnEwNnM4MWphZDgifQ.VSLkTQ3yEJBUTqC14kAkcQ';
@@ -235,11 +236,13 @@ export default function HeroLocationSearch() {
     }
   };
 
+  const isMobile = useIsMobile();
+
   return (
-    <div className="bg-white/95 backdrop-blur rounded-lg shadow-xl p-6">
-      <h3 className="text-xl font-bold text-gray-900 mb-4">Ready to Transform Your Vehicle?</h3>
+    <div className="bg-white/95 backdrop-blur rounded-lg shadow-xl p-4 sm:p-6">
+      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Ready to Transform Your Vehicle?</h3>
       
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700 flex items-center">
             <MapPin className="h-4 w-4 mr-1 text-primary-red" />
@@ -279,10 +282,23 @@ export default function HeroLocationSearch() {
             </p>
           )}
           
-          <p className="text-xs text-gray-500 mt-1">
-            We currently service Davis, Irvine, Bonita, Costa Mesa, Tustin, Alameda, Mission Viejo, 
-            Newport Beach, Dixon, Woodland, Sacramento, and Galt.
-          </p>
+          {/* Service locations - collapsed on mobile for cleanliness */}
+          {isMobile ? (
+            <details className="mt-1">
+              <summary className="text-xs text-gray-500 cursor-pointer">
+                View service locations
+              </summary>
+              <p className="text-xs text-gray-500 mt-1 pl-2">
+                We currently service Davis, Irvine, Bonita, Costa Mesa, Tustin, Alameda, Mission Viejo, 
+                Newport Beach, Dixon, Woodland, Sacramento, and Galt.
+              </p>
+            </details>
+          ) : (
+            <p className="text-xs text-gray-500 mt-1">
+              We currently service Davis, Irvine, Bonita, Costa Mesa, Tustin, Alameda, Mission Viejo, 
+              Newport Beach, Dixon, Woodland, Sacramento, and Galt.
+            </p>
+          )}
         </div>
         
         <div className="pt-2">

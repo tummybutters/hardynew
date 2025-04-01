@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { bookingFormSchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { z } from "zod";
 import { CheckCircle, ArrowRight, ArrowLeft, MapPin, Calendar, Car, Settings, 
   ClipboardList, Clock, DollarSign, X, Check, Droplets, Sparkles, 
@@ -577,15 +578,18 @@ export default function MultiStepBookingForm() {
     return services.find(s => s.value === watchMainService);
   };
 
+  const isMobile = useIsMobile();
+
   return (
-    <div className="bg-[#F3F4E6] py-10">
-      <div className="container mx-auto px-4">
-        <div className="mb-12 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Book Your Mobile Detailing Service</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">Experience premium car detailing at your home or office. Our expert team brings everything needed to transform your vehicle.</p>
+    <div className="bg-[#F3F4E6] py-8 md:py-10">
+      <div className="container mx-auto px-3 sm:px-4">
+        <div className="mb-8 md:mb-12 text-center">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 text-gray-900">Book Your Mobile Detailing Service</h1>
+          <p className="text-gray-600 text-sm md:text-base max-w-2xl mx-auto">Experience premium car detailing at your home or office. Our expert team brings everything needed to transform your vehicle.</p>
         </div>
         
-        <div ref={stepsRef} className="relative mb-10">
+        <div ref={stepsRef} className="relative mb-6 md:mb-10">
+          {/* Desktop progress indicator */}
           <div className="hidden md:flex justify-between items-center mb-4">
             {steps.map((step, index) => (
               <div 
@@ -628,18 +632,20 @@ export default function MultiStepBookingForm() {
             ></div>
           </div>
           
+          {/* Mobile progress indicator - simplified dots */}
           <div className="md:hidden flex items-center justify-center space-x-1 mb-4">
             {steps.map((_, index) => (
               <div 
                 key={index}
                 className={`h-2 rounded-full transition-all ${
-                  index === currentStep ? 'w-8 bg-primary' : 
-                  index < currentStep ? 'w-4 bg-primary' : 'w-4 bg-gray-300'
+                  index === currentStep ? 'w-6 bg-primary' : 
+                  index < currentStep ? 'w-3 bg-primary' : 'w-3 bg-gray-300'
                 }`}
               ></div>
             ))}
           </div>
           
+          {/* Mobile step indicator */}
           <div className="text-center md:hidden mb-4">
             <div className="flex justify-center mb-2">
               <ThreeDStepIcon status="active">
@@ -651,8 +657,9 @@ export default function MultiStepBookingForm() {
           </div>
         </div>
         
-        <Card className="max-w-3xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden border-gray-200">
-          <CardContent className="p-6 md:p-8">
+        {/* Main form card - adjusted padding for mobile */}
+        <Card className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border-gray-200">
+          <CardContent className="p-4 sm:p-6 md:p-8">
             <Form {...form}>
               <div className="space-y-6">
                 {/* Step 1: Location */}
@@ -1355,16 +1362,16 @@ export default function MultiStepBookingForm() {
                   </div>
                 )}
                 
-                {/* Navigation buttons */}
+                {/* Navigation buttons - optimized for mobile */}
                 {currentStep < 8 && (
-                  <div className={`flex ${currentStep > 0 ? 'justify-between' : 'justify-end'} mt-8 pt-4 border-t border-gray-200`}>
+                  <div className={`flex ${currentStep > 0 ? 'justify-between' : 'justify-end'} mt-6 sm:mt-8 pt-4 border-t border-gray-200`}>
                     {currentStep > 0 && (
                       <BackButton
                         type="button"
                         onClick={handlePrevious}
-                        className="border-gray-300"
+                        className="border-gray-300 text-sm sm:text-base"
                       >
-                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        <ArrowLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                         Back
                       </BackButton>
                     )}
@@ -1374,13 +1381,14 @@ export default function MultiStepBookingForm() {
                       onClick={handleNext}
                       disabled={isSubmitting}
                       variant="primary"
+                      className="text-sm sm:text-base px-4 py-2 sm:px-6 sm:py-3"
                     >
                       {currentStep === 7 ? (
                         isSubmitting ? "Processing..." : "Confirm Booking"
                       ) : (
                         <>
-                          Continue
-                          <ArrowRight className="ml-2 h-4 w-4" />
+                          {isMobile ? "Next" : "Continue"}
+                          <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                         </>
                       )}
                     </ThreeDButton>
@@ -1391,28 +1399,55 @@ export default function MultiStepBookingForm() {
           </CardContent>
         </Card>
         
-        <div className="max-w-3xl mx-auto mt-12">
-          <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Mobile Detailing: What to Expect</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start">
-                <CheckCircle className="text-primary mr-2 mt-1 h-5 w-5 shrink-0" />
-                <span>We service Irvine and surrounding areas with appointments available Monday-Friday 8am-5pm and Saturday 9am-3pm.</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle className="text-primary mr-2 mt-1 h-5 w-5 shrink-0" />
-                <span>Please ensure your vehicle is accessible and that you have access to water hookups within 100 feet of your vehicle.</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle className="text-primary mr-2 mt-1 h-5 w-5 shrink-0" />
-                <span>Our team brings all necessary equipment, water capture systems, and eco-friendly cleaning products.</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle className="text-primary mr-2 mt-1 h-5 w-5 shrink-0" />
-                <span>Payment is collected after service completion - we accept all major credit cards, cash, and digital payment apps.</span>
-              </li>
-            </ul>
-          </div>
+        {/* What to Expect section - mobile optimized */}
+        <div className="max-w-3xl mx-auto mt-8 sm:mt-12">
+          {isMobile ? (
+            <details className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+              <summary className="text-lg font-bold text-gray-900 cursor-pointer">
+                Mobile Detailing: What to Expect
+              </summary>
+              <ul className="space-y-3 mt-3 text-sm">
+                <li className="flex items-start">
+                  <CheckCircle className="text-primary mr-2 mt-0.5 h-4 w-4 shrink-0" />
+                  <span>Appointments available Monday-Friday 8am-5pm and Saturday 9am-3pm.</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="text-primary mr-2 mt-0.5 h-4 w-4 shrink-0" />
+                  <span>Ensure vehicle accessibility and water hookups within 100 feet.</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="text-primary mr-2 mt-0.5 h-4 w-4 shrink-0" />
+                  <span>We bring all equipment, water capture systems, and eco-friendly products.</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="text-primary mr-2 mt-0.5 h-4 w-4 shrink-0" />
+                  <span>Payment after service - accept credit cards, cash, and digital payments.</span>
+                </li>
+              </ul>
+            </details>
+          ) : (
+            <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Mobile Detailing: What to Expect</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start">
+                  <CheckCircle className="text-primary mr-2 mt-1 h-5 w-5 shrink-0" />
+                  <span>We service Irvine and surrounding areas with appointments available Monday-Friday 8am-5pm and Saturday 9am-3pm.</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="text-primary mr-2 mt-1 h-5 w-5 shrink-0" />
+                  <span>Please ensure your vehicle is accessible and that you have access to water hookups within 100 feet of your vehicle.</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="text-primary mr-2 mt-1 h-5 w-5 shrink-0" />
+                  <span>Our team brings all necessary equipment, water capture systems, and eco-friendly cleaning products.</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="text-primary mr-2 mt-1 h-5 w-5 shrink-0" />
+                  <span>Payment is collected after service completion - we accept all major credit cards, cash, and digital payment apps.</span>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>
