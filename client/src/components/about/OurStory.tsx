@@ -1,3 +1,5 @@
+import ianImage from "@assets/678560598bc5ae2be726a02c_ian about-p-500.jpg";
+
 export default function OurStory() {
   return (
     <div className="bg-white py-16">
@@ -26,9 +28,9 @@ export default function OurStory() {
             <div className="absolute -top-4 -left-4 w-24 h-24 bg-primary/10 rounded-lg -z-10"></div>
             <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-primary/10 rounded-lg -z-10"></div>
             <img 
-              src="https://images.unsplash.com/photo-1599256681832-6b29a5f903c2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=600&q=80" 
-              alt="Professional car detailing" 
-              className="rounded-lg shadow-lg w-full h-auto relative z-10"
+              src={ianImage}
+              alt="Ian at UC Davis" 
+              className="rounded-xl shadow-lg w-full h-auto object-cover relative z-10"
             />
           </div>
         </div>
