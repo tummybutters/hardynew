@@ -149,49 +149,46 @@ export default function ServiceList() {
           {services.map((service) => (
             <div 
               key={service.id}
-              className={`relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 transform ${
-                hoveredService === service.id ? 'scale-102 -translate-y-1' : ''
-              }`}
-              onMouseEnter={() => setHoveredService(service.id)}
-              onMouseLeave={() => setHoveredService(null)}
+              className="relative overflow-hidden rounded-lg shadow-lg"
             >
-              {/* Card Background with Gradient */}
-              <div className={`${service.bgColor} p-6 pb-4`}>
-                <div className="mb-6 text-center">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-1">{service.title}</h3>
-                  <div className="flex items-center justify-center space-x-3 text-sm mb-2">
-                    <span className="line-through text-gray-700">{service.originalPrice}</span>
-                    <span className="font-bold text-red-600 bg-white/30 px-2 py-0.5 rounded-full">{service.discount}</span>
-                  </div>
-                  <div className="text-3xl font-black mt-1">
-                    {service.salePrice}
-                  </div>
+              {/* Card Header (Orange Section) */}
+              <div className={`${service.bgColor} p-5 text-center`}>
+                <h3 className="text-2xl font-bold text-gray-900 mb-1">{service.title}</h3>
+                <div className="flex items-center justify-center space-x-2 text-sm">
+                  <span className="line-through text-gray-700">{service.originalPrice}</span>
+                  <span className="font-bold text-red-600">{service.discount}</span>
+                </div>
+                <div className="text-3xl font-black mt-1 mb-4">
+                  {service.salePrice}
                 </div>
                 
-                <div className="bg-white/40 px-4 py-2 rounded-md text-center text-xs font-bold text-gray-700 mb-5">
+                <div className="bg-white/40 px-4 py-2 rounded-md text-center text-xs font-bold text-gray-700 mb-4">
                   {service.duration}
                 </div>
                 
                 <Link href="/booking">
                   <Service3DButton className="w-full">
-                    Book Now
+                    BOOK NOW
                   </Service3DButton>
                 </Link>
               </div>
               
-              {/* Service Features */}
-              <div className="bg-white p-6">
-                <ul className="space-y-3 mb-6">
-                  {service.features.map((feature, index) => (
-                    <li key={index} className="flex items-start text-sm">
-                      <CheckCircle2 className="text-primary shrink-0 mr-2 mt-0.5 h-4 w-4" />
-                      <span>{feature.text}</span>
-                    </li>
-                  ))}
-                </ul>
+              {/* Card Body (White Section) */}
+              <div className="bg-white p-5 flex flex-col" style={{minHeight: "350px"}}>
+                {/* Service Features */}
+                <div className="flex-1">
+                  <ul className="space-y-3">
+                    {service.features.map((feature, index) => (
+                      <li key={index} className="flex items-start text-sm">
+                        <CheckCircle2 className="text-primary shrink-0 mr-2 mt-0.5 h-4 w-4" />
+                        <span>{feature.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
                 
-                {/* Bonuses Section */}
-                <div className="mt-4 pt-4 border-t border-gray-200">
+                {/* Bonuses Section - fixed to bottom of card */}
+                <div className="mt-auto pt-4 border-t border-gray-200">
                   <div className="font-bold text-xl text-gray-900 mb-2">FREE BONUS</div>
                   <ul className="space-y-3">
                     {service.bonuses.map((bonus, index) => (
@@ -203,11 +200,6 @@ export default function ServiceList() {
                   </ul>
                 </div>
               </div>
-              
-              {/* Highlight Border on Hover */}
-              <div className={`absolute inset-0 border-2 border-transparent rounded-xl pointer-events-none transition-all duration-300 ${
-                hoveredService === service.id ? 'border-primary' : ''
-              }`}></div>
             </div>
           ))}
         </div>
