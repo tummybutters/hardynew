@@ -1,11 +1,27 @@
 import mailchimp from '@mailchimp/mailchimp_marketing';
 import { Booking } from '@shared/schema';
 
-// Initialize the Mailchimp client
-mailchimp.setConfig({
-  apiKey: process.env.MAILCHIMP_API_KEY,
-  server: 'us7', // Hardcoded based on error message that showed API key is linked to us7 datacenter
-});
+// Check if Mailchimp credentials are available
+const hasMailchimpCredentials = 
+  process.env.MAILCHIMP_API_KEY && 
+  process.env.MAILCHIMP_API_KEY.length > 0 &&
+  process.env.MAILCHIMP_AUDIENCE_ID && 
+  process.env.MAILCHIMP_AUDIENCE_ID.length > 0;
+
+// Initialize the Mailchimp client if credentials are available
+if (hasMailchimpCredentials) {
+  try {
+    mailchimp.setConfig({
+      apiKey: process.env.MAILCHIMP_API_KEY,
+      server: process.env.MAILCHIMP_SERVER || 'us1', 
+    });
+    console.log('Mailchimp client initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize Mailchimp client:', error);
+  }
+} else {
+  console.log('Mailchimp credentials not found or incomplete - email marketing features will be disabled');
+}
 
 /**
  * Add a subscriber to the Mailchimp audience
@@ -21,6 +37,16 @@ export async function addSubscriberToMailchimp(
   lastName: string,
   phone?: string
 ): Promise<any> {
+  // Skip Mailchimp integration if credentials aren't available
+  if (!hasMailchimpCredentials) {
+    console.log('Skipping Mailchimp subscription - credentials not available');
+    return {
+      status: 'skipped',
+      message: 'Mailchimp integration not configured',
+      email_address: email
+    };
+  }
+  
   try {
     const response = await mailchimp.lists.addListMember(
       process.env.MAILCHIMP_AUDIENCE_ID as string,
@@ -98,6 +124,16 @@ export async function processBookingWithMailchimp(booking: Booking): Promise<any
       booking.phone
     );
     
+    // Check for skipped status (indicates Mailchimp is not configured)
+    if (subscriberResult.status === 'skipped') {
+      console.log(`Mailchimp subscription skipped for booking: ${booking.email} - Mailchimp not configured`);
+      return {
+        subscriber: null,
+        status: 'skipped',
+        message: `Booking processed for ${booking.email} without Mailchimp integration`
+      };
+    }
+    
     // Log the booking for record-keeping
     console.log(`[MAILCHIMP] Added booking customer to audience: ${booking.email}`);
     
@@ -108,10 +144,11 @@ export async function processBookingWithMailchimp(booking: Booking): Promise<any
       message: `Booking processed for ${booking.email}, customer added to Mailchimp audience`
     };
   } catch (error: any) {
+    // Don't fail the booking process just because Mailchimp integration failed
     console.error(`Error in processBookingWithMailchimp: ${error.message}`);
     return {
       status: 'error',
-      message: error.message
+      message: `Booking processed but Mailchimp integration failed: ${error.message}`
     };
   }
 }
