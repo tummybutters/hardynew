@@ -13,55 +13,52 @@ export default function Subscriptions() {
   
   const subscriptionPlans = [
     {
-      id: "monthly",
-      name: "Monthly Shine",
-      price: "$119",
+      id: "signature",
+      name: "Signature Service",
+      price: "$120+",
       period: "per month",
       popular: false,
-      description: "Keep your vehicle looking fresh with monthly exterior maintenance.",
+      description: "A premium, gentle cleaning that maintains your vehicle's shine without the commitment of a full detail.",
       features: [
-        "Basic exterior hand wash & dry",
-        "Tire cleaning & dressing",
-        "Exterior window cleaning",
-        "Monthly scheduling",
-        "10% off additional services"
+        "Exterior Hand Wash & Dry: Premium, gentle cleaning to maintain shine",
+        "Wheel & Tire Detailing: Protection from brake dust and road grime",
+        "Interior Touch-Up: Quick vacuuming and wipe-down of high-touch areas",
+        "Add-On Discounts: Special rates on additional services"
       ],
       color: "bg-white"
     },
     {
-      id: "premium",
-      name: "Premium Protection",
-      price: "$179",
+      id: "executive",
+      name: "Executive Detail",
+      price: "$300+",
       period: "per month",
       popular: true,
-      description: "Our most popular package with comprehensive care for your vehicle.",
+      description: "Comprehensive care for vehicles that deserve meticulous attention to maintain a near-showroom finish.",
       features: [
-        "Complete exterior detailing",
-        "Basic interior cleaning",
-        "Wax protection every visit",
-        "Dashboard & console conditioning",
-        "Flexible scheduling",
-        "15% off additional services",
-        "Quarterly deep cleaning included"
+        "Comprehensive Exterior Care: Includes Signature cleaning plus spray wax",
+        "Enhanced Interior Care: Deep cleaning of all surfaces and crevices",
+        "Glass & Surface Treatments: For better clarity and protection",
+        "Scheduled Checkups: Regular assessments of vehicle condition",
+        "Light Paint Correction: Reduces swirls and minor imperfections",
+        "Dashboard & Console Deep Conditioning"
       ],
       color: "bg-gradient-to-b from-primary/5 to-primary/10"
     },
     {
-      id: "ultimate",
-      name: "Ultimate Luxury",
-      price: "$299",
+      id: "concierge",
+      name: "Concierge Express",
+      price: "$800+",
       period: "per month",
       popular: false,
-      description: "The complete solution for those who demand perfection.",
+      description: "Our premium service designed for busy families with multiple vehicles, offering the ultimate in flexibility and convenience.",
       features: [
-        "Full interior & exterior detailing",
-        "Premium ceramic coating maintenance",
-        "Leather conditioning",
-        "Engine bay cleaning quarterly",
-        "Pet hair removal",
-        "Priority scheduling",
-        "20% off additional services",
-        "Quarterly paint correction treatment"
+        "Multiple Express Details: Several exterior detail sessions per month",
+        "Combination Service: Blend of exterior and interior treatments",
+        "Flexible Service Mix: Choose what works for your schedule",
+        "Priority Scheduling: Fast, guaranteed booking times",
+        "Custom Add-Ons: Tailored services for your specific needs",
+        "Headlight Restoration: Specialized care for clarity and safety",
+        "Specialized Surface Care: Premium treatments for all surfaces"
       ],
       color: "bg-white"
     }
