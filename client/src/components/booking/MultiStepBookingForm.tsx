@@ -58,53 +58,53 @@ const serviceCategories = [
   { value: "complete", label: "Complete Package", icon: <Sparkles className="w-6 h-6 text-primary-red" />, description: "Full interior and exterior detailing" }
 ];
 
-// Service prices for each vehicle tier (static pricing)
+// Service prices for each vehicle tier based on image (static pricing)
 const servicePrices = {
-  // Sedan/Coupe Tier (Tier 1)
+  // Sedan/Coupe Tier (Tier 1 - lowest prices)
   sedan: {
     interior: {
-      "interior-deep-clean": { price: 199, duration: "3-4 hours" }
+      "interior-deep-clean": { price: 150, duration: "2-4 hours" }
     },
     exterior: {
-      "express-detail": { price: 99, duration: "1-1.5 hours" },
-      "exterior-wash-wax": { price: 149, duration: "2-3 hours" },
-      "exterior-polish-wax": { price: 249, duration: "3-4 hours" }
+      "express-detail": { price: 125, duration: "2 hours" },
+      "exterior-wash-wax": { price: 200, duration: "2-4 hours" },
+      "exterior-polish-wax": { price: 350, duration: "3-6 hours" }
     },
     complete: {
-      "luxury-full-detail": { price: 399, duration: "5-6 hours" },
-      "showroom-prep": { price: 599, duration: "7-8 hours" }
+      "luxury-full-detail": { price: 550, duration: "4-8 hours" },
+      "showroom-prep": { price: 699, duration: "7-8 hours" }
     }
   },
   
-  // SUV/Truck Tier (Tier 2)
+  // SUV/Truck Tier (Tier 2 - middle range prices)
   suv: {
     interior: {
-      "interior-deep-clean": { price: 249, duration: "3-4 hours" }
+      "interior-deep-clean": { price: 250, duration: "2-4 hours" }
     },
     exterior: {
-      "express-detail": { price: 129, duration: "1-1.5 hours" },
-      "exterior-wash-wax": { price: 179, duration: "2-3 hours" },
-      "exterior-polish-wax": { price: 299, duration: "3-4 hours" }
+      "express-detail": { price: 150, duration: "2 hours" },
+      "exterior-wash-wax": { price: 300, duration: "2-4 hours" },
+      "exterior-polish-wax": { price: 400, duration: "3-6 hours" }
     },
     complete: {
-      "luxury-full-detail": { price: 479, duration: "5-6 hours" },
-      "showroom-prep": { price: 729, duration: "7-8 hours" }
+      "luxury-full-detail": { price: 699, duration: "4-8 hours" },
+      "showroom-prep": { price: 849, duration: "7-8 hours" }
     }
   },
   
-  // Van/Luxury Tier (Tier 3)
+  // Van/Luxury Tier (Tier 3 - highest prices)
   luxury: {
     interior: {
-      "interior-deep-clean": { price: 299, duration: "3-4 hours" }
+      "interior-deep-clean": { price: 350, duration: "2-4 hours" }
     },
     exterior: {
-      "express-detail": { price: 159, duration: "1-1.5 hours" },
-      "exterior-wash-wax": { price: 219, duration: "2-3 hours" },
-      "exterior-polish-wax": { price: 349, duration: "3-4 hours" }
+      "express-detail": { price: 175, duration: "2 hours" },
+      "exterior-wash-wax": { price: 400, duration: "2-4 hours" },
+      "exterior-polish-wax": { price: 450, duration: "3-6 hours" }
     },
     complete: {
-      "luxury-full-detail": { price: 549, duration: "5-6 hours" },
-      "showroom-prep": { price: 849, duration: "7-8 hours" }
+      "luxury-full-detail": { price: 850, duration: "4-8 hours" },
+      "showroom-prep": { price: 999, duration: "7-8 hours" }
     }
   }
 };
@@ -267,25 +267,78 @@ export default function MultiStepBookingForm() {
   // Get the price for a service based on the vehicle type
   const getServicePrice = (serviceValue: string, serviceCategory: string, vehicleType: string): number => {
     // Map vehicle type to one of our three pricing tiers
-    const priceTier = vehicleType === 'sedan' ? 'sedan' : 
+    const priceTier = vehicleType === 'sedan' || vehicleType === 'coupe' ? 'sedan' : 
                      (vehicleType === 'suv' || vehicleType === 'truck') ? 'suv' : 'luxury';
     
     try {
-      // Type-safe price lookup
-      if (priceTier === 'sedan' && serviceCategory in servicePrices.sedan && 
-          serviceValue in servicePrices.sedan[serviceCategory as keyof typeof servicePrices.sedan]) {
-        return servicePrices.sedan[serviceCategory as keyof typeof servicePrices.sedan][serviceValue].price;
+      // Type-safe lookup for sedan/coupe tier
+      if (priceTier === 'sedan') {
+        if (serviceCategory === 'interior') {
+          if (serviceValue === 'interior-deep-clean') {
+            return servicePrices.sedan.interior["interior-deep-clean"].price;
+          }
+        } else if (serviceCategory === 'exterior') {
+          if (serviceValue === 'express-detail') {
+            return servicePrices.sedan.exterior["express-detail"].price;
+          } else if (serviceValue === 'exterior-wash-wax') {
+            return servicePrices.sedan.exterior["exterior-wash-wax"].price;
+          } else if (serviceValue === 'exterior-polish-wax') {
+            return servicePrices.sedan.exterior["exterior-polish-wax"].price;
+          }
+        } else if (serviceCategory === 'complete') {
+          if (serviceValue === 'luxury-full-detail') {
+            return servicePrices.sedan.complete["luxury-full-detail"].price;
+          } else if (serviceValue === 'showroom-prep') {
+            return servicePrices.sedan.complete["showroom-prep"].price;
+          }
+        }
       } 
-      else if (priceTier === 'suv' && serviceCategory in servicePrices.suv && 
-               serviceValue in servicePrices.suv[serviceCategory as keyof typeof servicePrices.suv]) {
-        return servicePrices.suv[serviceCategory as keyof typeof servicePrices.suv][serviceValue].price;
+      // Type-safe lookup for SUV/truck tier
+      else if (priceTier === 'suv') {
+        if (serviceCategory === 'interior') {
+          if (serviceValue === 'interior-deep-clean') {
+            return servicePrices.suv.interior["interior-deep-clean"].price;
+          }
+        } else if (serviceCategory === 'exterior') {
+          if (serviceValue === 'express-detail') {
+            return servicePrices.suv.exterior["express-detail"].price;
+          } else if (serviceValue === 'exterior-wash-wax') {
+            return servicePrices.suv.exterior["exterior-wash-wax"].price;
+          } else if (serviceValue === 'exterior-polish-wax') {
+            return servicePrices.suv.exterior["exterior-polish-wax"].price;
+          }
+        } else if (serviceCategory === 'complete') {
+          if (serviceValue === 'luxury-full-detail') {
+            return servicePrices.suv.complete["luxury-full-detail"].price;
+          } else if (serviceValue === 'showroom-prep') {
+            return servicePrices.suv.complete["showroom-prep"].price;
+          }
+        }
       }
-      else if (priceTier === 'luxury' && serviceCategory in servicePrices.luxury && 
-               serviceValue in servicePrices.luxury[serviceCategory as keyof typeof servicePrices.luxury]) {
-        return servicePrices.luxury[serviceCategory as keyof typeof servicePrices.luxury][serviceValue].price;
+      // Type-safe lookup for luxury/van tier
+      else if (priceTier === 'luxury') {
+        if (serviceCategory === 'interior') {
+          if (serviceValue === 'interior-deep-clean') {
+            return servicePrices.luxury.interior["interior-deep-clean"].price;
+          }
+        } else if (serviceCategory === 'exterior') {
+          if (serviceValue === 'express-detail') {
+            return servicePrices.luxury.exterior["express-detail"].price;
+          } else if (serviceValue === 'exterior-wash-wax') {
+            return servicePrices.luxury.exterior["exterior-wash-wax"].price;
+          } else if (serviceValue === 'exterior-polish-wax') {
+            return servicePrices.luxury.exterior["exterior-polish-wax"].price;
+          }
+        } else if (serviceCategory === 'complete') {
+          if (serviceValue === 'luxury-full-detail') {
+            return servicePrices.luxury.complete["luxury-full-detail"].price;
+          } else if (serviceValue === 'showroom-prep') {
+            return servicePrices.luxury.complete["showroom-prep"].price;
+          }
+        }
       }
       
-      console.error('Unable to find price for this service/vehicle combination');
+      console.error('Unable to find price for this service/vehicle combination:', {serviceValue, serviceCategory, vehicleType, priceTier});
       return 0;
     } catch (error) {
       console.error('Error getting service price:', error);
