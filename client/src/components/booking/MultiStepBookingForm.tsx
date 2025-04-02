@@ -704,19 +704,41 @@ export default function MultiStepBookingForm() {
           break;
       }
       
+      // Update step first
       setCurrentStep(prev => prev + 1);
       
-      // Improved scrolling for all devices, especially mobile
+      // Enhanced scrolling logic with both immediate and delayed scrolling
+      // Immediate scroll to get closer to the top
+      window.scrollTo({
+        top: 0,
+        behavior: 'auto'
+      });
+      
+      // Use multiple attempts with different techniques
       setTimeout(() => {
-        // First try the most reliable method for mobile
+        // Mobile-optimized approach - scroll to absolute position
         window.scrollTo({
-          top: stepsRef.current?.offsetTop ? (stepsRef.current.offsetTop - 20) : 0,
-          behavior: 'smooth'
+          top: 0,
+          behavior: 'auto'
         });
         
-        // Fallback to scrollIntoView as backup
-        stepsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+        // Fallback scrolling with a small delay
+        setTimeout(() => {
+          if (stepsRef.current) {
+            // Try native approach first
+            window.scrollTo({
+              top: stepsRef.current.offsetTop - 20,
+              behavior: 'auto'
+            });
+            
+            // Then element method
+            stepsRef.current.scrollIntoView({
+              behavior: 'auto',
+              block: 'start'
+            });
+          }
+        }, 50);
+      }, 50);
     }
   };
   
@@ -772,17 +794,37 @@ export default function MultiStepBookingForm() {
     if (currentStep > 0) {
       setCurrentStep(prev => prev - 1);
       
-      // Use the same improved scrolling for "Back" navigation
+      // Immediate scroll to get closer to the top
+      window.scrollTo({
+        top: 0,
+        behavior: 'auto'
+      });
+      
+      // Use multiple attempts with different techniques
       setTimeout(() => {
-        // First try the most reliable method for mobile
+        // Mobile-optimized approach - scroll to absolute position
         window.scrollTo({
-          top: stepsRef.current?.offsetTop ? (stepsRef.current.offsetTop - 20) : 0,
-          behavior: 'smooth'
+          top: 0,
+          behavior: 'auto'
         });
         
-        // Fallback to scrollIntoView as backup
-        stepsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+        // Fallback scrolling with a small delay
+        setTimeout(() => {
+          if (stepsRef.current) {
+            // Try native approach first
+            window.scrollTo({
+              top: stepsRef.current.offsetTop - 20,
+              behavior: 'auto'
+            });
+            
+            // Then element method
+            stepsRef.current.scrollIntoView({
+              behavior: 'auto',
+              block: 'start'
+            });
+          }
+        }, 50);
+      }, 50);
     }
   };
   
