@@ -102,3 +102,41 @@
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
+
+/* Mapbox geocoder customizations */
+.mapboxgl-ctrl-geocoder {
+  width: 100%;
+  max-width: 100%;
+  font-size: 15px;
+  line-height: 20px;
+  font-family: inherit;
+}
+
+.mapboxgl-ctrl-geocoder input[type='text'] {
+  font-size: 15px;
+  border-radius: 0.5rem;
+  border: 1px solid #eee;
+  padding: 0.75rem 1rem;
+  width: 100%;
+}
+
+.mapboxgl-ctrl-geocoder--icon-search {
+  fill: #222;
+}
+
+/* Fix for duplicate search boxes */
+.mapboxgl-ctrl-geocoder:not(:first-child) {
+  display: none !important;
+}
+
+/* Ensure container only has one input field */
+#mapbox-geocoder-unique-container .mapboxgl-ctrl-geocoder:first-child {
+  display: block !important;
+  width: 100%;
+}
+
+#mapbox-geocoder-unique-container .mapboxgl-ctrl-geocoder:not(:first-child),
+#mapbox-geocoder-unique-container > input:not(:first-child),
+#mapbox-geocoder-unique-container > .mapboxgl-ctrl:not(:first-child) {
+  display: none !important;
+}

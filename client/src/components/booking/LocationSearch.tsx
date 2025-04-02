@@ -74,7 +74,23 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
 
   // Initialize Mapbox Geocoder
   useEffect(() => {
+    // Reset initialization status when component remounts
+    return () => {
+      setGeocoderInitialized(false);
+    };
+  }, []);
+
+  // Load and initialize geocoder
+  useEffect(() => {
+    // If already initialized or no container ref, don't reinitialize
     if (!geocoderContainerRef.current || geocoderInitialized) return;
+    
+    // Clear any existing content in the geocoder container first
+    if (geocoderContainerRef.current) {
+      while (geocoderContainerRef.current.firstChild) {
+        geocoderContainerRef.current.removeChild(geocoderContainerRef.current.firstChild);
+      }
+    }
     
     // Dynamically load Mapbox GL JS and Geocoder if needed
     const loadMapboxScripts = async () => {
@@ -286,7 +302,7 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
         </FormLabel>
         <FormControl>
           <div className="relative">
-            {/* Geocoder container */}
+            {/* Geocoder container - this is where Mapbox will add its search input */}
             <div 
               ref={geocoderContainerRef} 
               className={`mapboxgl-geocoder-container ${
@@ -294,6 +310,11 @@ export default function LocationSearch({ value, onChange, onAddressValidated, fi
                 isInServiceArea === true ? 'border-green-500' : 
                 'border-[#FFAA75]'
               }`}
+              style={{ 
+                minHeight: '38px',  // Ensure container has height even before Mapbox initializes
+                position: 'relative' // Ensure proper positioning
+              }}
+              id="mapbox-geocoder-unique-container" // Add a unique ID to make CSS targeting easier
             />
             
             {isInServiceArea !== null && (
