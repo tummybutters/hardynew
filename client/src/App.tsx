@@ -9,6 +9,7 @@ import Booking from "@/pages/booking";
 import About from "@/pages/about";
 import Subscriptions from "@/pages/subscriptions";
 import Contact from "@/pages/contact";
+import Admin from "@/pages/admin";
 import CardDemo from "@/pages/card-demo";
 import Layout from "@/components/layout/Layout";
 
@@ -32,6 +33,7 @@ function Router() {
         <Route path="/about" component={About} />
         <Route path="/subscriptions" component={Subscriptions} />
         <Route path="/contact" component={Contact} />
+        <Route path="/admin" component={Admin} />
         <Route path="/card-demo" component={CardDemo} />
         <Route component={NotFound} />
       </Switch>
