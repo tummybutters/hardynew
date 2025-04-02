@@ -41,45 +41,96 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 type FormValues = z.infer<typeof bookingFormSchema>;
 
-// Vehicle Types
+// Vehicle Types with pricing tiers
 const vehicleTypes = [
-  { value: "sedan", label: "Sedan", icon: <Car className="w-6 h-6 text-primary-red" />, description: "Standard 4-door car" },
-  { value: "coupe", label: "Coupe", icon: <Car className="w-6 h-6 text-primary-red" />, description: "2-door sporty car" },
-  { value: "suv", label: "SUV/Crossover", icon: <Truck className="w-6 h-6 text-primary-red" />, description: "Sport utility vehicle" },
-  { value: "truck", label: "Truck", icon: <Truck className="w-6 h-6 text-primary-red" />, description: "Pickup truck" },
-  { value: "van", label: "Van/Minivan", icon: <Truck className="w-6 h-6 text-primary-red" />, description: "Family or cargo van" },
-  { value: "luxury", label: "Luxury/Sports Car", icon: <Car className="w-6 h-6 text-primary-red" />, description: "High-end performance vehicle" },
+  { value: "sedan", label: "Sedan", icon: <Car className="w-6 h-6 text-primary-red" />, description: "Standard 4-door car", priceTier: "low" },
+  { value: "coupe", label: "Coupe", icon: <Car className="w-6 h-6 text-primary-red" />, description: "2-door sporty car", priceTier: "low" },
+  { value: "suv", label: "SUV/Crossover", icon: <Truck className="w-6 h-6 text-primary-red" />, description: "Sport utility vehicle", priceTier: "mid" },
+  { value: "truck", label: "Truck", icon: <Truck className="w-6 h-6 text-primary-red" />, description: "Pickup truck", priceTier: "mid" },
+  { value: "van", label: "Van/Minivan", icon: <Truck className="w-6 h-6 text-primary-red" />, description: "Family or cargo van", priceTier: "high" },
+  { value: "luxury", label: "Luxury/Sports Car", icon: <Car className="w-6 h-6 text-primary-red" />, description: "High-end performance vehicle", priceTier: "high" },
 ];
 
 // Categories 
 const serviceCategories = [
   { value: "interior", label: "Interior Only", icon: <Brush className="w-6 h-6 text-primary-red" />, description: "Focus on cleaning the inside of your vehicle" },
   { value: "exterior", label: "Exterior Only", icon: <Droplets className="w-6 h-6 text-primary-red" />, description: "Focus on making the outside shine" },
-  { value: "complete", label: "Complete Package", icon: <Sparkles className="w-6 h-6 text-primary-red" />, description: "Full interior and exterior detailing" },
-  { value: "specialty", label: "Specialty Services", icon: <Search className="w-6 h-6 text-primary-red" />, description: "Specific treatments for particular issues" }
+  { value: "complete", label: "Complete Package", icon: <Sparkles className="w-6 h-6 text-primary-red" />, description: "Full interior and exterior detailing" }
 ];
 
-// Service Packages
+// Base service prices that will be adjusted based on vehicle type
+const baseServicePrices = {
+  interior: {
+    "interior-deep-clean": { price: 225, duration: "3-4 hours" }
+  },
+  exterior: {
+    "express-detail": { price: 125, duration: "1-1.5 hours" },
+    "exterior-wash-wax": { price: 175, duration: "2-3 hours" },
+    "exterior-polish-wax": { price: 275, duration: "3-4 hours" }
+  },
+  complete: {
+    "luxury-full-detail": { price: 425, duration: "5-6 hours" },
+    "showroom-prep": { price: 575, duration: "7-8 hours" }
+  }
+};
+
+// Price multipliers based on vehicle type
+const priceTierMultipliers = {
+  low: 1, // sedan/coupe
+  mid: 1.25, // SUV/truck
+  high: 1.5 // van/luxury
+};
+
+// Service Packages (displayed options)
 const servicePackages = {
   interior: [
-    { value: "express-interior", label: "Express Interior", price: "$125", duration: "1.5 hours", description: "Quick interior vacuum, wipe down of surfaces, and window cleaning" },
-    { value: "deep-clean", label: "Deep Clean", price: "$225", duration: "3 hours", description: "Thorough cleaning of all interior surfaces, carpet & upholstery cleaning, stain removal" },
-    { value: "premium-interior", label: "Premium Interior", price: "$350", duration: "4-5 hours", description: "Complete interior restoration with leather conditioning, steam cleaning, and all vents/crevices detailed" }
+    { 
+      value: "interior-deep-clean", 
+      label: "Interior Detail Deep Clean", 
+      basePrice: baseServicePrices.interior["interior-deep-clean"].price,
+      duration: baseServicePrices.interior["interior-deep-clean"].duration, 
+      description: "Thorough cleaning of all interior surfaces, carpet & upholstery cleaning, stain removal, leather conditioning, and protection" 
+    }
   ],
   exterior: [
-    { value: "express-wash", label: "Express Wash & Wax", price: "$150", duration: "1.5 hours", description: "Hand wash, spray wax, tire shine, and exterior windows" },
-    { value: "deluxe-exterior", label: "Deluxe Exterior", price: "$250", duration: "3 hours", description: "Two-step wash process, premium wax, wheel detailing, and trim restoration" },
-    { value: "paint-correction", label: "Paint Correction", price: "$450", duration: "5-6 hours", description: "Machine polish to remove scratches, swirls, and oxidation plus premium ceramic wax" }
+    { 
+      value: "express-detail", 
+      label: "Express Detail", 
+      basePrice: baseServicePrices.exterior["express-detail"].price,
+      duration: baseServicePrices.exterior["express-detail"].duration, 
+      description: "Quick exterior wash, tire shine, and basic wax protection" 
+    },
+    { 
+      value: "exterior-wash-wax", 
+      label: "Exterior Wash & Wax", 
+      basePrice: baseServicePrices.exterior["exterior-wash-wax"].price,
+      duration: baseServicePrices.exterior["exterior-wash-wax"].duration, 
+      description: "Thorough wash, premium wax application, wheel cleaning, and tire shine" 
+    },
+    { 
+      value: "exterior-polish-wax", 
+      label: "Exterior Polish & Wax", 
+      basePrice: baseServicePrices.exterior["exterior-polish-wax"].price,
+      duration: baseServicePrices.exterior["exterior-polish-wax"].duration, 
+      description: "Full exterior polish to remove minor scratches and swirls, followed by premium wax protection" 
+    }
   ],
   complete: [
-    { value: "signature-detail", label: "Signature Detail", price: "$350", duration: "4 hours", description: "Our most popular package with interior deep clean and exterior deluxe service" },
-    { value: "luxury-detail", label: "Luxury Detail", price: "$550", duration: "6-7 hours", description: "Premium interior and exterior services with extra attention to detail" },
-    { value: "showroom-prep", label: "Showroom Prep", price: "$750", duration: "8+ hours", description: "Comprehensive detailing bringing your vehicle to like-new condition inside and out" }
-  ],
-  specialty: [
-    { value: "ceramic-coating", label: "Ceramic Coating", price: "$600", duration: "6 hours", description: "Professional-grade ceramic coating application with 12-18 month protection" },
-    { value: "pet-hair-removal", label: "Pet Hair Removal", price: "$175", duration: "2-3 hours", description: "Specialized extraction process to remove embedded pet hair and odors" },
-    { value: "headlight-restoration", label: "Headlight Restoration", price: "$150", duration: "1.5 hours", description: "Restore cloudy, yellow headlights to clear condition" }
+    { 
+      value: "luxury-full-detail", 
+      label: "Luxury Full Detail", 
+      basePrice: baseServicePrices.complete["luxury-full-detail"].price,
+      duration: baseServicePrices.complete["luxury-full-detail"].duration, 
+      description: "Complete interior and exterior detailing with premium products and extra attention to detail" 
+    },
+    { 
+      value: "showroom-prep", 
+      label: "Showroom Prep", 
+      basePrice: baseServicePrices.complete["showroom-prep"].price,
+      additionalPrice: 150,
+      duration: baseServicePrices.complete["showroom-prep"].duration, 
+      description: "Our most comprehensive package bringing your vehicle to like-new condition with ceramic coating" 
+    }
   ]
 };
 
@@ -185,9 +236,31 @@ export default function MultiStepBookingForm() {
     return parseFloat(numericString) || 0;
   };
   
-  // Calculate total price
-  const calculateTotalPrice = (mainPrice: string, addOns: {id: string, price: string}[]): string => {
-    const basePrice = extractPrice(mainPrice);
+  // Calculate price based on vehicle type
+  const calculateServicePrice = (basePrice: number, vehicleType: string): number => {
+    // Get the vehicle price tier
+    const vehicle = vehicleTypes.find(v => v.value === vehicleType);
+    if (!vehicle) return basePrice;
+    
+    // Apply the multiplier
+    const multiplier = priceTierMultipliers[vehicle.priceTier as keyof typeof priceTierMultipliers];
+    return basePrice * multiplier;
+  };
+
+  // Calculate total price including add-ons
+  const calculateTotalPrice = (serviceInfo: any, vehicleType: string, addOns: {id: string, price: string}[]): string => {
+    // Calculate service price based on vehicle type
+    let basePrice = 0;
+    
+    if (serviceInfo) {
+      basePrice = calculateServicePrice(serviceInfo.basePrice, vehicleType);
+      // Add additional price for Showroom Prep if applicable
+      if (serviceInfo.value === 'showroom-prep' && serviceInfo.additionalPrice) {
+        basePrice += serviceInfo.additionalPrice;
+      }
+    }
+    
+    // Add the add-on costs
     const addOnTotal = addOns.reduce((total, addon) => {
       return total + extractPrice(addon.price);
     }, 0);
@@ -295,13 +368,14 @@ export default function MultiStepBookingForm() {
         // Find the selected service package details
         const selectedServices = servicePackages[watchServiceCategory as keyof typeof servicePackages];
         const selectedService = selectedServices.find(s => s.value === watchMainService);
+        const vehicleType = form.getValues().vehicleType;
         
         // Track main service selection
         trackInteraction('select_main_service', 'mainService', watchMainService);
         
-        if (selectedService) {
+        if (selectedService && vehicleType) {
           // Calculate total price with add-ons
-          const totalPrice = calculateTotalPrice(selectedService.price, selectedAddOnDetails);
+          const totalPrice = calculateTotalPrice(selectedService, vehicleType, selectedAddOnDetails);
           
           // Track total price calculation
           trackInteraction('total_price_calculated', 'totalPrice', totalPrice);
@@ -570,12 +644,39 @@ export default function MultiStepBookingForm() {
     }
   };
   
-  // Find selected service details
+  // Get service price adjusted for vehicle type
+  const getAdjustedPrice = (serviceInfo: any, vehicleType: string): string => {
+    if (!serviceInfo || !vehicleType) return "$0.00";
+    
+    // Calculate the base price adjusted for vehicle type
+    const basePriceAdjusted = calculateServicePrice(serviceInfo.basePrice, vehicleType);
+    
+    // Add additional price for special packages like Showroom Prep
+    let finalPrice = basePriceAdjusted;
+    if (serviceInfo.value === 'showroom-prep' && serviceInfo.additionalPrice) {
+      finalPrice += serviceInfo.additionalPrice;
+    }
+    
+    return `$${finalPrice.toFixed(2)}`;
+  };
+  
+  // Find selected service details with adjusted price based on vehicle type
   const getSelectedServiceDetails = () => {
     if (!selectedCategory || !watchMainService) return null;
     
     const services = servicePackages[selectedCategory as keyof typeof servicePackages];
-    return services.find(s => s.value === watchMainService);
+    const serviceInfo = services.find(s => s.value === watchMainService);
+    
+    if (serviceInfo) {
+      const vehicleType = form.getValues().vehicleType;
+      // Add the price property adjusted for vehicle type
+      return {
+        ...serviceInfo,
+        price: getAdjustedPrice(serviceInfo, vehicleType)
+      };
+    }
+    
+    return null;
   };
 
   const isMobile = useIsMobile();
@@ -906,7 +1007,9 @@ export default function MultiStepBookingForm() {
                                         <p className="text-sm text-gray-500 mt-1">Duration: {service.duration}</p>
                                       </div>
                                       <span className="text-primary font-bold text-lg bg-primary/5 px-3 py-1 rounded-md">
-                                        {service.price}
+                                        {form.getValues().vehicleType 
+                                          ? getAdjustedPrice(service, form.getValues().vehicleType)
+                                          : `$${service.basePrice.toFixed(2)}`}
                                       </span>
                                     </div>
                                   </div>
