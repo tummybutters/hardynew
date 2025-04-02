@@ -63,14 +63,14 @@ const services = [
 ];
 
 const addOns = [
-  { id: "ceramic", label: "Premium Ceramic Coating (12-month protection)", price: "+$150" },
-  { id: "headlight", label: "Headlight Restoration & Protection", price: "+$75" },
-  { id: "engine", label: "Engine Bay Detail & Dressing", price: "+$85" },
-  { id: "leather", label: "Premium Leather Deep Conditioning", price: "+$95" },
-  { id: "pet", label: "Pet Hair Extraction & Odor Neutralizing", price: "+$65" },
-  { id: "sanitize", label: "Complete Interior Sanitization & Disinfection", price: "+$55" },
-  { id: "paint", label: "Paint Correction (Medium-Heavy Swirl Removal)", price: "+$120" },
-  { id: "clay", label: "Clay Bar Treatment", price: "+$45" }
+  { id: "carpet", label: "Carpet Conditioning", price: "+$100" },
+  { id: "leather", label: "Leather Conditioning", price: "+$50" },
+  { id: "clay", label: "Clay Bar", price: "+$50" },
+  { id: "spray-wax", label: "Spray Wax", price: "+$65" },
+  { id: "headlight", label: "Headlight Restoration", price: "+$50-$100" },
+  { id: "headliner", label: "Headliner Restore", price: "+$50-$75" },
+  { id: "scratch", label: "Scratch Buffing", price: "+$65-$95" },
+  { id: "plastic", label: "Interior Plastic/Chrome Polishing", price: "+$45-$85" }
 ];
 
 export default function BookingForm() {

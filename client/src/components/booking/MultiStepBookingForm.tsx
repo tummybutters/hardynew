@@ -85,14 +85,14 @@ const servicePackages = {
 
 // Add-on Services
 const addOnServices = [
-  { id: "ceramic", label: "Premium Ceramic Coating", price: "+$150", description: "12-month protection against environmental damage" },
-  { id: "engine", label: "Engine Bay Detail", price: "+$85", description: "Complete cleaning and dressing of engine compartment" },
-  { id: "clay", label: "Clay Bar Treatment", price: "+$65", description: "Removes embedded contaminants from paint" },
-  { id: "leather", label: "Leather Conditioning", price: "+$75", description: "Deep conditioning and UV protection for leather surfaces" },
-  { id: "odor", label: "Odor Elimination", price: "+$65", description: "Professional-grade odor neutralization treatment" },
-  { id: "headlights", label: "Headlight Restoration", price: "+$85", description: "Restore yellowed or cloudy headlights" },
-  { id: "trim-restore", label: "Trim Restoration", price: "+$45", description: "Restore faded exterior plastic and rubber" },
-  { id: "pet-hair", label: "Pet Hair Treatment", price: "+$75", description: "Extra attention to remove stubborn pet hair" }
+  { id: "carpet", label: "Carpet Conditioning", price: "+$100", description: "Deep conditioning treatment for carpets and floor mats" },
+  { id: "leather", label: "Leather Conditioning", price: "+$50", description: "Deep conditioning and UV protection for leather surfaces" },
+  { id: "clay", label: "Clay Bar", price: "+$50", description: "Removes embedded contaminants from paint" },
+  { id: "spray-wax", label: "Spray Wax", price: "+$65", description: "Additional layer of wax protection for your vehicle" },
+  { id: "headlights", label: "Headlight Restoration", price: "+$50-$100", description: "Restore yellowed or cloudy headlights" },
+  { id: "headliner", label: "Headliner Restore", price: "+$50-$75", description: "Clean and restore vehicle headliner" },
+  { id: "scratch", label: "Scratch Buffing", price: "+$65-$95", description: "Buff out minor scratches from your vehicle's paint" },
+  { id: "plastic", label: "Interior Plastic/Chrome Polishing", price: "+$45-$85", description: "Restore and polish interior plastic and chrome surfaces" }
 ];
 
 // Time Slots
