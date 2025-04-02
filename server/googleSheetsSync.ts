@@ -46,12 +46,10 @@ function bookingToSheetRow(booking: Booking): any[] {
     booking.status || 'pending',                     // Status
     booking.createdAt?.toString() || new Date().toISOString(), // Timestamp
     booking.location || '',                          // Location
-    '', // Coordinates (not in schema)
     booking.vehicleType || '',                       // Vehicle Type
     booking.conditionNotes || '',                    // Vehicle Condition
     booking.serviceCategory || '',                   // Service Category
     booking.mainService || '',                       // Main Service
-    '',                                              // Service Price (not in schema)
     booking.addOns || '',                            // Add-ons
     booking.totalPrice || '',                        // Total Price
     booking.appointmentDate || '',                   // Appointment Date
@@ -71,12 +69,10 @@ const HEADER_ROW = [
   'Status',
   'Timestamp',
   'Location',
-  'Coordinates',
   'Vehicle Type',
   'Vehicle Condition',
   'Service Category',
   'Main Service',
-  'Service Price',
   'Add-ons',
   'Total Price',
   'Appointment Date',
