@@ -194,7 +194,23 @@ export async function addBookingToGoogleSheets(booking: Booking): Promise<boolea
       console.log(`Added booking ${booking.id} to Google Sheets. Updated ${response.data.updates?.updatedCells} cells.`);
     } else {
       // If there's existing data, insert after header row (at A2)
-      // First, insert a blank row to push everything down
+      // First, we need to get the actual sheet ID
+      const spreadsheet = await sheets.spreadsheets.get({
+        spreadsheetId: SPREADSHEET_ID
+      });
+      
+      // Find the sheet ID for the SHEET_NAME
+      const sheet = spreadsheet.data.sheets?.find(
+        s => s.properties?.title === SHEET_NAME
+      );
+      
+      if (!sheet || sheet.properties?.sheetId === undefined) {
+        throw new Error(`Could not find sheet ID for ${SHEET_NAME}`);
+      }
+      
+      const actualSheetId = sheet.properties.sheetId;
+      
+      // Now insert a blank row to push everything down
       await sheets.spreadsheets.batchUpdate({
         spreadsheetId: SPREADSHEET_ID,
         requestBody: {
@@ -202,7 +218,7 @@ export async function addBookingToGoogleSheets(booking: Booking): Promise<boolea
             {
               insertDimension: {
                 range: {
-                  sheetId: 0, // Assuming the first sheet
+                  sheetId: actualSheetId, // Using the actual sheet ID
                   dimension: 'ROWS',
                   startIndex: 1, // After header row (0-indexed)
                   endIndex: 2 // Insert one row
