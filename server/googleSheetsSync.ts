@@ -43,7 +43,6 @@ function bookingToSheetRow(booking: Booking): any[] {
   return [
     booking.id.toString(),                           // ID
     booking.bookingReference || '',                  // Reference
-    booking.status || 'pending',                     // Status
     booking.createdAt?.toString() || new Date().toISOString(), // Timestamp
     booking.location || '',                          // Location
     booking.vehicleType || '',                       // Vehicle Type
@@ -58,7 +57,6 @@ function bookingToSheetRow(booking: Booking): any[] {
     booking.lastName || '',                          // Last Name
     booking.email || '',                             // Email
     booking.phone || '',                             // Phone
-    'website',                                       // Submitted From
   ];
 }
 
@@ -66,7 +64,6 @@ function bookingToSheetRow(booking: Booking): any[] {
 const HEADER_ROW = [
   'ID',
   'Reference',
-  'Status',
   'Timestamp',
   'Location',
   'Vehicle Type',
@@ -80,8 +77,7 @@ const HEADER_ROW = [
   'First Name',
   'Last Name',
   'Email',
-  'Phone',
-  'Submitted From'
+  'Phone'
 ];
 
 // Function to clear existing data and write all bookings to the sheet
