@@ -80,7 +80,7 @@ const HEADER_ROW = [
   'Phone'
 ];
 
-// Function to clear existing data and write all bookings to the sheet
+// Function to clear existing data and write all bookings to the sheet (newest first)
 export async function syncBookingsToGoogleSheets(): Promise<boolean> {
   // Get auth client
   const auth = await getAuthClient();
@@ -103,8 +103,11 @@ export async function syncBookingsToGoogleSheets(): Promise<boolean> {
     // Get all bookings from storage
     const bookings = await storage.getBookings();
     
+    // Sort bookings by ID in descending order (newest first)
+    const sortedBookings = [...bookings].sort((a, b) => b.id - a.id);
+    
     // Prepare data for Google Sheets
-    const rows = bookings.map(booking => bookingToSheetRow(booking));
+    const rows = sortedBookings.map(booking => bookingToSheetRow(booking));
     
     // Add header row at the top
     const values = [HEADER_ROW, ...rows];
@@ -114,7 +117,7 @@ export async function syncBookingsToGoogleSheets(): Promise<boolean> {
       try {
         await sheets.spreadsheets.values.clear({
           spreadsheetId: SPREADSHEET_ID,
-          range: `${SHEET_NAME}!A2:T1000`, // Clear from A2 to preserve header
+          range: `${SHEET_NAME}!A2:P1000`, // Clear from A2 to preserve header
         });
       } catch (clearError) {
         console.warn('Error clearing sheet (continuing with update):', clearError);
@@ -145,7 +148,7 @@ export async function syncBookingsToGoogleSheets(): Promise<boolean> {
   }
 }
 
-// Function to add a single booking to the sheet (appends to the end)
+// Function to add a single booking to the sheet (inserts at the top after headers)
 export async function addBookingToGoogleSheets(booking: Booking): Promise<boolean> {
   // Get auth client
   const auth = await getAuthClient();
@@ -165,21 +168,65 @@ export async function addBookingToGoogleSheets(booking: Booking): Promise<boolea
     // Create sheets API instance
     const sheets = google.sheets({ version: 'v4', auth });
     
+    // First, get existing data to determine where to insert
+    const existingData = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!A1:P1000`, // Get all data
+    });
+    
     // Convert booking to row format
     const row = bookingToSheetRow(booking);
     
-    // Append the row to the sheet
-    const response = await sheets.spreadsheets.values.append({
-      spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A2`, // Start at A2 to preserve header
-      valueInputOption: 'RAW',
-      insertDataOption: 'INSERT_ROWS',
-      requestBody: {
-        values: [row],
-      },
-    });
+    // Get the number of existing rows (headers included)
+    const dataRows = existingData.data.values || [HEADER_ROW];
     
-    console.log(`Added booking ${booking.id} to Google Sheets. Updated ${response.data.updates?.updatedCells} cells.`);
+    if (dataRows.length <= 1) {
+      // If only header row or empty, just append
+      const response = await sheets.spreadsheets.values.append({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${SHEET_NAME}!A2`,
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: {
+          values: [row],
+        },
+      });
+      console.log(`Added booking ${booking.id} to Google Sheets. Updated ${response.data.updates?.updatedCells} cells.`);
+    } else {
+      // If there's existing data, insert after header row (at A2)
+      // First, insert a blank row to push everything down
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: SPREADSHEET_ID,
+        requestBody: {
+          requests: [
+            {
+              insertDimension: {
+                range: {
+                  sheetId: 0, // Assuming the first sheet
+                  dimension: 'ROWS',
+                  startIndex: 1, // After header row (0-indexed)
+                  endIndex: 2 // Insert one row
+                },
+                inheritFromBefore: false
+              }
+            }
+          ]
+        }
+      });
+      
+      // Now add the new data to the inserted row
+      const response = await sheets.spreadsheets.values.update({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${SHEET_NAME}!A2`, // Row after header
+        valueInputOption: 'RAW',
+        requestBody: {
+          values: [row],
+        },
+      });
+      
+      console.log(`Added booking ${booking.id} to top of Google Sheets. Updated ${response.data.updatedCells} cells.`);
+    }
+    
     return true;
   } catch (error) {
     console.error('Error adding booking to Google Sheets:', error);
