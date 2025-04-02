@@ -254,7 +254,7 @@ export default function MultiStepBookingForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidAddress, setIsValidAddress] = useState(false);
   const [addressCoordinates, setAddressCoordinates] = useState<[number, number] | undefined>(undefined);
-  const [showLocationSearch, setShowLocationSearch] = useState(true);
+  // No need for a conditional rendering since component unmounting handles cleanup
   const stepsRef = useRef<HTMLDivElement>(null);
   
   // Extract price value as numeric
@@ -649,8 +649,7 @@ export default function MultiStepBookingForm() {
         return;
       }
       
-      // Hide location search when moving to next step to avoid memory leaks
-      setShowLocationSearch(false);
+      // Memory is managed by component unmounting when changing steps
     }
     
     // Validate current step fields
@@ -753,10 +752,7 @@ export default function MultiStepBookingForm() {
     console.log('NAVIGATION: Going back from step', currentStep, 'to step', currentStep-1);
     
     if (currentStep > 0) {
-      // If going back to location step, show the location search component
-      if (currentStep === 1) {
-        setShowLocationSearch(true);
-      }
+      // Simply navigate to previous step, no special handling needed
       
       setCurrentStep(prev => prev - 1);
       stepsRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -895,51 +891,32 @@ export default function MultiStepBookingForm() {
                       name="location"
                       render={({ field }) => (
                         <>
-                          {showLocationSearch && (
-                            <LocationSearch 
-                              value={field.value} 
-                              onChange={field.onChange}
-                              onAddressValidated={(isValid, coordinates) => {
-                                setIsValidAddress(isValid);
-                                if (coordinates) {
-                                  setAddressCoordinates(coordinates);
-                                }
-                                
-                                if (!isValid && field.value) {
-                                  toast({
-                                    title: "Location Outside Service Area",
-                                    description: "We currently only service areas within California, from Sacramento to San Diego. Please enter a location within our service area.",
-                                    variant: "destructive",
-                                  });
-                                } else if (isValid && field.value) {
-                                  toast({
-                                    title: "Address Verified",
-                                    description: "Great! Your location is within our service area.",
-                                    variant: "default",
-                                  });
-                                }
-                              }}
-                              field={field}
-                              formState={form.formState}
-                            />
-                          )}
-                          
-                          {!showLocationSearch && field.value && (
-                            <div className="py-3 px-4 border border-gray-200 rounded-lg flex justify-between items-center">
-                              <div className="flex items-start">
-                                <MapPin className="h-5 w-5 text-primary-red mr-2 mt-0.5 flex-shrink-0" />
-                                <span className="text-gray-800">{field.value}</span>
-                              </div>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                type="button"
-                                onClick={() => setShowLocationSearch(true)}
-                              >
-                                Edit
-                              </Button>
-                            </div>
-                          )}
+                          <LocationSearch 
+                            value={field.value} 
+                            onChange={field.onChange}
+                            onAddressValidated={(isValid, coordinates) => {
+                              setIsValidAddress(isValid);
+                              if (coordinates) {
+                                setAddressCoordinates(coordinates);
+                              }
+                              
+                              if (!isValid && field.value) {
+                                toast({
+                                  title: "Location Outside Service Area",
+                                  description: "We currently only service areas within California, from Sacramento to San Diego. Please enter a location within our service area.",
+                                  variant: "destructive",
+                                });
+                              } else if (isValid && field.value) {
+                                toast({
+                                  title: "Address Verified",
+                                  description: "Great! Your location is within our service area.",
+                                  variant: "default",
+                                });
+                              }
+                            }}
+                            field={field}
+                            formState={form.formState}
+                          />
                           
                           {field.value && !isValidAddress && (
                             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
