@@ -3,6 +3,7 @@ import HeroLocationSearch from "./HeroLocationSearch";
 import { HeroButton } from "@/components/ui/hero-button";
 import hardyLogoPath from "@assets/hardy logo-Photoroom.png";
 import carSunsetBg from "@assets/ChatGPT Image Mar 31, 2025, 05_35_46 PM.png";
+import mobileHeroBg from "@assets/mobile hero image.png";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Hero() {
@@ -12,7 +13,7 @@ export default function Hero() {
     <div className="relative bg-secondary min-h-[85vh] overflow-hidden">
       {/* Background image with different image for mobile */}
       <img 
-        src={isMobile ? "/mobile-hero.png" : carSunsetBg} 
+        src={isMobile ? mobileHeroBg : carSunsetBg} 
         alt="Luxury car detailing at sunset" 
         className={`absolute inset-0 w-full h-full object-cover`}
       />
@@ -59,15 +60,15 @@ export default function Hero() {
         
         {/* Stats section - simplified for mobile */}
         <div className={`grid grid-cols-3 gap-2 sm:gap-4 mt-8 sm:mt-12 ${isMobile ? 'max-w-full' : 'max-w-3xl'} mx-auto`}>
-          <div className="bg-black/30 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-5 text-center border border-white/10">
+          <div className="rounded-lg sm:rounded-xl p-3 sm:p-5 text-center border border-white/10">
             <div className={`text-accent-orange font-bold text-xl sm:text-3xl ${isMobile ? 'mobile-hero-text' : ''}`}>5★</div>
             <div className={`text-white text-xs sm:text-sm mt-1 ${isMobile ? 'mobile-hero-text' : ''}`}>Rated Service</div>
           </div>
-          <div className="bg-black/30 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-5 text-center border border-white/10">
+          <div className="rounded-lg sm:rounded-xl p-3 sm:p-5 text-center border border-white/10">
             <div className={`text-accent-orange font-bold text-xl sm:text-3xl ${isMobile ? 'mobile-hero-text' : ''}`}>2K+</div>
             <div className={`text-white text-xs sm:text-sm mt-1 ${isMobile ? 'mobile-hero-text' : ''}`}>Cars Detailed</div>
           </div>
-          <div className="bg-black/30 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-5 text-center border border-white/10">
+          <div className="rounded-lg sm:rounded-xl p-3 sm:p-5 text-center border border-white/10">
             <div className={`text-accent-orange font-bold text-xl sm:text-3xl ${isMobile ? 'mobile-hero-text' : ''}`}>100%</div>
             <div className={`text-white text-xs sm:text-sm mt-1 ${isMobile ? 'mobile-hero-text' : ''}`}>Satisfaction</div>
           </div>
