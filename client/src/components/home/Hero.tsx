@@ -14,20 +14,12 @@ export default function Hero() {
       <img 
         src={carSunsetBg} 
         alt="Luxury car detailing at sunset" 
-        className={`absolute inset-0 w-full h-full ${
-          isMobile 
-            ? "object-contain sm:object-cover opacity-95 scale-[0.95] sm:scale-100" // Mobile optimization - showing full image with slight scaling
-            : "object-cover"
-        }`}
+        className="absolute inset-0 w-full h-full object-cover"
         style={{
-          objectPosition: isMobile ? 'center center' : 'center center'
+          objectPosition: 'center center'
         }}
       />
-      <div className={`absolute inset-0 ${
-        isMobile 
-          ? "bg-black/50 bg-gradient-to-t from-gray-900/80 to-black/30" // Enhanced mobile gradient for better contrast with full image
-          : "bg-overlay-gradient"
-      }`}></div>
+      <div className="absolute inset-0 bg-overlay-gradient"></div>
       
       <div className="relative container mx-auto px-4 py-12 md:py-16 lg:py-24">
         {/* Main headline - optimized for mobile */}
