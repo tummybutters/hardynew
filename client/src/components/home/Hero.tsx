@@ -10,37 +10,37 @@ export default function Hero() {
   
   return (
     <div className="relative bg-secondary min-h-[85vh] overflow-hidden">
-      {/* Background image with different styling for mobile */}
+      {/* Background image with different image for mobile */}
       <img 
-        src={carSunsetBg} 
+        src={isMobile ? "/images/mobile-hero.png" : carSunsetBg} 
         alt="Luxury car detailing at sunset" 
         className={`absolute inset-0 w-full h-full ${
           isMobile 
-            ? "object-cover object-[80%_center] opacity-90" // Mobile optimization
+            ? "object-cover object-center opacity-90" // Mobile optimization with new image
             : "object-cover"
         }`}
       />
       <div className={`absolute inset-0 ${
         isMobile 
-          ? "bg-black/40" // Stronger overlay on mobile for better text contrast
+          ? "bg-black/25" // Lighter overlay for the mobile image which already has good contrast
           : "bg-overlay-gradient"
       }`}></div>
       
       <div className="relative container mx-auto px-4 py-12 md:py-16 lg:py-24">
         {/* Main headline - optimized for mobile */}
-        <h1 className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-heading leading-tight text-left mb-6 sm:mb-10 max-w-5xl">
+        <h1 className={`text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-heading leading-tight text-left mb-6 sm:mb-10 max-w-5xl ${isMobile ? 'mobile-hero-text' : ''}`}>
           Luxury Where It Matters Most:
         </h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-center min-h-[calc(70vh-12rem)] lg:min-h-[calc(80vh-12rem)]">
           {/* Left side content */}
           <div className="flex flex-col justify-center">
-            <h2 className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-heading leading-tight">
+            <h2 className={`text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-heading leading-tight ${isMobile ? 'mobile-hero-text' : ''}`}>
               Your Home on the Road,
               <span className="block mt-2">Detailed Right at Your Door.</span>
             </h2>
             
-            <p className="text-gray-100 text-lg sm:text-xl mt-4 sm:mt-6 mb-6 sm:mb-8 font-light">
+            <p className={`text-gray-100 text-lg sm:text-xl mt-4 sm:mt-6 mb-6 sm:mb-8 font-light ${isMobile ? 'mobile-hero-text' : ''}`}>
               "You'll spend thousands of Hours in your Car, Let Us Spend Two making it perfect"
             </p>
             
@@ -69,16 +69,16 @@ export default function Hero() {
         {/* Stats section - simplified for mobile */}
         <div className={`grid grid-cols-3 gap-2 sm:gap-4 mt-8 sm:mt-12 ${isMobile ? 'max-w-full' : 'max-w-3xl'} mx-auto`}>
           <div className="bg-black/30 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-5 text-center border border-white/10">
-            <div className="text-accent-orange font-bold text-xl sm:text-3xl">5★</div>
-            <div className="text-white text-xs sm:text-sm mt-1">Rated Service</div>
+            <div className={`text-accent-orange font-bold text-xl sm:text-3xl ${isMobile ? 'mobile-hero-text' : ''}`}>5★</div>
+            <div className={`text-white text-xs sm:text-sm mt-1 ${isMobile ? 'mobile-hero-text' : ''}`}>Rated Service</div>
           </div>
           <div className="bg-black/30 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-5 text-center border border-white/10">
-            <div className="text-accent-orange font-bold text-xl sm:text-3xl">2K+</div>
-            <div className="text-white text-xs sm:text-sm mt-1">Cars Detailed</div>
+            <div className={`text-accent-orange font-bold text-xl sm:text-3xl ${isMobile ? 'mobile-hero-text' : ''}`}>2K+</div>
+            <div className={`text-white text-xs sm:text-sm mt-1 ${isMobile ? 'mobile-hero-text' : ''}`}>Cars Detailed</div>
           </div>
           <div className="bg-black/30 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-5 text-center border border-white/10">
-            <div className="text-accent-orange font-bold text-xl sm:text-3xl">100%</div>
-            <div className="text-white text-xs sm:text-sm mt-1">Satisfaction</div>
+            <div className={`text-accent-orange font-bold text-xl sm:text-3xl ${isMobile ? 'mobile-hero-text' : ''}`}>100%</div>
+            <div className={`text-white text-xs sm:text-sm mt-1 ${isMobile ? 'mobile-hero-text' : ''}`}>Satisfaction</div>
           </div>
         </div>
       </div>

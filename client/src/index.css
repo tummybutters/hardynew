@@ -44,6 +44,10 @@
   background: linear-gradient(135deg, #EE432C 0%, #FFB375 100%);
 }
 
+.bg-overlay-gradient {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.2) 100%);
+}
+
 /* Custom color utility classes */
 .bg-cream {
   background-color: #F3F4E6;
@@ -71,6 +75,11 @@
 
 .text-red-primary {
   color: #EE432C;
+}
+
+/* Add a slight text shadow to improve readability on the mobile hero image */
+.mobile-hero-text {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .border-orange-primary {
