@@ -1,0 +1,67 @@
+Advanced Configuration
+Custom Domains with Deployments
+
+Copy page
+
+Learn how to add and configure custom domain names for your Replit deployments, including DNS setup, verification, and troubleshooting steps.
+
+While every deployment comes with a unique URL at https://<deployment-name>.replit.app, you can also connect a custom domain to your deployment. This allows you to use your own domain name instead of the default Replit domain. If you’d like to know more, you can watch the following video or follow along below.
+
+
+​
+Connecting Your Domain To Your Deployment
+First, open the Deployment you want to connect to your custom domain.
+
+In the Deployments pane, under Settings, find the “Domains” section.
+
+domains tab
+Click the “Link a domain” button, and enter your domain name in the provided field (e.g., mydomain.com). Click “Next” to proceed.
+
+domain linking panel
+Replit will automatically generate the necessary DNS records for your domain:
+
+An A record pointing to your Replit App
+A TXT record to verify that you own the domain
+copy domain information
+Here, we’re adding a top-level domain, hat-tip.cc—a fork of this Replit App that allows you to add hats to images with OpenCV.
+
+​
+Adding DNS Records to your Domain Registrar
+After copying these records, you will need to log in to your domain registrar (e.g., GoDaddy, Namecheap) and navigate to the DNS management section for your domain.
+
+Add the DNS records (A record and TXT record) provided by Replit and save the changes in your domain registrar.
+
+Please note that for top-level domains, the “hostname” field is commonly @ as in the example below. If you wanted to add a subdomain, such as my-subdomain.hat-tip.cc, you would enter my-subdomain as the hostname.
+
+adding a record
+Enter @ for hostname and the IP address from your deployments settings panel.
+
+If you would like to add both www and @ records, you must add two A and TXT records, as well as link both domains to your deployment.
+
+Adding two records on Replit
+Adding two records on Cloudflare
+Once you complete these details, you’ll need to wait for the DNS records to propagate.
+
+​
+Waiting for DNS Propagation
+The time to fully propagate DNS changes can range from a few minutes to about 24-48 hours. Most times it’s just a few minutes. You can relax, sit back, and grab some coffee—your domain should be all set when you get back.
+
+If things are taking a bit longer, we recommend using a tool such as https://whatsmydns.net/ to keep track of the DNS propagation. All you need to do is input your custom domain and select the DNS record type you want to check.
+
+In the screenshot below, you can see how quickly the A record propagated.
+
+TXT propagation
+​
+We Have Liftoff!
+Once your DNS records have been fully propagated, you can check back on the Domains tab for your Deployment, which should show that your domain has been verified:
+
+custom domain is verified
+If you don’t see this, please check out Troubleshooting.
+
+​
+Troubleshooting
+There are many reasons a domain may fail to link since the process involve multiple parties. Here are some known issues:
+
+Having multiple A records for the same domain name. Note that you can still add A records for subdomains such as www.
+Having AAAA records alongside the prescribed A record on a domain. Our system only supports A records.
+Using proxied records from Cloudflare since this makes it hard for us to automatically renew certificates.
