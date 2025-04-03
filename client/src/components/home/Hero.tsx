@@ -12,19 +12,10 @@ export default function Hero() {
     <div className="relative bg-secondary min-h-[85vh] overflow-hidden">
       {/* Background image with different image for mobile */}
       <img 
-        src={isMobile ? "/images/mobile-hero.png" : carSunsetBg} 
+        src={isMobile ? "/mobile-hero.png" : carSunsetBg} 
         alt="Luxury car detailing at sunset" 
-        className={`absolute inset-0 w-full h-full ${
-          isMobile 
-            ? "object-cover object-center opacity-90" // Mobile optimization with new image
-            : "object-cover"
-        }`}
+        className={`absolute inset-0 w-full h-full object-cover`}
       />
-      <div className={`absolute inset-0 ${
-        isMobile 
-          ? "bg-black/25" // Lighter overlay for the mobile image which already has good contrast
-          : "bg-overlay-gradient"
-      }`}></div>
       
       <div className="relative container mx-auto px-4 py-12 md:py-16 lg:py-24">
         {/* Main headline - optimized for mobile */}
