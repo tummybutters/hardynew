@@ -9,17 +9,22 @@ export default function Hero() {
   const isMobile = useIsMobile();
   
   return (
-    <div className="relative bg-gray-900 min-h-[85vh] overflow-hidden">
+    <div className="relative bg-secondary min-h-[85vh] overflow-hidden">
       {/* Background image with different styling for mobile */}
       <img 
         src={carSunsetBg} 
         alt="Luxury car detailing at sunset" 
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{
-          objectPosition: 'center center'
-        }}
+        className={`absolute inset-0 w-full h-full ${
+          isMobile 
+            ? "object-cover object-[80%_center] opacity-90" // Mobile optimization
+            : "object-cover"
+        }`}
       />
-      <div className="absolute inset-0 bg-overlay-gradient"></div>
+      <div className={`absolute inset-0 ${
+        isMobile 
+          ? "bg-black/40" // Stronger overlay on mobile for better text contrast
+          : "bg-overlay-gradient"
+      }`}></div>
       
       <div className="relative container mx-auto px-4 py-12 md:py-16 lg:py-24">
         {/* Main headline - optimized for mobile */}
