@@ -595,11 +595,20 @@ export default function MultiStepBookingForm() {
       // Capture all booking data when submitting
       const completeBookingData = captureBookingData();
       
-      return apiRequest("POST", "/api/bookings", {
+      // Create a submission object that matches the expected schema
+      // The additionalData is sent separately and handled in the backend
+      const submission = {
         ...data,
         addOns: selectedAddOns.join(", "),
-        bookingReference: bookingReference,
-        bookingData: completeBookingData // Send the complete data for analytics
+        bookingReference: bookingReference
+      };
+      
+      // Log complete request data for debugging
+      console.log('Sending booking request:', submission);
+      
+      return apiRequest("POST", "/api/bookings", {
+        ...submission,
+        bookingData: completeBookingData // Send as separate field, handled specially in backend
       });
     },
     onSuccess: async () => {
@@ -616,6 +625,7 @@ export default function MultiStepBookingForm() {
         description: error.message || "There was an error booking your appointment. Please try again.",
         variant: "destructive",
       });
+      console.error("Booking mutation error:", error);
       setIsSubmitting(false);
     }
   });

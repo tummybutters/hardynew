@@ -57,67 +57,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract the comprehensive tracking data if it exists
       const { bookingData, ...formData } = req.body;
       
+      // Log the incoming request data for debugging
+      console.log('Received booking request:');
+      console.log('Form data keys:', Object.keys(formData));
+      
       // Validate the core booking data
-      const validatedData = bookingFormSchema.parse(formData);
-      
-      // Create the booking
-      const booking = await storage.createBooking(validatedData);
-      
-      // Log comprehensive data if available
-      if (bookingData) {
-        console.log('===== COMPREHENSIVE BOOKING DATA =====');
-        console.log(JSON.stringify(bookingData, null, 2));
-        console.log('=====================================');
-      }
-      
-      // Prepare and send employee notification email with the enhanced data
-      const employeeEmailData = prepareEmployeeEmailNotification(booking);
-      // If we have comprehensive data, add it to the email for the employees
-      if (bookingData) {
-        employeeEmailData.enhancedData = bookingData as EnhancedBookingData;
-      }
-      await sendEmailNotification(employeeEmailData);
-      
-      // Prepare and send customer confirmation email (without the enhanced data)
-      const customerEmailData = prepareCustomerEmailConfirmation(booking);
-      await sendEmailNotification(customerEmailData);
-      
-      // Log basic booking info
-      console.log(`New booking (${booking.bookingReference}) created for ${booking.firstName} ${booking.lastName}`);
-      console.log(`Vehicle: ${booking.vehicleType}, Service: ${booking.mainService}`);
-      console.log(`Appointment: ${booking.appointmentDate} at ${booking.appointmentTime}`);
-      console.log(`Location: ${booking.location}`);
-      
-      // Sync the booking with Google Sheets (don't await, do this in the background)
-      addBookingToGoogleSheets(booking)
-        .then(success => {
-          if (success) {
-            console.log(`Booking ${booking.id} successfully added to Google Sheets`);
-          } else {
-            console.warn(`Failed to add booking ${booking.id} to Google Sheets`);
-          }
-        })
-        .catch(error => {
-          console.error(`Error syncing booking ${booking.id} to Google Sheets:`, error);
+      try {
+        const validatedData = bookingFormSchema.parse(formData);
+        
+        // Create the booking
+        const booking = await storage.createBooking(validatedData);
+        
+        // Log comprehensive data if available
+        if (bookingData) {
+          console.log('===== COMPREHENSIVE BOOKING DATA =====');
+          console.log(JSON.stringify(bookingData, null, 2));
+          console.log('=====================================');
+        }
+        
+        // Prepare and send employee notification email with the enhanced data
+        const employeeEmailData = prepareEmployeeEmailNotification(booking);
+        // If we have comprehensive data, add it to the email for the employees
+        if (bookingData) {
+          employeeEmailData.enhancedData = bookingData as EnhancedBookingData;
+        }
+        await sendEmailNotification(employeeEmailData);
+        
+        // Prepare and send customer confirmation email (without the enhanced data)
+        const customerEmailData = prepareCustomerEmailConfirmation(booking);
+        await sendEmailNotification(customerEmailData);
+        
+        // Log basic booking info
+        console.log(`New booking (${booking.bookingReference}) created for ${booking.firstName} ${booking.lastName}`);
+        console.log(`Vehicle: ${booking.vehicleType}, Service: ${booking.mainService}`);
+        console.log(`Appointment: ${booking.appointmentDate} at ${booking.appointmentTime}`);
+        console.log(`Location: ${booking.location}`);
+        
+        // Sync the booking with Google Sheets (don't await, do this in the background)
+        addBookingToGoogleSheets(booking)
+          .then(success => {
+            if (success) {
+              console.log(`Booking ${booking.id} successfully added to Google Sheets`);
+            } else {
+              console.warn(`Failed to add booking ${booking.id} to Google Sheets`);
+            }
+          })
+          .catch(error => {
+            console.error(`Error syncing booking ${booking.id} to Google Sheets:`, error);
+          });
+        
+        // Return the created booking
+        return res.status(201).json({
+          message: 'Booking created successfully',
+          booking
         });
-      
-      // Return the created booking
-      return res.status(201).json({
-        message: 'Booking created successfully',
-        booking
-      });
+      } catch (validationError) {
+        // Detailed validation error handling
+        if (validationError instanceof ZodError) {
+          console.error('Validation error details:', validationError.errors);
+          const formattedError = fromZodError(validationError);
+          return res.status(400).json({
+            message: 'Validation error',
+            errors: formattedError.message
+          });
+        }
+        throw validationError; // Re-throw if it's not a ZodError
+      }
     } catch (error) {
-      if (error instanceof ZodError) {
-        // Handle validation errors
-        const validationError = fromZodError(error);
-        return res.status(400).json({
-          message: 'Validation error',
-          errors: validationError.message
-        });
+      // Log detailed error information
+      console.error('Error creating booking:', error);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
       }
       
-      // Handle other errors
-      console.error('Error creating booking:', error);
       return res.status(500).json({
         message: 'An error occurred while creating the booking'
       });
