@@ -30,8 +30,14 @@ export function CustomCheckbox({
         disabled={disabled}
       />
       <span
-        onClick={() => !disabled && onChange(!checked)}
-        className="flex items-start gap-2"
+        onClick={(e) => {
+          // Prevent default to avoid double-clicking behavior
+          e.preventDefault();
+          if (!disabled) {
+            onChange(!checked);
+          }
+        }}
+        className="flex items-start gap-2 w-full cursor-pointer"
       >
         <div className="flex-1">
           <div className="font-medium flex items-center justify-between">
@@ -82,14 +88,19 @@ export function SelectCard({
             <div className="font-medium">{label}</div>
             {price && <div className="text-red-primary font-semibold">{price}</div>}
           </div>
-          <div className="cl-checkbox mr-1" onClick={(e) => e.stopPropagation()}>
+          <div className="cl-checkbox mr-1">
             <input
               type="checkbox"
               id={`select-${id}`}
               checked={selected}
               onChange={() => onClick()}
             />
-            <span></span>
+            <span onClick={(e) => {
+              // Prevent default to avoid double-clicking behavior
+              e.preventDefault();
+              e.stopPropagation();
+              onClick();
+            }}></span>
           </div>
         </div>
         {description && (
