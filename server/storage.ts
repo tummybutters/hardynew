@@ -182,7 +182,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   /**
-   * Create a new booking
+   * Create a new booking with retry capability for better reliability
    */
   async createBooking(insertBooking: InsertBooking): Promise<Booking> {
     const now = new Date();
@@ -191,18 +191,58 @@ export class DatabaseStorage implements IStorage {
     const bookingReference = insertBooking.bookingReference || 
       `HWW-${now.getTime().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
     
-    // Insert the booking with default values for status and createdAt
-    const [booking] = await db
-      .insert(bookings)
-      .values({
-        ...insertBooking,
-        status: "pending",
-        bookingReference,
-        createdAt: now
-      })
-      .returning();
+    // Maximum number of retries before giving up
+    const MAX_RETRIES = 3;
+    // Delay between retries in milliseconds, increasing with each retry
+    let delay = 500;
+    let lastError;
     
-    return booking;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        console.log(`[storage] Creating booking attempt ${attempt}/${MAX_RETRIES}`);
+        
+        // Attempt to insert the booking into the database
+        const [booking] = await db
+          .insert(bookings)
+          .values({
+            ...insertBooking,
+            status: "pending",
+            bookingReference,
+            createdAt: now
+          })
+          .returning();
+          
+        console.log(`[storage] Successfully created booking on attempt ${attempt}`);
+        return booking;
+      } catch (error) {
+        lastError = error;
+        console.error(`[storage] Error creating booking (attempt ${attempt}/${MAX_RETRIES}):`, error);
+        
+        // Check if this is a connection error that might resolve with a retry
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const isConnectionError = 
+          errorMessage.includes('ECONNREFUSED') || 
+          errorMessage.includes('timeout') || 
+          errorMessage.includes('connection') ||
+          errorMessage.includes('network');
+          
+        // Only retry for connection-related errors
+        if (isConnectionError && attempt < MAX_RETRIES) {
+          console.log(`[storage] Connection issue detected, retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          // Exponential backoff - increase delay for next retry
+          delay = Math.min(delay * 1.5, 3000);
+        } else if (!isConnectionError) {
+          // If not a connection error, don't retry
+          console.error(`[storage] Non-connection error, not retrying:`, errorMessage);
+          break;
+        }
+      }
+    }
+    
+    // If we got here, all retries failed
+    console.error(`[storage] All ${MAX_RETRIES} attempts to create booking failed`);
+    throw lastError;
   }
 
   /**
