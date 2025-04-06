@@ -120,23 +120,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Check for common PostgreSQL error types
           const errorMessage = dbError instanceof Error ? dbError.message : String(dbError);
           
-          if (errorMessage.includes('ECONNREFUSED')) {
+          // Only classify as database connection issues if we have clear evidence
+          // Most database errors are actually operational/temporary and will resolve on retry
+          
+          if (errorMessage.includes('ECONNREFUSED') || errorMessage.includes('connection refused')) {
             console.error('Database connection refused. Check that PostgreSQL is running.');
             return res.status(503).json({
               message: 'Database temporarily unavailable. Please try again later.',
               error: 'connection_refused'
             });
-          } else if (errorMessage.includes('timeout')) {
+          } else if (errorMessage.includes('timeout') || errorMessage.includes('timed out')) {
             console.error('Database connection timeout. The database might be overloaded.');
             return res.status(503).json({
               message: 'Database temporarily unavailable. Please try again later.',
               error: 'connection_timeout'
             });
           } else {
-            // Generic database error
+            // For other errors, log them but don't expose the specific database error to the client
+            // This prevents the message from being displayed as a database error when it's something else
+            console.log('Non-connection database error, treating as general server error:', errorMessage);
+            
             return res.status(500).json({
-              message: 'A database error occurred while saving your booking.',
-              error: 'database_error'
+              message: 'There was a problem processing your booking. Please try again.',
+              error: 'server_error' // Changed from database_error
             });
           }
         }

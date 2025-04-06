@@ -628,15 +628,16 @@ export default function MultiStepBookingForm() {
       if (error instanceof Error) {
         console.error("Booking mutation error details:", error);
         
-        // Handle specific error types
-        if (error.message.includes('Database temporarily unavailable') || 
-            error.message.includes('connection_refused') ||
-            error.message.includes('connection_timeout')) {
+        // Only show database-specific errors if the response clearly indicates a database problem
+        // Look for specific error codes or messages from the API
+        if (error.message.includes('"error":"connection_refused"') || 
+            error.message.includes('"error":"connection_timeout"') ||
+            error.message.includes('Database temporarily unavailable')) {
           errorTitle = "Database Connection Issue";
           errorMessage = "We're currently experiencing database connectivity issues. Please try again in a few minutes.";
         } else if (error.message.includes('Failed to fetch') || 
                   error.message.includes('NetworkError') || 
-                  error.message.includes('network')) {
+                  error.message.includes('network error')) {
           errorTitle = "Network Connection Issue";
           errorMessage = "Please check your internet connection and try again.";
         } else if (error.message.includes('validation')) {
