@@ -2,7 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { checkGoogleSheetsCredentials, syncBookingsToGoogleSheets } from "./googleSheetsSync";
-import { migrateDatabase, checkDatabaseConnection, closeDatabaseConnection } from "./migrate";
+import { migrateDatabase, closeDatabaseConnection, checkDatabaseConnection } from "./migrate";
+import { testDatabaseConnection } from "./db";
 
 const app = express();
 app.use(express.json());
@@ -53,17 +54,43 @@ process.on('SIGINT', async () => {
 
 (async () => {
   try {
-    // Check database connection
-    const dbConnected = await checkDatabaseConnection();
+    // Check database connection with more details
+    log('Testing database connection...', 'server');
+    
+    // First, test the connection directly with our improved test function
+    const connectionTest = await testDatabaseConnection();
+    
+    // If direct test failed, log detailed database info
+    if (!connectionTest) {
+      // Log database connection details (without sensitive info)
+      log('Database connection parameters:', 'server');
+      log(`Host: ${process.env.PGHOST || 'not set'}`, 'server');
+      log(`Port: ${process.env.PGPORT || 'not set'}`, 'server');
+      log(`Database: ${process.env.PGDATABASE || 'not set'}`, 'server');
+      log(`User: ${process.env.PGUSER ? 'set' : 'not set'}`, 'server');
+      log(`Password: ${process.env.PGPASSWORD ? 'set' : 'not set'}`, 'server');
+      log(`Database URL: ${process.env.DATABASE_URL ? 'set' : 'not set'}`, 'server');
+      
+      log('Attempting database operations with migrate check...', 'server');
+    }
+    
+    // Fallback to the traditional connection check
+    const dbConnected = connectionTest || await migrateDatabase();
+    
     if (!dbConnected) {
       log('Database connection failed, proceeding without database persistence', 'server');
+      log('WARNING: Application will not be able to store bookings permanently!', 'server');
+      log('Please check your database connection settings and restart the application', 'server');
     } else {
       log('Database connected successfully', 'server');
       
-      // Apply migrations
-      const migrationResult = await migrateDatabase();
-      if (!migrationResult) {
-        log('Database migration failed, but continuing with current schema', 'server');
+      // Only run migrations if we haven't directly tested yet
+      if (!connectionTest) {
+        // Apply migrations
+        const migrationResult = await migrateDatabase();
+        if (!migrationResult) {
+          log('Database migration failed, but continuing with current schema', 'server');
+        }
       }
     }
     

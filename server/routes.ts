@@ -65,52 +65,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const validatedData = bookingFormSchema.parse(formData);
         
-        // Create the booking
-        const booking = await storage.createBooking(validatedData);
-        
-        // Log comprehensive data if available
-        if (bookingData) {
-          console.log('===== COMPREHENSIVE BOOKING DATA =====');
-          console.log(JSON.stringify(bookingData, null, 2));
-          console.log('=====================================');
-        }
-        
-        // Prepare and send employee notification email with the enhanced data
-        const employeeEmailData = prepareEmployeeEmailNotification(booking);
-        // If we have comprehensive data, add it to the email for the employees
-        if (bookingData) {
-          employeeEmailData.enhancedData = bookingData as EnhancedBookingData;
-        }
-        await sendEmailNotification(employeeEmailData);
-        
-        // Prepare and send customer confirmation email (without the enhanced data)
-        const customerEmailData = prepareCustomerEmailConfirmation(booking);
-        await sendEmailNotification(customerEmailData);
-        
-        // Log basic booking info
-        console.log(`New booking (${booking.bookingReference}) created for ${booking.firstName} ${booking.lastName}`);
-        console.log(`Vehicle: ${booking.vehicleType}, Service: ${booking.mainService}`);
-        console.log(`Appointment: ${booking.appointmentDate} at ${booking.appointmentTime}`);
-        console.log(`Location: ${booking.location}`);
-        
-        // Sync the booking with Google Sheets (don't await, do this in the background)
-        addBookingToGoogleSheets(booking)
-          .then(success => {
-            if (success) {
-              console.log(`Booking ${booking.id} successfully added to Google Sheets`);
-            } else {
-              console.warn(`Failed to add booking ${booking.id} to Google Sheets`);
-            }
-          })
-          .catch(error => {
-            console.error(`Error syncing booking ${booking.id} to Google Sheets:`, error);
+        // Try to create the booking
+        try {
+          // Create the booking - potential database error point
+          const booking = await storage.createBooking(validatedData);
+          
+          // Log comprehensive data if available
+          if (bookingData) {
+            console.log('===== COMPREHENSIVE BOOKING DATA =====');
+            console.log(JSON.stringify(bookingData, null, 2));
+            console.log('=====================================');
+          }
+          
+          // Prepare and send employee notification email with the enhanced data
+          const employeeEmailData = prepareEmployeeEmailNotification(booking);
+          // If we have comprehensive data, add it to the email for the employees
+          if (bookingData) {
+            employeeEmailData.enhancedData = bookingData as EnhancedBookingData;
+          }
+          await sendEmailNotification(employeeEmailData);
+          
+          // Prepare and send customer confirmation email (without the enhanced data)
+          const customerEmailData = prepareCustomerEmailConfirmation(booking);
+          await sendEmailNotification(customerEmailData);
+          
+          // Log basic booking info
+          console.log(`New booking (${booking.bookingReference}) created for ${booking.firstName} ${booking.lastName}`);
+          console.log(`Vehicle: ${booking.vehicleType}, Service: ${booking.mainService}`);
+          console.log(`Appointment: ${booking.appointmentDate} at ${booking.appointmentTime}`);
+          console.log(`Location: ${booking.location}`);
+          
+          // Sync the booking with Google Sheets (don't await, do this in the background)
+          addBookingToGoogleSheets(booking)
+            .then(success => {
+              if (success) {
+                console.log(`Booking ${booking.id} successfully added to Google Sheets`);
+              } else {
+                console.warn(`Failed to add booking ${booking.id} to Google Sheets`);
+              }
+            })
+            .catch(error => {
+              console.error(`Error syncing booking ${booking.id} to Google Sheets:`, error);
+            });
+          
+          // Return the created booking
+          return res.status(201).json({
+            message: 'Booking created successfully',
+            booking
           });
-        
-        // Return the created booking
-        return res.status(201).json({
-          message: 'Booking created successfully',
-          booking
-        });
+        } catch (dbError) {
+          // Specific handling for database errors
+          console.error('Database error while creating booking:', dbError);
+          
+          // Check for common PostgreSQL error types
+          const errorMessage = dbError instanceof Error ? dbError.message : String(dbError);
+          
+          if (errorMessage.includes('ECONNREFUSED')) {
+            console.error('Database connection refused. Check that PostgreSQL is running.');
+            return res.status(503).json({
+              message: 'Database temporarily unavailable. Please try again later.',
+              error: 'connection_refused'
+            });
+          } else if (errorMessage.includes('timeout')) {
+            console.error('Database connection timeout. The database might be overloaded.');
+            return res.status(503).json({
+              message: 'Database temporarily unavailable. Please try again later.',
+              error: 'connection_timeout'
+            });
+          } else {
+            // Generic database error
+            return res.status(500).json({
+              message: 'A database error occurred while saving your booking.',
+              error: 'database_error'
+            });
+          }
+        }
       } catch (validationError) {
         // Detailed validation error handling
         if (validationError instanceof ZodError) {
@@ -131,8 +160,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error('Error stack:', error.stack);
       }
       
+      // More user-friendly error message
       return res.status(500).json({
-        message: 'An error occurred while creating the booking'
+        message: 'An error occurred while creating the booking. Please try again later.'
       });
     }
   });

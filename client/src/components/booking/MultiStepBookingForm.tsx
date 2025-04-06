@@ -620,11 +620,37 @@ export default function MultiStepBookingForm() {
       setCurrentStep(8); // Move to confirmation step
     },
     onError: (error) => {
+      // Parse the error to get more specific information
+      let errorMessage = "There was an error booking your appointment. Please try again.";
+      let errorTitle = "Booking Failed";
+      
+      // Check if the error is an API connection error
+      if (error instanceof Error) {
+        console.error("Booking mutation error details:", error);
+        
+        // Handle specific error types
+        if (error.message.includes('Database temporarily unavailable') || 
+            error.message.includes('connection_refused') ||
+            error.message.includes('connection_timeout')) {
+          errorTitle = "Database Connection Issue";
+          errorMessage = "We're currently experiencing database connectivity issues. Please try again in a few minutes.";
+        } else if (error.message.includes('Failed to fetch') || 
+                  error.message.includes('NetworkError') || 
+                  error.message.includes('network')) {
+          errorTitle = "Network Connection Issue";
+          errorMessage = "Please check your internet connection and try again.";
+        } else if (error.message.includes('validation')) {
+          errorTitle = "Validation Error";
+          errorMessage = error.message || "Please check the form for errors and try again.";
+        }
+      }
+      
       toast({
-        title: "Booking Failed",
-        description: error.message || "There was an error booking your appointment. Please try again.",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
+      
       console.error("Booking mutation error:", error);
       setIsSubmitting(false);
     }
