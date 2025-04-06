@@ -595,20 +595,11 @@ export default function MultiStepBookingForm() {
       // Capture all booking data when submitting
       const completeBookingData = captureBookingData();
       
-      // Create a submission object that matches the expected schema
-      // The additionalData is sent separately and handled in the backend
-      const submission = {
+      return apiRequest("POST", "/api/bookings", {
         ...data,
         addOns: selectedAddOns.join(", "),
-        bookingReference: bookingReference
-      };
-      
-      // Log complete request data for debugging
-      console.log('Sending booking request:', submission);
-      
-      return apiRequest("POST", "/api/bookings", {
-        ...submission,
-        bookingData: completeBookingData // Send as separate field, handled specially in backend
+        bookingReference: bookingReference,
+        bookingData: completeBookingData // Send the complete data for analytics
       });
     },
     onSuccess: async () => {
@@ -620,39 +611,11 @@ export default function MultiStepBookingForm() {
       setCurrentStep(8); // Move to confirmation step
     },
     onError: (error) => {
-      // Parse the error to get more specific information
-      let errorMessage = "There was an error booking your appointment. Please try again.";
-      let errorTitle = "Booking Failed";
-      
-      // Check if the error is an API connection error
-      if (error instanceof Error) {
-        console.error("Booking mutation error details:", error);
-        
-        // Only show database-specific errors if the response clearly indicates a database problem
-        // Look for specific error codes or messages from the API
-        if (error.message.includes('"error":"connection_refused"') || 
-            error.message.includes('"error":"connection_timeout"') ||
-            error.message.includes('Database temporarily unavailable')) {
-          errorTitle = "Database Connection Issue";
-          errorMessage = "We're currently experiencing database connectivity issues. Please try again in a few minutes.";
-        } else if (error.message.includes('Failed to fetch') || 
-                  error.message.includes('NetworkError') || 
-                  error.message.includes('network error')) {
-          errorTitle = "Network Connection Issue";
-          errorMessage = "Please check your internet connection and try again.";
-        } else if (error.message.includes('validation')) {
-          errorTitle = "Validation Error";
-          errorMessage = error.message || "Please check the form for errors and try again.";
-        }
-      }
-      
       toast({
-        title: errorTitle,
-        description: errorMessage,
+        title: "Booking Failed",
+        description: error.message || "There was an error booking your appointment. Please try again.",
         variant: "destructive",
       });
-      
-      console.error("Booking mutation error:", error);
       setIsSubmitting(false);
     }
   });
