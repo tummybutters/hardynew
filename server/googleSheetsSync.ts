@@ -93,7 +93,7 @@ const CONTACT_HEADER_ROW = [
   'Message'
 ];
 
-// Function to clear existing data and write all bookings to the sheet (newest first)
+// Function to sync only unsynced bookings to the sheet
 export async function syncBookingsToGoogleSheets(): Promise<boolean> {
   // Get auth client
   const auth = await getAuthClient();
@@ -113,47 +113,90 @@ export async function syncBookingsToGoogleSheets(): Promise<boolean> {
     // Create sheets API instance
     const sheets = google.sheets({ version: 'v4', auth });
     
-    // Get all bookings from storage
-    const bookings = await storage.getBookings();
+    // Get only unsynced bookings from storage
+    const unsyncedBookings = await storage.getUnsyncedBookings();
     
-    // Sort bookings by ID in descending order (newest first)
-    const sortedBookings = [...bookings].sort((a, b) => b.id - a.id);
-    
-    // Prepare data for Google Sheets
-    const rows = sortedBookings.map(booking => bookingToSheetRow(booking));
-    
-    // Add header row at the top
-    const values = [HEADER_ROW, ...rows];
-    
-    // First, clear existing sheet content (but keep headers)
-    if (bookings.length > 0) {
-      try {
-        await sheets.spreadsheets.values.clear({
-          spreadsheetId: SPREADSHEET_ID,
-          range: `${SHEET_NAME}!A2:P1000`, // Clear from A2 to preserve header
-        });
-      } catch (clearError) {
-        console.warn('Error clearing sheet (continuing with update):', clearError);
-        // We'll continue anyway to write the data
-      }
+    if (unsyncedBookings.length === 0) {
+      console.log('No new bookings to sync to Google Sheets');
+      return true;
     }
     
-    // Write all data to sheet
-    let response;
-    if (bookings.length > 0) {
-      response = await sheets.spreadsheets.values.update({
+    console.log(`Found ${unsyncedBookings.length} new bookings to sync to Google Sheets`);
+    
+    // Get the existing data to determine where to insert
+    const existingData = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!A1:P1`,
+    });
+    
+    // Make sure the header row exists, if not add it
+    if (!existingData.data.values || existingData.data.values.length === 0) {
+      await sheets.spreadsheets.values.update({
         spreadsheetId: SPREADSHEET_ID,
         range: `${SHEET_NAME}!A1`,
         valueInputOption: 'RAW',
         requestBody: {
-          values: values,
-        },
+          values: [HEADER_ROW]
+        }
       });
-      console.log(`Synced ${bookings.length} bookings to Google Sheets. Updated ${response.data.updatedCells} cells.`);
-    } else {
-      console.log('No bookings to sync');
     }
     
+    // For each unsynced booking, add it to the sheet in row 2 (right after headers)
+    for (const booking of unsyncedBookings) {
+      // First, we need to get the actual sheet ID for inserting rows
+      const spreadsheet = await sheets.spreadsheets.get({
+        spreadsheetId: SPREADSHEET_ID
+      });
+      
+      // Find the sheet ID for the SHEET_NAME
+      const sheet = spreadsheet.data.sheets?.find(
+        s => s.properties?.title === SHEET_NAME
+      );
+      
+      if (!sheet || sheet.properties?.sheetId === undefined) {
+        throw new Error(`Could not find sheet ID for ${SHEET_NAME}`);
+      }
+      
+      const actualSheetId = sheet.properties.sheetId;
+      
+      // Insert a blank row after the header to push everything down
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: SPREADSHEET_ID,
+        requestBody: {
+          requests: [
+            {
+              insertDimension: {
+                range: {
+                  sheetId: actualSheetId,
+                  dimension: 'ROWS',
+                  startIndex: 1, // After header row (0-indexed)
+                  endIndex: 2 // Insert one row
+                },
+                inheritFromBefore: false
+              }
+            }
+          ]
+        }
+      });
+      
+      // Add the booking data to the inserted row
+      const row = bookingToSheetRow(booking);
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${SHEET_NAME}!A2`, // Row after header
+        valueInputOption: 'RAW',
+        requestBody: {
+          values: [row],
+        },
+      });
+      
+      // Mark the booking as synced in the database
+      await storage.markBookingAsSynced(booking.id);
+      
+      console.log(`Added booking ${booking.id} to Google Sheets and marked as synced`);
+    }
+    
+    console.log(`Successfully synced ${unsyncedBookings.length} new bookings to Google Sheets`);
     return true;
   } catch (error) {
     console.error('Error syncing bookings to Google Sheets:', error);
@@ -163,6 +206,12 @@ export async function syncBookingsToGoogleSheets(): Promise<boolean> {
 
 // Function to add a single booking to the sheet (inserts at the top after headers)
 export async function addBookingToGoogleSheets(booking: Booking): Promise<boolean> {
+  // Skip if already synced
+  if (booking.syncedToSheets) {
+    console.log(`Booking ${booking.id} already synced to Google Sheets, skipping`);
+    return true;
+  }
+
   // Get auth client
   const auth = await getAuthClient();
   if (!auth) {
@@ -255,6 +304,10 @@ export async function addBookingToGoogleSheets(booking: Booking): Promise<boolea
       
       console.log(`Added booking ${booking.id} to top of Google Sheets. Updated ${response.data.updatedCells} cells.`);
     }
+    
+    // Mark the booking as synced in the database
+    await storage.markBookingAsSynced(booking.id);
+    console.log(`Marked booking ${booking.id} as synced to Google Sheets`);
     
     return true;
   } catch (error) {

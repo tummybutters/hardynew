@@ -112,6 +112,39 @@ export class DatabaseStorage implements IStorage {
       return updatedBooking || undefined;
     });
   }
+  
+  /**
+   * Mark booking as synced to Google Sheets
+   */
+  async markBookingAsSynced(id: number): Promise<Booking | undefined> {
+    return await dbOperation("markBookingAsSynced", async (db) => {
+      const now = new Date();
+      
+      const [updatedBooking] = await db
+        .update(bookings)
+        .set({ 
+          syncedToSheets: true,
+          updatedAt: now
+        })
+        .where(eq(bookings.id, id))
+        .returning();
+      
+      return updatedBooking || undefined;
+    });
+  }
+  
+  /**
+   * Get all bookings that have not been synced to Google Sheets
+   */
+  async getUnsyncedBookings(): Promise<Booking[]> {
+    return await dbOperation("getUnsyncedBookings", async (db) => {
+      return await db
+        .select()
+        .from(bookings)
+        .where(eq(bookings.syncedToSheets, false))
+        .orderBy(bookings.createdAt);
+    });
+  }
 }
 
 export const dbStorage = new DatabaseStorage();

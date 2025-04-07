@@ -166,6 +166,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  // Get all unsynced bookings for Google Sheets - route with proper error handling
+  app.get('/api/bookings/unsynced', async (req, res) => {
+    try {
+      console.log('Fetching unsynced bookings');
+      const unsyncedBookings = await storage.getUnsyncedBookings();
+      console.log(`Found ${unsyncedBookings.length} unsynced bookings`);
+      
+      // Success response - always return an array (even if empty)
+      return res.status(200).json({
+        success: true,
+        bookings: unsyncedBookings || []
+      });
+    } catch (error) {
+      console.error('Error fetching unsynced bookings:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'An error occurred while fetching unsynced bookings'
+      });
+    }
+  });
 
   // Get a single booking
   app.get('/api/bookings/:id', async (req, res) => {
@@ -305,6 +326,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({
         error: 'Failed to process your request',
         message: error.message || 'An unexpected error occurred'
+      });
+    }
+  });
+
+  // Mark a booking as synced to Google Sheets
+  app.patch('/api/bookings/:id/mark-synced', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.status(400).json({
+          message: 'Invalid booking ID'
+        });
+      }
+
+      const booking = await storage.markBookingAsSynced(id);
+      if (!booking) {
+        return res.status(404).json({
+          message: 'Booking not found'
+        });
+      }
+
+      return res.status(200).json({
+        message: 'Booking marked as synced successfully',
+        booking
+      });
+    } catch (error) {
+      console.error('Error marking booking as synced:', error);
+      return res.status(500).json({
+        message: 'An error occurred while marking the booking as synced'
       });
     }
   });

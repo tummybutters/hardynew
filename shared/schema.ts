@@ -50,6 +50,7 @@ export const bookings = pgTable("bookings", {
   updatedAt: timestamp("updated_at"),
   status: text("status").default("pending"),
   bookingReference: text("booking_reference"),
+  syncedToSheets: boolean("synced_to_sheets").default(false),
 });
 
 export const insertBookingSchema = createInsertSchema(bookings).omit({
@@ -57,6 +58,7 @@ export const insertBookingSchema = createInsertSchema(bookings).omit({
   createdAt: true,
   updatedAt: true,
   status: true,
+  syncedToSheets: true,
 });
 
 export const bookingFormSchema = insertBookingSchema.extend({

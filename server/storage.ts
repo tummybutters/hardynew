@@ -13,6 +13,10 @@ export interface IStorage {
   getBookings(): Promise<Booking[]>;
   getBooking(id: number): Promise<Booking | undefined>;
   updateBookingStatus(id: number, status: string): Promise<Booking | undefined>;
+  
+  // Google Sheets sync methods
+  markBookingAsSynced(id: number): Promise<Booking | undefined>;
+  getUnsyncedBookings(): Promise<Booking[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -53,7 +57,8 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
       updatedAt: new Date(),
       status: "pending",
-      bookingReference: `HWW-${Date.now().toString().slice(-6)}-001`
+      bookingReference: `HWW-${Date.now().toString().slice(-6)}-001`,
+      syncedToSheets: true // Already synced
     };
     
     // Second test booking - confirmed
@@ -76,7 +81,8 @@ export class MemStorage implements IStorage {
       createdAt: new Date(Date.now() - 86400000), // 1 day ago
       updatedAt: new Date(Date.now() - 43200000), // 12 hours ago
       status: "confirmed",
-      bookingReference: `HWW-${Date.now().toString().slice(-6)}-002`
+      bookingReference: `HWW-${Date.now().toString().slice(-6)}-002`,
+      syncedToSheets: true // Already synced
     };
     
     this.bookingsStore.set(testBooking1.id, testBooking1);
@@ -121,7 +127,8 @@ export class MemStorage implements IStorage {
       createdAt: now, 
       updatedAt: now,
       status: "pending",
-      bookingReference
+      bookingReference,
+      syncedToSheets: false // New booking is not synced yet
     };
     
     this.bookingsStore.set(id, booking);
@@ -147,6 +154,24 @@ export class MemStorage implements IStorage {
     };
     this.bookingsStore.set(id, updatedBooking);
     return updatedBooking;
+  }
+  
+  async markBookingAsSynced(id: number): Promise<Booking | undefined> {
+    const booking = this.bookingsStore.get(id);
+    if (!booking) return undefined;
+    
+    const updatedBooking = { 
+      ...booking, 
+      syncedToSheets: true,
+      updatedAt: new Date()
+    };
+    this.bookingsStore.set(id, updatedBooking);
+    return updatedBooking;
+  }
+  
+  async getUnsyncedBookings(): Promise<Booking[]> {
+    return Array.from(this.bookingsStore.values())
+      .filter(booking => !booking.syncedToSheets);
   }
 }
 
@@ -231,5 +256,14 @@ export const storage: IStorage = {
   
   updateBookingStatus: async (id: number, status: string) => {
     return (global.appStorage.selectedStorage || memStorage).updateBookingStatus(id, status);
+  },
+  
+  // Google Sheets sync methods
+  markBookingAsSynced: async (id: number) => {
+    return (global.appStorage.selectedStorage || memStorage).markBookingAsSynced(id);
+  },
+  
+  getUnsyncedBookings: async () => {
+    return (global.appStorage.selectedStorage || memStorage).getUnsyncedBookings();
   }
 };
