@@ -1,5 +1,4 @@
 import { Link } from "wouter";
-import HeroLocationSearch from "./HeroLocationSearch";
 import { HeroButton } from "@/components/ui/hero-button";
 import hardyLogoPath from "@assets/hardy logo-Photoroom.png";
 import carSunsetBg from "@assets/ChatGPT Image Mar 31, 2025, 05_35_46 PM.png";
@@ -50,10 +49,24 @@ export default function Hero() {
             </div>
           </div>
           
-          {/* Right side with location search - conditionally rendered for mobile */}
+          {/* Right side with mini booking iframe */}
           <div className="flex justify-center lg:justify-end mt-8 lg:mt-0">
             <div className={`w-full ${isMobile ? 'max-w-full' : 'max-w-md'}`}>
-              <HeroLocationSearch />
+              <div className="bg-white/95 backdrop-blur rounded-lg shadow-lg overflow-hidden">
+                <div className="py-3 px-4 bg-gradient-to-r from-[#EE432C] to-[#FFB375] text-white">
+                  <h3 className="text-lg font-bold">Book Your Detail</h3>
+                </div>
+                <iframe 
+                  src="https://hardyswashnwax.fieldd.co" 
+                  style={{
+                    width: "100%", 
+                    height: "400px",
+                    border: "none",
+                    overflow: "hidden"
+                  }}
+                  title="Hardys Wash N' Wax Quick Booking"
+                ></iframe>
+              </div>
             </div>
           </div>
         </div>
