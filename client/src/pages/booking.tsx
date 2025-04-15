@@ -1,5 +1,4 @@
 import BookingHero from "@/components/booking/BookingHero";
-import MultiStepBookingForm from "@/components/booking/MultiStepBookingForm";
 import { Helmet } from "react-helmet";
 
 export default function Booking() {
@@ -12,7 +11,21 @@ export default function Booking() {
         <link rel="canonical" href="https://hardyswashnwax.com/booking" />
       </Helmet>
       <BookingHero />
-      <MultiStepBookingForm />
+      <div className="container mx-auto px-4 py-10 flex justify-center">
+        <iframe 
+          src="https://hardyswashnwax.fieldd.co" 
+          style={{
+            overflow: "scroll", 
+            width: "100%", 
+            maxWidth: "1300px", 
+            minHeight: "calc(85vh)",
+            border: "none",
+            borderRadius: "8px",
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+          }}
+          title="Hardys Wash N' Wax Booking System"
+        ></iframe>
+      </div>
     </>
   );
 }
