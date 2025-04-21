@@ -10,11 +10,12 @@ export default function Hero() {
   
   return (
     <div className="relative bg-secondary min-h-[85vh] overflow-hidden">
-      {/* Background image with different image for mobile */}
+      {/* Background image with different image for mobile, optimized with loading priority */}
       <img 
         src={isMobile ? mobileHeroBg : carSunsetBg} 
         alt="Luxury car detailing at sunset" 
         className={`absolute inset-0 w-full h-full object-cover`}
+        loading="eager"
       />
       
       <div className="relative container mx-auto px-4 py-12 md:py-16 lg:py-24">
@@ -65,6 +66,7 @@ export default function Hero() {
                     overflow: "hidden"
                   }}
                   title="Hardys Wash N' Wax Quick Booking"
+                  loading="lazy"
                 ></iframe>
               </div>
             </div>
