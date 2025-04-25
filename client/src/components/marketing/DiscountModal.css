@@ -1,0 +1,197 @@
+/* Discount Modal Styles */
+.discount-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal container */
+.discount-modal {
+  background-color: #7486e6; /* Brand blue color - matching the image from user */
+  max-width: 480px;
+  width: 90%;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  text-align: center;
+  position: relative;
+  animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+  from { 
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Close button */
+.discount-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 20px;
+  color: white;
+  transition: background-color 0.2s;
+  z-index: 10;
+}
+
+.discount-modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Modal content */
+.discount-modal-content {
+  padding: 40px 30px;
+  color: white;
+}
+
+.brand {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  margin-bottom: 15px;
+}
+
+.discount {
+  font-size: 64px;
+  font-weight: 800;
+  margin: 10px 0 5px;
+  line-height: 1;
+}
+
+.subtext {
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  opacity: 0.8;
+}
+
+.modal-image {
+  width: 180px;
+  height: 140px;
+  margin: 20px auto;
+  object-fit: contain;
+}
+
+/* Button styles */
+.claim-button {
+  background-color: #e6bc8a; /* Brand accent color from image */
+  color: #333;
+  border: none;
+  border-radius: 3px;
+  padding: 16px 30px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin: 20px 0 15px;
+  transition: background-color 0.2s, transform 0.2s;
+  letter-spacing: 1px;
+}
+
+.claim-button:hover {
+  background-color: #e6c69e;
+  transform: translateY(-2px);
+}
+
+.decline {
+  display: inline-block;
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.2s;
+  text-transform: uppercase;
+}
+
+.decline:hover {
+  color: white;
+}
+
+/* Email form */
+.email-form p {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.email-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  font-size: 16px;
+  margin-bottom: 15px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.email-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.email-input:focus {
+  border-color: white;
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.thank-you-content p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.email-display {
+  font-weight: bold;
+  font-size: 18px !important;
+  margin-bottom: 20px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+  .discount-modal-content {
+    padding: 30px 20px;
+  }
+
+  .brand {
+    font-size: 18px;
+  }
+
+  .discount {
+    font-size: 48px;
+  }
+
+  .modal-image {
+    width: 140px;
+    height: 110px;
+  }
+
+  .claim-button {
+    padding: 14px 20px;
+  }
+}
