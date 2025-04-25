@@ -9,7 +9,10 @@ export function DiscountModal() {
 
   useEffect(() => {
     // Check if user has previously dismissed the modal
-    if (localStorage.getItem('popup-dismissed') !== '1') {
+    if (localStorage.getItem('discount-popup-dismissed') !== '1') {
+      // Reset previous popup dismissal flag (from old version)
+      localStorage.removeItem('popup-dismissed');
+      
       // Show modal after 4 seconds
       const timer = setTimeout(() => {
         setIsVisible(true);
@@ -21,7 +24,7 @@ export function DiscountModal() {
 
   const hideModal = () => {
     setIsVisible(false);
-    localStorage.setItem('popup-dismissed', '1');
+    localStorage.setItem('discount-popup-dismissed', '1');
   };
 
   const handleClaimClick = () => {
@@ -69,7 +72,7 @@ export function DiscountModal() {
               
               <div className="image-container">
                 <img 
-                  src="/attached_assets/express.jpg" 
+                  src="/images/express.jpg" 
                   alt="Premium car detailing" 
                   className="modal-image"
                   onError={(e) => {

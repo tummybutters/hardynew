@@ -204,9 +204,15 @@
 
   .image-container {
     height: 100px;
+    margin: 15px auto;
+  }
+
+  .modal-image {
+    object-position: center 25%;
   }
 
   .claim-button {
     padding: 14px 20px;
+    margin: 15px 0 10px;
   }
 }
