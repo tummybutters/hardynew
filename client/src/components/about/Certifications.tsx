@@ -50,7 +50,7 @@ export default function Certifications() {
               {certifications.map((cert, index) => (
                 <li key={index} className="flex items-start">
                   <div className="bg-primary/10 rounded-full p-2 mr-4 mt-1">
-                    <Award className="h-5 w-5 text-primary" />
+                    <Award className="h-5 w-5 text-[#EE432C]" />
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900">{cert.title}</h3>
@@ -69,7 +69,7 @@ export default function Certifications() {
               {tools.map((tool, index) => (
                 <li key={index} className="flex items-start">
                   <div className="bg-primary/10 rounded-full p-2 mr-4 mt-1">
-                    <Check className="h-5 w-5 text-primary" />
+                    <Check className="h-5 w-5 text-[#EE432C]" />
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900">{tool.title}</h3>

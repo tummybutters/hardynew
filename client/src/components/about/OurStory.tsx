@@ -6,7 +6,7 @@ export default function OurStory() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-block bg-primary/10 rounded-full px-4 py-1 text-primary font-medium mb-4">
+            <div className="inline-block bg-primary/10 rounded-full px-4 py-1 text-[#EE432C] font-medium mb-4">
               Meet The Founder
             </div>
             <h2 className="text-3xl font-bold font-heading text-gray-900 mb-6">Hi, I'm Ian – Welcome to Hardy's Wash N' Wax!</h2>
@@ -20,7 +20,7 @@ export default function OurStory() {
               My mission is simple: combine my passion for cars with my commitment to delivering results you'll love. Whether it's restoring your vehicle's original shine or giving it that extra polish, my focus is always on the details that matter. Let's make your car something to smile about!
             </p>
             <div className="flex items-center mt-6">
-              <div className="w-16 h-1 bg-primary mr-4"></div>
+              <div className="w-16 h-1 bg-[#EE432C] mr-4"></div>
               <span className="text-gray-500 italic">"Driving's better when the only thing on your mind is an open road—not a month's worth of mess under your feet."</span>
             </div>
           </div>
