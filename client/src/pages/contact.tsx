@@ -34,7 +34,7 @@ export default function Contact() {
             
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="font-bold text-lg mb-2 text-red-primary">Do you need water or electricity?</h3>
-              <p className="text-gray-700">We're fully self-contained! Our mobile setup includes water and power, so we can detail your vehicle anywhere.</p>
+              <p className="text-gray-700">We need access to a water source from the customer. Please ensure you have a functioning outdoor water spigot available. Our equipment is powered by our own generators, so no electricity is required.</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-md">
