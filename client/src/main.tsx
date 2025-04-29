@@ -8,6 +8,28 @@ import "./components/ui/custom-hero-button.css";
 import "./components/ui/custom-nav-button.css";
 import "./components/ui/service-3d-button.css";
 import "./components/ui/3d-step-icon.css";
+import { initEmailJS } from "./lib/emailService";
+
+// Initialize EmailJS when the app starts
+initEmailJS();
+
+// Make environment variables available to the frontend
+declare global {
+  interface Window {
+    env: {
+      EMAILJS_SERVICE_ID: string;
+      EMAILJS_TEMPLATE_ID: string;
+      EMAILJS_PUBLIC_KEY: string;
+    };
+  }
+}
+
+// Initialize global env object
+window.env = {
+  EMAILJS_SERVICE_ID: import.meta.env.EMAILJS_SERVICE_ID || '',
+  EMAILJS_TEMPLATE_ID: import.meta.env.EMAILJS_TEMPLATE_ID || '',
+  EMAILJS_PUBLIC_KEY: import.meta.env.EMAILJS_PUBLIC_KEY || ''
+};
 
 // Mount the React application
 createRoot(document.getElementById("root")!).render(<App />);

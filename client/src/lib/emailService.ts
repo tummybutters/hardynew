@@ -26,11 +26,10 @@ interface ContactFormData {
 
 export const sendContactEmail = async (formData: ContactFormData) => {
   try {
-    // The service ID should be your actual EmailJS service ID
-    // These values should come from environment variables in production
-    const serviceId = 'service_9o6a9hq'; // Replace with your service ID
-    const templateId = 'template_njn095q'; // Replace with your template ID
-    const userId = 'k6KdWLBsB-i4uUIa8'; // Your public key
+    // Using your actual EmailJS credentials that were added as secrets
+    const serviceId = import.meta.env.EMAILJS_SERVICE_ID || '';
+    const templateId = import.meta.env.EMAILJS_TEMPLATE_ID || '';
+    const userId = 'k6KdWLBsB-i4uUIa8'; // Public key
 
     console.log('Sending email with service ID:', serviceId);
     console.log('Sending email with template ID:', templateId);
