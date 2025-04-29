@@ -68,6 +68,7 @@ export default function Home() {
       <Hero />
       <FeaturedServicesNew />
       <WhyChooseUs />
+      <GoogleReviews />
       <Testimonials />
       <CallToAction />
     </>

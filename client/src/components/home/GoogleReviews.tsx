@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import useEmblaCarousel from 'embla-carousel-react';
+import * as EmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+
+// Fix for embla-carousel-react import
+const useEmblaCarousel = EmblaCarousel.default || EmblaCarousel;
 
 // Reviews data from Google
 const googleReviews = [
@@ -222,87 +225,85 @@ const GoogleReviewCard = ({ review }: { review: typeof googleReviews[0] }) => {
 };
 
 export default function GoogleReviews() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
-    loop: true, 
+  // Create two separate instances of the carousel
+  const [emblaRef1, emblaApi1] = useEmblaCarousel({
+    loop: true,
     align: 'start',
-    skipSnaps: false,
-    draggable: true
+    direction: 'ltr' // Left to right
+  });
+  
+  const [emblaRef2, emblaApi2] = useEmblaCarousel({
+    loop: true,
+    align: 'start',
+    direction: 'rtl' // Right to left for opposite direction
   });
   
   const [prevBtnEnabled, setPrevBtnEnabled] = useState(false);
   const [nextBtnEnabled, setNextBtnEnabled] = useState(false);
-  const [autoplayActive, setAutoplayActive] = useState(true);
-  const autoplayIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const autoplay1IntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const autoplay2IntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   const scrollPrev = () => {
-    if (emblaApi) emblaApi.scrollPrev();
+    if (emblaApi1) emblaApi1.scrollPrev();
   };
   
   const scrollNext = () => {
-    if (emblaApi) emblaApi.scrollNext();
+    if (emblaApi1) emblaApi1.scrollNext();
   };
 
   // Split reviews into two rows
   const rowOne = googleReviews.slice(0, Math.ceil(googleReviews.length / 2));
   const rowTwo = googleReviews.slice(Math.ceil(googleReviews.length / 2));
 
-  // Initialize or cleanup the Embla instance
+  // Initialize or cleanup the Embla instances
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi1 || !emblaApi2) return;
 
     const onSelect = () => {
-      setPrevBtnEnabled(emblaApi.canScrollPrev());
-      setNextBtnEnabled(emblaApi.canScrollNext());
+      setPrevBtnEnabled(emblaApi1.canScrollPrev());
+      setNextBtnEnabled(emblaApi1.canScrollNext());
     };
 
-    emblaApi.on('select', onSelect);
+    emblaApi1.on('select', onSelect);
     onSelect();
     
-    // Autoplay setup
-    const startAutoplay = () => {
-      stopAutoplay();
-      if (autoplayActive) {
-        autoplayIntervalRef.current = setInterval(() => {
-          if (emblaApi.canScrollNext()) {
-            emblaApi.scrollNext();
-          } else {
-            emblaApi.scrollTo(0);
-          }
-        }, 5000); // Scroll every 5 seconds
-      }
+    // First carousel - automatic scroll
+    const startAutoplay1 = () => {
+      if (autoplay1IntervalRef.current) clearInterval(autoplay1IntervalRef.current);
+      
+      autoplay1IntervalRef.current = setInterval(() => {
+        if (emblaApi1.canScrollNext()) {
+          emblaApi1.scrollNext();
+        } else {
+          emblaApi1.scrollTo(0);
+        }
+      }, 4000); // Scroll every 4 seconds
     };
     
-    const stopAutoplay = () => {
-      if (autoplayIntervalRef.current) {
-        clearInterval(autoplayIntervalRef.current);
-        autoplayIntervalRef.current = null;
-      }
+    // Second carousel - automatic scroll in opposite direction
+    const startAutoplay2 = () => {
+      if (autoplay2IntervalRef.current) clearInterval(autoplay2IntervalRef.current);
+      
+      autoplay2IntervalRef.current = setInterval(() => {
+        if (emblaApi2.canScrollNext()) {
+          emblaApi2.scrollNext();
+        } else {
+          emblaApi2.scrollTo(0);
+        }
+      }, 4500); // Different timing to create an interesting effect
     };
     
     // Start autoplay initially
-    startAutoplay();
+    startAutoplay1();
+    startAutoplay2();
     
-    // Pause autoplay on user interaction and restart when idle
-    const handlePointerDown = () => {
-      stopAutoplay();
-      setAutoplayActive(false);
-    };
-    
-    const handlePointerUp = () => {
-      setAutoplayActive(true);
-      startAutoplay();
-    };
-    
-    emblaApi.on('pointerDown', handlePointerDown);
-    document.addEventListener('pointerup', handlePointerUp);
-    
+    // Clear intervals on component unmount
     return () => {
-      stopAutoplay();
-      emblaApi.off('select', onSelect);
-      emblaApi.off('pointerDown', handlePointerDown);
-      document.removeEventListener('pointerup', handlePointerUp);
+      if (autoplay1IntervalRef.current) clearInterval(autoplay1IntervalRef.current);
+      if (autoplay2IntervalRef.current) clearInterval(autoplay2IntervalRef.current);
+      emblaApi1.off('select', onSelect);
     };
-  }, [emblaApi, autoplayActive]);
+  }, [emblaApi1, emblaApi2]);
 
   return (
     <div className="bg-gradient-to-br from-[#F3F4E6] to-[#FFD7B5] py-16">
@@ -325,7 +326,7 @@ export default function GoogleReviews() {
         <div className="space-y-10">
           {/* First Row */}
           <div className="relative">
-            <div className="overflow-hidden" ref={emblaRef}>
+            <div className="overflow-hidden" ref={emblaRef1}>
               <div className="flex">
                 {rowOne.map((review) => (
                   <GoogleReviewCard key={review.id} review={review} />
@@ -336,8 +337,8 @@ export default function GoogleReviews() {
           
           {/* Second Row - Reverse Direction */}
           <div className="relative">
-            <div className="overflow-hidden">
-              <div className="flex animate-carousel-reverse">
+            <div className="overflow-hidden" ref={emblaRef2}>
+              <div className="flex">
                 {rowTwo.map((review) => (
                   <GoogleReviewCard key={review.id} review={review} />
                 ))}
