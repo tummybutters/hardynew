@@ -1,7 +1,6 @@
 import Hero from "@/components/home/Hero";
 import FeaturedServicesNew from "@/components/home/FeaturedServicesNew";
 import WhyChooseUs from "@/components/home/WhyChooseUs";
-import Testimonials from "@/components/home/Testimonials";
 import GoogleReviews from "@/components/home/GoogleReviews";
 import CallToAction from "@/components/home/CallToAction";
 import { Helmet } from "react-helmet";
@@ -66,10 +65,9 @@ export default function Home() {
         </script>
       </Helmet>
       <Hero />
+      <GoogleReviews />
       <FeaturedServicesNew />
       <WhyChooseUs />
-      <GoogleReviews />
-      <Testimonials />
       <CallToAction />
     </>
   );
