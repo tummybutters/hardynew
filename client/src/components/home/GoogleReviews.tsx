@@ -200,12 +200,7 @@ const GoogleReviewCard = ({ review }: { review: typeof googleReviews[0] }) => {
       
       <p className="text-gray-700 flex-grow line-clamp-4 mb-3 overflow-hidden">"{review.content}"</p>
       
-      <div className="flex items-center mt-auto">
-        <img 
-          src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
-          alt="Google Logo" 
-          className="h-5 mr-2" 
-        />
+      <div className="mt-auto">
         <span className="text-sm text-gray-500">Posted on Google</span>
       </div>
     </div>
@@ -269,11 +264,6 @@ export default function GoogleReviews() {
             rel="noopener noreferrer"
             className="google-review-btn"
           >
-            <img 
-              src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
-              alt="Google Logo" 
-              className="h-6" 
-            />
             <span>See All Reviews on Google</span>
           </a>
         </div>
