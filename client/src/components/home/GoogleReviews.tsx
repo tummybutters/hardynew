@@ -183,25 +183,24 @@ const GoogleReviewCard = ({ review }: { review: typeof googleReviews[0] }) => {
   return (
     <div className="review-card">
       <div className="review-content">
-        <div className="flex items-center justify-between">
-          <div className="flex space-x-0.5">
+        <div className="flex-col">
+          <div className="flex space-x-0.5 mb-1">
             {Array(5).fill(0).map((_, i) => (
               <Star 
                 key={i} 
-                size={16} 
+                size={14} 
                 fill="#EE432C" 
                 className="text-[#EE432C]" 
               />
             ))}
           </div>
-          <div className="review-time">{review.time}</div>
+          <div className="review-author text-sm truncate">{review.author}</div>
+          <div className="review-time text-xs">{review.time}</div>
         </div>
         
-        <div className="review-author">{review.author}</div>
+        <div className="review-text text-sm">"{review.content}"</div>
         
-        <div className="review-text">"{review.content}"</div>
-        
-        <div className="review-footer">
+        <div className="review-footer text-xs">
           Posted on Google
         </div>
       </div>
