@@ -59,23 +59,42 @@
   animation: carousel-reverse 45s linear infinite;
 }
 
-/* Google review button */
+/* Neo Brutalism styling for review cards */
+.review-card {
+  background: #FFB375;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 0.5vmin solid #05060f;
+  box-shadow: 0.4rem 0.4rem #05060f;
+  overflow: hidden;
+  color: black;
+  transition: transform 0.2s;
+}
+
+.review-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0.5rem 0.5rem #05060f;
+}
+
+/* Google review button with Neo Brutalism style */
 .google-review-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 24px;
-  background-color: white;
-  color: #444444;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  font-weight: 500;
+  padding: 12px 28px;
+  background-color: #EE432C;
+  color: white;
+  border: 0.5vmin solid #05060f;
+  border-radius: 0.8rem;
+  box-shadow: 0.4rem 0.4rem #05060f;
+  font-weight: 600;
   transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .google-review-btn:hover {
-  background-color: #f8f8f8;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0.5rem 0.5rem #05060f;
 }

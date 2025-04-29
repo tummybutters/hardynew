@@ -179,29 +179,36 @@ const googleReviews = [
   }
 ];
 
-const GoogleReviewCard = ({ review }: { review: typeof googleReviews[0] }) => {
+const GoogleReviewCard = ({ review, index = 0 }: { review: typeof googleReviews[0], index?: number }) => {
+  // Create an array of background colors for variety
+  const bgColors = ["#FFB375", "#FFD7B5", "#F3F4E6"]; 
+  const bgColor = bgColors[index % bgColors.length];
+  
   return (
-    <div className="flex flex-col h-[280px] bg-white p-5 rounded-lg shadow-md mx-2 min-w-[320px] w-[320px]">
+    <div 
+      className="flex flex-col h-[280px] review-card mx-2 min-w-[320px] w-[320px]"
+      style={{ background: bgColor }}
+    >
       <div className="flex items-center justify-between mb-3">
         <div className="flex space-x-0.5">
           {Array(5).fill(0).map((_, i) => (
             <Star 
               key={i} 
               size={16} 
-              fill="#EE432C" 
-              className="text-[#EE432C]" 
+              fill="#05060f" 
+              className="text-[#05060f]" 
             />
           ))}
         </div>
-        <div className="text-gray-500 text-sm">{review.time}</div>
+        <div className="text-[#05060f] text-sm font-medium">{review.time}</div>
       </div>
       
-      <h4 className="font-medium text-gray-900 mb-2">{review.author}</h4>
+      <h4 className="font-bold text-[#05060f] mb-2 text-lg">{review.author}</h4>
       
-      <p className="text-gray-700 flex-grow line-clamp-4 mb-3 overflow-hidden">"{review.content}"</p>
+      <p className="text-[#05060f] flex-grow line-clamp-4 mb-3 overflow-hidden">"{review.content}"</p>
       
       <div className="mt-auto">
-        <span className="text-sm text-gray-500">Posted on Google</span>
+        <span className="text-sm font-medium text-[#05060f]">Posted on Google</span>
       </div>
     </div>
   );
@@ -237,7 +244,7 @@ export default function GoogleReviews() {
               <div className="continuous-carousel">
                 {/* Double the cards for seamless loop effect */}
                 {[...rowOne, ...rowOne].map((review, index) => (
-                  <GoogleReviewCard key={`${review.id}-${index}`} review={review} />
+                  <GoogleReviewCard key={`${review.id}-${index}`} review={review} index={index} />
                 ))}
               </div>
             </div>
@@ -249,7 +256,7 @@ export default function GoogleReviews() {
               <div className="continuous-carousel-reverse">
                 {/* Double the cards for seamless loop effect */}
                 {[...rowTwo, ...rowTwo].map((review, index) => (
-                  <GoogleReviewCard key={`${review.id}-${index}`} review={review} />
+                  <GoogleReviewCard key={`${review.id}-${index}`} review={review} index={index} />
                 ))}
               </div>
             </div>
