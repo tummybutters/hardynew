@@ -32,6 +32,7 @@ type ContactFormValues = z.infer<typeof contactFormSchema>;
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailJSInitialized, setEmailJSInitialized] = useState(false);
+  const [messageSent, setMessageSent] = useState(false);
   const { toast } = useToast();
 
   // Initialize EmailJS
@@ -81,6 +82,7 @@ export default function ContactForm() {
           title: "Message Sent",
           description: "Thank you for your message. We'll get back to you soon!",
         });
+        setMessageSent(true);
         form.reset();
       } else {
         toast({
@@ -101,21 +103,54 @@ export default function ContactForm() {
     }
   }
 
+  if (messageSent) {
+    return (
+      <div className="w-full max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md">
+        <div className="text-center py-10">
+          <h2 className="text-2xl font-bold mb-4 text-red-primary">Thank You!</h2>
+          <p className="text-gray-700 mb-6">Your message has been received. We'll respond to you as soon as possible.</p>
+          <Button 
+            onClick={() => setMessageSent(false)}
+            className="bg-gradient-to-r from-red-primary to-accent-orange hover:from-red-primary-dark hover:to-accent-orange-dark transition-all duration-300"
+          >
+            Send Another Message
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-center text-red-primary">Contact Us</h2>
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
+            <FormField
+              control={form.control}
+              name="subject"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">Subject</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Subject of your message" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 gap-4">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel className="text-gray-700">Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your name" {...field} />
+                    <Input placeholder="Your full name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -127,25 +162,9 @@ export default function ContactForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-gray-700">Email</FormLabel>
                   <FormControl>
                     <Input placeholder="your.email@example.com" type="email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone (Optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="(123) 456-7890" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -154,12 +173,12 @@ export default function ContactForm() {
             
             <FormField
               control={form.control}
-              name="subject"
+              name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Subject (Optional)</FormLabel>
+                  <FormLabel className="text-gray-700">Phone (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="What's this about?" {...field} />
+                    <Input placeholder="(123) 456-7890" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -172,17 +191,14 @@ export default function ContactForm() {
             name="message"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Message</FormLabel>
+                <FormLabel className="text-gray-700">Message</FormLabel>
                 <FormControl>
                   <Textarea 
-                    placeholder="How can we help you?" 
-                    className="min-h-[120px]" 
+                    placeholder="Type your message here..." 
+                    className="min-h-[150px] resize-y" 
                     {...field} 
                   />
                 </FormControl>
-                <FormDescription>
-                  Please provide as much detail as possible.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
