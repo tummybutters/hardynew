@@ -3,12 +3,8 @@ import emailjs from '@emailjs/browser';
 // Initialize EmailJS with the public key
 export const initEmailJS = () => {
   try {
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || process.env.EMAILJS_PUBLIC_KEY;
-    
-    if (!publicKey) {
-      console.error('EmailJS public key not found');
-      return false;
-    }
+    // Using the public key directly since it's already meant to be public
+    const publicKey = 'k6KdWLBsB-i4uUIa8';
     
     emailjs.init(publicKey);
     return true;
@@ -28,12 +24,10 @@ interface ContactFormData {
 
 export const sendContactEmail = async (formData: ContactFormData) => {
   try {
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || process.env.EMAILJS_SERVICE_ID;
-    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || process.env.EMAILJS_TEMPLATE_ID;
-    
-    if (!serviceId || !templateId) {
-      throw new Error('EmailJS service ID or template ID not found');
-    }
+    // These values should match your EmailJS configuration
+    // For testing, we're hard-coding service and template IDs
+    const serviceId = process.env.EMAILJS_SERVICE_ID || 'service_9o6a9hq';
+    const templateId = process.env.EMAILJS_TEMPLATE_ID || 'template_njn095q';
 
     // Create template parameters
     const templateParams = {

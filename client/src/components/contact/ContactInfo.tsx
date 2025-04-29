@@ -1,97 +1,88 @@
-import { 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Clock, 
-  Instagram, 
-  Facebook 
-} from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Instagram } from 'lucide-react';
 
-export default function ContactInfo() {
+const ContactInfo = () => {
   return (
-    <div className="w-full max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-center text-red-primary">Our Details</h2>
+    <div className="bg-white p-8 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
       
       <div className="space-y-6">
-        <div className="flex items-start space-x-3">
-          <MapPin className="w-5 h-5 mt-1 text-red-primary flex-shrink-0" />
-          <div>
-            <h3 className="font-medium">Service Area</h3>
-            <p className="text-gray-600">
-              Irvine, Orange County & Greater Southern California
-            </p>
-          </div>
-        </div>
-        
-        <div className="flex items-start space-x-3">
-          <Phone className="w-5 h-5 mt-1 text-red-primary flex-shrink-0" />
+        <div className="flex items-start">
+          <Phone className="h-5 w-5 text-red-500 mt-1 mr-3" />
           <div>
             <h3 className="font-medium">Phone</h3>
-            <p className="text-gray-600">
-              <a href="tel:+19495556789" className="hover:text-accent-orange transition-colors">
-                (949) 555-6789
+            <p className="text-gray-700">
+              <a href="tel:+17147134937" className="hover:text-orange-500 transition-colors">
+                (714) 713-4937
               </a>
             </p>
           </div>
         </div>
         
-        <div className="flex items-start space-x-3">
-          <Mail className="w-5 h-5 mt-1 text-red-primary flex-shrink-0" />
+        <div className="flex items-start">
+          <Mail className="h-5 w-5 text-red-500 mt-1 mr-3" />
           <div>
             <h3 className="font-medium">Email</h3>
-            <p className="text-gray-600">
-              <a href="mailto:info@hardyswashnwax.com" className="hover:text-accent-orange transition-colors">
+            <p className="text-gray-700">
+              <a href="mailto:info@hardyswashnwax.com" className="hover:text-orange-500 transition-colors">
                 info@hardyswashnwax.com
               </a>
             </p>
           </div>
         </div>
         
-        <div className="flex items-start space-x-3">
-          <Clock className="w-5 h-5 mt-1 text-red-primary flex-shrink-0" />
+        <div className="flex items-start">
+          <MapPin className="h-5 w-5 text-red-500 mt-1 mr-3" />
           <div>
-            <h3 className="font-medium">Business Hours</h3>
-            <ul className="text-gray-600 space-y-1">
-              <li className="grid grid-cols-2">
-                <span>Monday - Friday</span>
-                <span>8:00 AM - 6:00 PM</span>
-              </li>
-              <li className="grid grid-cols-2">
-                <span>Saturday</span>
-                <span>8:00 AM - 4:00 PM</span>
-              </li>
-              <li className="grid grid-cols-2">
-                <span>Sunday</span>
-                <span>Closed</span>
-              </li>
-            </ul>
+            <h3 className="font-medium">Service Area</h3>
+            <p className="text-gray-700">Orange County, CA</p>
+            <p className="text-sm text-gray-500 mt-1">
+              We come to you! Our mobile detailing service travels throughout Orange County.
+            </p>
           </div>
         </div>
         
-        <div className="border-t pt-6 mt-6">
-          <h3 className="font-medium mb-3">Connect With Us</h3>
-          <div className="flex space-x-4">
-            <a 
-              href="https://www.instagram.com/hardyswashnwax" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-red-primary/10 hover:bg-red-primary text-red-primary hover:text-white p-3 rounded-full transition-all duration-300"
-            >
-              <Instagram className="w-5 h-5" />
-              <span className="sr-only">Instagram</span>
-            </a>
-            <a 
-              href="https://www.facebook.com/hardyswashnwax" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-red-primary/10 hover:bg-red-primary text-red-primary hover:text-white p-3 rounded-full transition-all duration-300"
-            >
-              <Facebook className="w-5 h-5" />
-              <span className="sr-only">Facebook</span>
-            </a>
+        <div className="flex items-start">
+          <Clock className="h-5 w-5 text-red-500 mt-1 mr-3" />
+          <div>
+            <h3 className="font-medium">Business Hours</h3>
+            <p className="text-gray-700">Monday - Friday: 8:00 AM - 6:00 PM</p>
+            <p className="text-gray-700">Saturday: 9:00 AM - 5:00 PM</p>
+            <p className="text-gray-700">Sunday: Closed</p>
+          </div>
+        </div>
+        
+        <div className="flex items-start">
+          <Instagram className="h-5 w-5 text-red-500 mt-1 mr-3" />
+          <div>
+            <h3 className="font-medium">Social Media</h3>
+            <p className="text-gray-700">
+              <a 
+                href="https://www.instagram.com/hardyswashnwax/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-orange-500 transition-colors"
+              >
+                @hardyswashnwax
+              </a>
+            </p>
           </div>
         </div>
       </div>
+      
+      <div className="mt-8 p-4 bg-gray-50 rounded border border-gray-100">
+        <h3 className="font-medium text-gray-800 mb-2">Book a Service</h3>
+        <p className="text-sm text-gray-600 mb-3">
+          Ready for a premium detailing experience? Book online or contact us directly.
+        </p>
+        <a 
+          href="/booking" 
+          className="inline-block bg-gradient-to-r from-orange-400 to-red-500 text-white font-medium px-4 py-2 rounded shadow-sm hover:from-orange-500 hover:to-red-600 transition-all"
+        >
+          Schedule Now
+        </a>
+      </div>
     </div>
   );
-}
+};
+
+export default ContactInfo;
