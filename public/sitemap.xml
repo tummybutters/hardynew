@@ -2,56 +2,69 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://hardyswashnwax.com/</loc>
-    <lastmod>2025-04-02</lastmod>
+    <lastmod>2025-04-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://hardyswashnwax.com/services</loc>
-    <lastmod>2025-04-02</lastmod>
+    <lastmod>2025-04-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hardyswashnwax.com/subscriptions</loc>
-    <lastmod>2025-04-02</lastmod>
+    <loc>https://hardyswashnwax.com/about</loc>
+    <lastmod>2025-04-30</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hardyswashnwax.com/contact</loc>
+    <lastmod>2025-04-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://hardyswashnwax.com/booking</loc>
-    <lastmod>2025-04-02</lastmod>
+    <lastmod>2025-04-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://hardyswashnwax.com/contact</loc>
-    <lastmod>2025-04-02</lastmod>
+    <loc>https://hardyswashnwax.com/services/ceramic-coating</loc>
+    <lastmod>2025-04-30</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+  </url>
+  <!-- Location pages -->
+  <url>
+    <loc>https://hardyswashnwax.com/davis-car-detailing</loc>
+    <lastmod>2025-04-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hardyswashnwax.com/about</loc>
-    <lastmod>2025-04-02</lastmod>
+    <loc>https://hardyswashnwax.com/woodland-car-detailing</loc>
+    <lastmod>2025-04-30</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hardyswashnwax.com/services/exterior-detailing</loc>
-    <lastmod>2025-04-02</lastmod>
+    <loc>https://hardyswashnwax.com/dixon-car-detailing</loc>
+    <lastmod>2025-04-30</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hardyswashnwax.com/services/interior-detailing</loc>
-    <lastmod>2025-04-02</lastmod>
+    <loc>https://hardyswashnwax.com/winters-car-detailing</loc>
+    <lastmod>2025-04-30</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hardyswashnwax.com/services/complete-packages</loc>
-    <lastmod>2025-04-02</lastmod>
+    <loc>https://hardyswashnwax.com/west-sacramento-car-detailing</loc>
+    <lastmod>2025-04-30</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
 </urlset>

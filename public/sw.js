@@ -1,109 +1,66 @@
-const CACHE_NAME = 'hardys-wash-n-wax-v2';
+// Service Worker for HardysWashnWax PWA
+const CACHE_NAME = 'hardys-washnwax-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/offline.html',
-  // Add only essential assets that should be available offline
-  '/src/main.tsx',
-  '/src/index.css'
+  '/about',
+  '/services',
+  '/contact',
+  '/booking'
 ];
 
-// Install service worker and cache assets
+// Install event - cache the app shell
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Cache opened');
+        console.log('Opened cache');
         return cache.addAll(urlsToCache);
-      })
-      .catch(err => {
-        console.error('Cache failed to open:', err);
       })
   );
 });
 
-// Activate and clean up old caches
-self.addEventListener('activate', event => {
-  const cacheAllowlist = [CACHE_NAME];
+// Fetch event - implement stale-while-revalidate strategy
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(cachedResponse => {
+        // Return cached response immediately if available
+        const fetchPromise = fetch(event.request)
+          .then(networkResponse => {
+            // If we got a valid response, cache it
+            if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+              const responseToCache = networkResponse.clone();
+              caches.open(CACHE_NAME)
+                .then(cache => {
+                  cache.put(event.request, responseToCache);
+                });
+            }
+            return networkResponse;
+          })
+          .catch(error => {
+            console.log('Fetch failed; returning cached response instead.', error);
+            // If fetch fails, return the cached response or fall back to a network error
+            return cachedResponse;
+          });
 
+        return cachedResponse || fetchPromise;
+      })
+  );
+});
+
+// Activate event - clean up old caches
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheAllowlist.indexOf(cacheName) === -1) {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
             return caches.delete(cacheName);
           }
         })
       );
     })
-  );
-});
-
-// Serve cached content when offline with network-first strategy
-self.addEventListener('fetch', event => {
-  // Skip non-GET requests and cross-origin requests
-  if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
-    return;
-  }
-
-  // Skip API requests
-  if (event.request.url.includes('/api/')) {
-    return;
-  }
-
-  // For HTML pages, use a network-first strategy
-  const isHTMLRequest = event.request.headers.get('accept')?.includes('text/html');
-  
-  if (isHTMLRequest) {
-    event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return caches.match(event.request)
-            .then(cachedResponse => {
-              return cachedResponse || caches.match('/offline.html');
-            });
-        })
-    );
-    return;
-  }
-
-  // For other assets, use a cache-first strategy
-  event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        if (cachedResponse) {
-          // If we have a cached version, return it
-          return cachedResponse;
-        }
-        
-        // Otherwise try to fetch it from the network
-        return fetch(event.request)
-          .then(response => {
-            if (!response || response.status !== 200) {
-              return response;
-            }
-            
-            // Clone the response to cache it for later
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              })
-              .catch(err => {
-                console.error('Failed to cache response:', err);
-              });
-            
-            return response;
-          })
-          .catch(error => {
-            console.error('Fetch failed:', error);
-            // For images, return a fallback if we have one
-            if (event.request.destination === 'image') {
-              return caches.match('/icons/fallback.png');
-            }
-            throw error;
-          });
-      })
   );
 });

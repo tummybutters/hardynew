@@ -1,13 +1,11 @@
 {
-  "name": "Hardys Wash N' Wax",
-  "short_name": "Hardys",
-  "description": "Luxury mobile car detailing service",
-  "start_url": "/?source=pwa",
-  "scope": "/",
+  "name": "Hardys Wash N' Wax - Mobile Car Detailing Davis CA",
+  "short_name": "Hardys Wash N' Wax",
+  "description": "Premium mobile car detailing service in Davis, CA. We come to your location for convenient, professional auto detailing.",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#F3F4E6",
   "theme_color": "#EE432C",
-  "orientation": "any",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -21,38 +19,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "shortcuts": [
-    {
-      "name": "Book a Service",
-      "short_name": "Book",
-      "description": "Book a car detailing service",
-      "url": "/booking?source=pwa",
-      "icons": [{ "src": "/icons/booking-icon.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Contact Us",
-      "short_name": "Contact",
-      "description": "Contact Hardys Wash N' Wax",
-      "url": "/contact?source=pwa",
-      "icons": [{ "src": "/icons/contact-icon.png", "sizes": "192x192" }]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/home-mobile.webp",
-      "sizes": "390x844",
-      "type": "image/webp",
-      "form_factor": "narrow",
-      "label": "Homescreen of Hardys Wash N' Wax"
-    },
-    {
-      "src": "/screenshots/booking-mobile.webp",
-      "sizes": "390x844",
-      "type": "image/webp",
-      "form_factor": "narrow",
-      "label": "Booking screen"
-    }
-  ],
-  "categories": ["business", "lifestyle", "productivity"]
+  ]
 }
