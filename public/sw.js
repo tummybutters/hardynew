@@ -6,7 +6,13 @@ const urlsToCache = [
   '/about',
   '/services',
   '/contact',
-  '/booking'
+  '/booking',
+  // Location-specific pages for SEO
+  '/davis-car-detailing',
+  '/woodland-car-detailing',
+  '/dixon-car-detailing',
+  '/winters-car-detailing',
+  '/west-sacramento-car-detailing'
 ];
 
 // Install event - cache the app shell

@@ -105,7 +105,8 @@ export default function Footer() {
         <div className="border-t border-white/20 pt-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-white/80 text-sm mb-4 md:mb-0">
-              &copy; {new Date().getFullYear()} Hardys Wash N' Wax. All rights reserved.
+              &copy; {new Date().getFullYear()} Hardys Wash N' Wax. All rights reserved. <br />
+              <span className="text-white/70 text-xs">Proudly serving Davis, Woodland, Dixon, Winters & West Sacramento, California</span>
             </p>
             <div className="flex space-x-6">
               <a href="#" className="text-white/80 hover:text-white text-sm transition-colors">Privacy Policy</a>
