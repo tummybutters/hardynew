@@ -9,8 +9,45 @@ export default function WoodlandCarDetailing() {
     <>
       <Helmet>
         <title>Mobile Car Detailing Services in Woodland, CA | Hardys Wash N' Wax</title>
-        <meta name="description" content="Premium mobile car detailing services in Woodland, California. We come to your home or office for convenient, professional auto detailing services." />
+        <meta name="description" content="Premium mobile car detailing services in Woodland, CA. We bring professional auto detailing to your home or office - serving Spring Lake, Gibson Road, and all Woodland neighborhoods." />
+        <meta name="keywords" content="Car Detailing Woodland CA, Mobile Car Detailing Spring Lake, Auto Detailing Yolo County, Premium Mobile Detailing Gibson Road, Car Wash Woodland" />
         <link rel="canonical" href="https://hardyswashnwax.com/woodland-car-detailing" />
+        
+        {/* Structured Data for Local Business with service location */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "AutoWash",
+            "name": "Hardys Wash N' Wax - Woodland",
+            "image": "https://hardyswashnwax.com/logo.png",
+            "description": "Premium mobile car detailing service that comes to your location in Woodland, CA and throughout Yolo County.",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Woodland",
+              "addressRegion": "CA",
+              "postalCode": "95695",
+              "addressCountry": "US"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": 38.6785,
+              "longitude": -121.7733
+            },
+            "telephone": "+19497340201",
+            "priceRange": "$$$",
+            "areaServed": [
+              { "@type": "Place", "name": "Woodland, CA"},
+              { "@type": "Place", "name": "Spring Lake, CA"},
+              { "@type": "Place", "name": "Gibson Road, Woodland, CA"},
+              { "@type": "Place", "name": "East Woodland, CA"},
+              { "@type": "Place", "name": "North Woodland, CA"}
+            ],
+            "sameAs": [
+              "https://www.facebook.com/hardyswashnwax",
+              "https://www.instagram.com/hardyswashnwax"
+            ]
+          })}
+        </script>
       </Helmet>
       
       {/* Hero Section */}

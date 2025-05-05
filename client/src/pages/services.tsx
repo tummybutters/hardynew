@@ -11,9 +11,47 @@ export default function Services() {
   return (
     <>
       <Helmet>
-        <title>Mobile Car Detailing Services Irvine & Orange County | Hardys Wash N' Wax</title>
-        <meta name="description" content="Comprehensive mobile car detailing services in Irvine and throughout Orange County. Express detail, interior cleaning, exterior wash & wax, ceramic coating, and paint correction." />
+        <title>Mobile Car Detailing Services in Davis, Woodland & Yolo County | Hardys Wash N' Wax</title>
+        <meta name="description" content="Comprehensive mobile car detailing services in Davis, Woodland, and throughout Yolo County. Premium express detail, interior cleaning, exterior wash & wax, ceramic coating, and paint correction at your location." />
+        <meta name="keywords" content="Car Detailing Services Davis CA, Mobile Car Wash Woodland CA, Auto Detail Packages UC Davis, Ceramic Coating Yolo County, Express Detail Near Me" />
         <link rel="canonical" href="https://hardyswashnwax.com/services" />
+        
+        {/* Structured Data for Service */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Service",
+            "name": "Mobile Car Detailing Services",
+            "provider": {
+              "@type": "LocalBusiness",
+              "name": "Hardys Wash N' Wax",
+              "image": "https://hardyswashnwax.com/logo.png",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Davis",
+                "addressRegion": "CA",
+                "postalCode": "95616",
+                "addressCountry": "US"
+              },
+              "telephone": "+19497340201"
+            },
+            "areaServed": [
+              { "@type": "City", "name": "Davis, CA" },
+              { "@type": "City", "name": "Woodland, CA" },
+              { "@type": "City", "name": "Dixon, CA" },
+              { "@type": "City", "name": "Winters, CA" },
+              { "@type": "City", "name": "West Sacramento, CA" }
+            ],
+            "serviceType": "Mobile Car Detailing",
+            "offers": {
+              "@type": "AggregateOffer",
+              "lowPrice": "99",
+              "highPrice": "499",
+              "priceCurrency": "USD",
+              "offerCount": "5"
+            }
+          })}
+        </script>
       </Helmet>
       
       <ServicesHero />

@@ -34,9 +34,10 @@ const ContactInfo = () => {
           <MapPin className="h-5 w-5 text-red-500 mt-1 mr-3" />
           <div>
             <h3 className="font-medium">Service Area</h3>
-            <p className="text-gray-700">Davis, CA | Orange County | Greater SoCal</p>
+            <p className="text-gray-700">Davis, CA | Woodland, CA | Yolo County</p>
             <p className="text-sm text-gray-500 mt-1">
-              We come to you! Our mobile detailing service travels throughout Davis, Orange County, and the Greater Southern California area.
+              We come to you! Our mobile detailing service travels throughout Davis, Woodland, Dixon, Winters, 
+              West Sacramento, and all of Yolo County within 30 minutes of our base.
             </p>
           </div>
         </div>
