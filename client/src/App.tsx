@@ -22,6 +22,9 @@ import PaintCorrection from "@/pages/services/paint-correction";
 // Import location pages for SEO
 import DavisCarDetailing from "@/pages/davis-car-detailing";
 import WoodlandCarDetailing from "@/pages/woodland-car-detailing";
+import DixonCarDetailing from "@/pages/dixon-car-detailing";
+import WintersCarDetailing from "@/pages/winters-car-detailing";
+import WestSacramentoCarDetailing from "@/pages/west-sacramento-car-detailing";
 
 function Router() {
   return (
@@ -45,6 +48,9 @@ function Router() {
             {/* Location pages for SEO */}
             <Route path="/davis-car-detailing" component={DavisCarDetailing} />
             <Route path="/woodland-car-detailing" component={WoodlandCarDetailing} />
+            <Route path="/dixon-car-detailing" component={DixonCarDetailing} />
+            <Route path="/winters-car-detailing" component={WintersCarDetailing} />
+            <Route path="/west-sacramento-car-detailing" component={WestSacramentoCarDetailing} />
             
             <Route component={NotFound} />
           </Switch>
