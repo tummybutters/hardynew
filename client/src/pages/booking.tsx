@@ -1,7 +1,103 @@
 import BookingHero from "@/components/booking/BookingHero";
 import { Helmet } from "react-helmet";
+import { useEffect, useRef } from "react";
+
+// Google Ads conversion tracking function
+function gtag_report_conversion(url?: string) {
+  var callback = function () {
+    if (typeof(url) != 'undefined') {
+      window.location = url as Location | (string & Location);
+    }
+  };
+  
+  // @ts-ignore - gtag may not be recognized by TypeScript
+  gtag('event', 'conversion', {
+      'send_to': 'AW-17059179967/bFhZCJWZ0MQaEL_bucY_',
+      'value': 1.0,
+      'currency': 'USD',
+      'event_callback': callback
+  });
+  return false;
+}
 
 export default function Booking() {
+  const conversionTracked = useRef<boolean>(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  
+  useEffect(() => {
+    // Listen for messages from the iframe
+    const handleIframeMessage = (event: MessageEvent) => {
+      // Security check - only accept messages from Fieldd
+      if (event.origin.includes('fieldd.co')) {
+        // Check if the message indicates booking completion
+        if (event.data && typeof event.data === 'object' && event.data.type === 'booking_complete') {
+          // Avoid duplicate conversion tracking
+          if (!conversionTracked.current) {
+            console.log('Booking conversion detected!');
+            gtag_report_conversion();
+            conversionTracked.current = true;
+          }
+        }
+      }
+    };
+
+    // Set up message listener
+    window.addEventListener('message', handleIframeMessage);
+    
+    // Visual detection fallback (if postMessage isn't implemented by Fieldd)
+    let checkInterval: NodeJS.Timeout | null = null;
+    
+    // Wait for iframe to load
+    if (iframeRef.current) {
+      iframeRef.current.addEventListener('load', () => {
+        // Check periodically for confirmation screen
+        checkInterval = setInterval(() => {
+          try {
+            const iframe = iframeRef.current;
+            if (iframe && iframe.contentWindow) {
+              // Try to detect booking confirmation screen
+              // This is a fallback that may not work due to same-origin policy
+              // But we implement it as a best-effort approach
+              const iframeDoc = iframe.contentWindow.document;
+              
+              // Look for confirmation elements that may indicate a booking was completed
+              const confirmationElements = iframeDoc.querySelectorAll('div[class*="confirmation"], button:contains("BOOK NOW")');
+              
+              if (confirmationElements.length > 0 && !conversionTracked.current) {
+                console.log('Booking confirmation screen detected!');
+                gtag_report_conversion();
+                conversionTracked.current = true;
+                
+                if (checkInterval) {
+                  clearInterval(checkInterval);
+                  checkInterval = null;
+                }
+              }
+            }
+          } catch (error) {
+            // We expect this to fail due to same-origin policy
+            // This is just a fallback attempt
+            console.log('Unable to access iframe content due to cross-origin restrictions');
+            
+            // Since direct access failed, clear the interval
+            if (checkInterval) {
+              clearInterval(checkInterval);
+              checkInterval = null;
+            }
+          }
+        }, 2000); // Check every 2 seconds
+      });
+    }
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('message', handleIframeMessage);
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
+    };
+  }, []);
+  
   return (
     <>
       <Helmet>
@@ -41,6 +137,7 @@ export default function Booking() {
       <BookingHero />
       <div className="container mx-auto px-4 py-10 flex justify-center">
         <iframe 
+          ref={iframeRef}
           src="https://hardyswashnwax.fieldd.co" 
           style={{
             overflow: "scroll", 
