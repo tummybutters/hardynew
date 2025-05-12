@@ -92,9 +92,9 @@ export default function CarWashAndWax() {
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Car Wash and Wax Services</h1>
             <p className="text-xl text-gray-800 mb-8 speakable-content">Professional exterior cleaning and protection that comes to you. Our premium wash and wax service includes foam wash, clay bar treatment, and long-lasting ceramic wax for unmatched shine and protection.</p>
-            <Service3DButton asChild>
-              <Link href="/booking">Schedule Your Wash & Wax</Link>
-            </Service3DButton>
+            <Link href="/booking">
+              <Service3DButton>Schedule Your Wash & Wax</Service3DButton>
+            </Link>
           </div>
         </div>
       </div>

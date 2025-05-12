@@ -92,9 +92,9 @@ export default function FullServiceCarWash() {
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Full Service Car Wash & Detailing</h1>
             <p className="text-xl text-gray-800 mb-8 speakable-content">Complete interior and exterior perfection. Our luxury detailing package thoroughly cleans, restores, and protects your vehicle inside and out, delivered right to your location.</p>
-            <Service3DButton asChild>
-              <Link href="/booking">Schedule Your Full Service Detail</Link>
-            </Service3DButton>
+            <Link href="/booking">
+              <Service3DButton>Schedule Your Full Service Detail</Service3DButton>
+            </Link>
           </div>
         </div>
       </div>
@@ -277,9 +277,9 @@ export default function FullServiceCarWash() {
               </div>
               
               <div className="flex justify-center mt-6">
-                <Service3DButton asChild>
-                  <Link href="/booking">Book Your Full Service Detail</Link>
-                </Service3DButton>
+                <Link href="/booking">
+                  <Service3DButton>Book Your Full Service Detail</Service3DButton>
+                </Link>
               </div>
             </div>
             
@@ -345,9 +345,9 @@ export default function FullServiceCarWash() {
               <p className="text-gray-100/90 text-lg">Our mobile full service detailing comes directly to your location.</p>
             </div>
             <div>
-              <Service3DButton asChild>
-                <Link href="/booking">Book Your Full Service Detail</Link>
-              </Service3DButton>
+              <Link href="/booking">
+                <Service3DButton>Book Your Full Service Detail</Service3DButton>
+              </Link>
             </div>
           </div>
         </div>

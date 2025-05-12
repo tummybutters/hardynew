@@ -92,9 +92,9 @@ export default function CeramicCoatingPage() {
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Ceramic Coating Near You</h1>
             <p className="text-xl text-gray-800 mb-8 speakable-content">7-10 years of premium paint protection with our mobile ceramic coating service. Enhance gloss, maintain resale value, and protect against environmental damage.</p>
-            <Service3DButton asChild>
-              <Link href="/booking">Schedule Your Ceramic Coating</Link>
-            </Service3DButton>
+            <Link href="/booking">
+              <Service3DButton>Schedule Your Ceramic Coating</Service3DButton>
+            </Link>
           </div>
         </div>
       </div>
@@ -266,9 +266,9 @@ export default function CeramicCoatingPage() {
               </div>
               
               <div className="flex justify-center mt-6">
-                <Service3DButton asChild>
-                  <Link href="/booking">Book Your Ceramic Coating</Link>
-                </Service3DButton>
+                <Link href="/booking">
+                  <Service3DButton>Book Your Ceramic Coating</Service3DButton>
+                </Link>
               </div>
             </div>
             
@@ -334,9 +334,9 @@ export default function CeramicCoatingPage() {
               <p className="text-gray-100/90 text-lg">Our mobile ceramic coating service comes directly to your location.</p>
             </div>
             <div>
-              <Service3DButton asChild>
-                <Link href="/booking">Book Your Ceramic Coating</Link>
-              </Service3DButton>
+              <Link href="/booking">
+                <Service3DButton>Book Your Ceramic Coating</Service3DButton>
+              </Link>
             </div>
           </div>
         </div>

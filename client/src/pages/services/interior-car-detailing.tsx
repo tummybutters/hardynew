@@ -92,9 +92,9 @@ export default function InteriorCarDetailing() {
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Interior Car Detailing Near You</h1>
             <p className="text-xl text-gray-800 mb-8 speakable-content">Deep cleaning, stain removal, and premium protection for your vehicle's interior. We bring professional detailing services directly to your driveway.</p>
-            <Service3DButton asChild>
-              <Link href="/booking">Schedule Your Interior Detail</Link>
-            </Service3DButton>
+            <Link href="/booking">
+              <Service3DButton>Schedule Your Interior Detail</Service3DButton>
+            </Link>
           </div>
         </div>
       </div>
@@ -224,9 +224,9 @@ export default function InteriorCarDetailing() {
               </div>
               
               <div className="flex justify-center mt-6">
-                <Service3DButton asChild>
-                  <Link href="/booking">Book Your Interior Detail</Link>
-                </Service3DButton>
+                <Link href="/booking">
+                  <Service3DButton>Book Your Interior Detail</Service3DButton>
+                </Link>
               </div>
             </div>
             
@@ -292,9 +292,9 @@ export default function InteriorCarDetailing() {
               <p className="text-gray-100/90 text-lg">Our mobile detailing service comes directly to your location.</p>
             </div>
             <div>
-              <Service3DButton asChild>
-                <Link href="/booking">Book Your Interior Detail</Link>
-              </Service3DButton>
+              <Link href="/booking">
+                <Service3DButton>Book Your Interior Detail</Service3DButton>
+              </Link>
             </div>
           </div>
         </div>
