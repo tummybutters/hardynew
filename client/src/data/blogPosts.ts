@@ -92,17 +92,6 @@ export const blogPosts: BlogPost[] = [
         answer: "Ceramic coating provides limited protection against minor scratches but won't prevent rock chips or deeper scratches. For maximum protection, consider combining ceramic coating with paint protection film (PPF) on high-impact areas."
       }
     ]
-  },
-  {
-    slug: "interior-detailing-for-pet-owners",
-    title: "Interior Detailing Tips for Sacramento Pet Owners",
-    metaDescription: "Learn effective techniques for maintaining your car's interior when traveling with pets in Sacramento. Professional tips for removing pet hair, odors, and protecting upholstery.",
-    date: "2025-04-15",
-    excerpt: "Traveling with pets doesn't have to mean a permanently messy car interior. Discover specialized cleaning techniques, preventative measures, and professional solutions for pet-related vehicle maintenance challenges.",
-    readTime: 6,
-    categories: ["Interior Detailing", "Pet Care"],
-    serviceLink: "/services/interior-detailing",
-    content: "This is a placeholder for the full article content about interior detailing for pet owners."
   }
 ];
 
