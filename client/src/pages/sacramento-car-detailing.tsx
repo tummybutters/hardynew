@@ -78,7 +78,7 @@ export default function SacramentoCarDetailing() {
       </div>
       
       {/* Service Area Highlight */}
-      <div className="bg-[#F3F4E6] py-16">
+      <div className="bg-[#F3F4E6] py-16 border-y-2 border-black">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-start gap-12">
             <div className="md:w-1/2">
@@ -88,7 +88,7 @@ export default function SacramentoCarDetailing() {
                 Whether you're a busy professional, downtown resident, or homeowner in the suburbs, we bring our premium 
                 detailing services right to your doorstep.
               </p>
-              <div className="mb-8">
+              <div className="mb-8 bg-white p-6 rounded-lg shadow-md border-2 border-black">
                 <h3 className="text-xl font-semibold mb-3">Popular Service Areas in Sacramento:</h3>
                 <ul className="grid grid-cols-2 gap-2">
                   <li className="flex items-center"><MapPin className="h-5 w-5 text-[#EE432C] mr-2" /> Downtown</li>
@@ -99,11 +99,11 @@ export default function SacramentoCarDetailing() {
                   <li className="flex items-center"><MapPin className="h-5 w-5 text-[#EE432C] mr-2" /> Natomas</li>
                 </ul>
               </div>
-              <p className="font-medium">
+              <p className="font-medium px-4 py-3 bg-[#FFD7B5] border-2 border-black rounded-lg inline-block">
                 Proudly serving the entire Sacramento region - if you're within 30 minutes we'll come to you.
               </p>
             </div>
-            <div className="md:w-1/2 bg-white p-6 rounded-lg shadow-md">
+            <div className="md:w-1/2 bg-white p-6 rounded-lg shadow-md border-2 border-black">
               <h3 className="text-xl font-semibold mb-4">Why Sacramento Residents Choose Us:</h3>
               <ul className="space-y-4">
                 <li className="flex items-start">
@@ -154,15 +154,15 @@ export default function SacramentoCarDetailing() {
                 </div>
                 <div className="space-y-3 mb-6">
                   <div className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
                     <p className="text-gray-800">Full interior vacuum and blowout with surface cleaning</p>
                   </div>
                   <div className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
                     <p className="text-gray-800">Complete dashboard, infotainment, plastics, and door panel cleaning</p>
                   </div>
                   <div className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
                     <p className="text-gray-800">Streak-free window cleaning and leather conditioning</p>
                   </div>
                 </div>
@@ -183,15 +183,15 @@ export default function SacramentoCarDetailing() {
                 </div>
                 <div className="space-y-3 mb-6">
                   <div className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
                     <p className="text-gray-800">Interior blowout with deep vacuuming of all surfaces and seats</p>
                   </div>
                   <div className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
                     <p className="text-gray-800">Professional carpet shampoo and stain removal treatment</p>
                   </div>
                   <div className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
                     <p className="text-gray-800">Premium leather conditioning and headliner cleaning</p>
                   </div>
                 </div>
@@ -212,15 +212,15 @@ export default function SacramentoCarDetailing() {
                 </div>
                 <div className="space-y-3 mb-6">
                   <div className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
                     <p className="text-gray-800">Iron decontamination and professional pre-treatment soak</p>
                   </div>
                   <div className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
                     <p className="text-gray-800">Clay bar decontamination to remove embedded contaminants</p>
                   </div>
                   <div className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
                     <p className="text-gray-800">Professional drying and tire dressing for a showroom finish</p>
                   </div>
                 </div>
@@ -242,9 +242,9 @@ export default function SacramentoCarDetailing() {
               Prices vary based on vehicle size:
             </p>
             <ul className="space-y-1 mb-4">
-              <li className="flex items-center"><CheckCircle2 className="h-4 w-4 text-[#EE432C] mr-2" /> Sedan/Coupe: Lower price range</li>
-              <li className="flex items-center"><CheckCircle2 className="h-4 w-4 text-[#EE432C] mr-2" /> SUV/Truck: Mid price range</li>
-              <li className="flex items-center"><CheckCircle2 className="h-4 w-4 text-[#EE432C] mr-2" /> Van/Luxury/Oversized: Higher price range</li>
+              <li className="flex items-center"><CheckCircle className="h-4 w-4 text-[#EE432C] mr-2" /> Sedan/Coupe: Lower price range</li>
+              <li className="flex items-center"><CheckCircle className="h-4 w-4 text-[#EE432C] mr-2" /> SUV/Truck: Mid price range</li>
+              <li className="flex items-center"><CheckCircle className="h-4 w-4 text-[#EE432C] mr-2" /> Van/Luxury/Oversized: Higher price range</li>
             </ul>
             <p className="text-sm text-gray-700">
               Final pricing depends on vehicle condition, size, and service requirements. For a precise quote, book a consultation or call us directly.
@@ -254,12 +254,12 @@ export default function SacramentoCarDetailing() {
       </div>
       
       {/* FAQ Section */}
-      <div className="bg-[#FFD7B5]/30 py-16">
+      <div className="bg-gradient-to-b from-[#FFD7B5] to-[#F3F4E6] py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Sacramento Car Detailing FAQs</h2>
           
           <div className="max-w-3xl mx-auto space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white p-6 rounded-lg shadow-md border-2 border-black">
               <h3 className="text-xl font-bold mb-2">Do you service all of Sacramento?</h3>
               <p className="text-gray-700">
                 Yes! We provide mobile car detailing services throughout all of Sacramento, including 
@@ -268,7 +268,7 @@ export default function SacramentoCarDetailing() {
               </p>
             </div>
             
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white p-6 rounded-lg shadow-md border-2 border-black">
               <h3 className="text-xl font-bold mb-2">Do I need to provide water and electricity?</h3>
               <p className="text-gray-700">
                 You'll need to provide access to a water spigot. We bring our own pressure washer,
@@ -276,7 +276,7 @@ export default function SacramentoCarDetailing() {
               </p>
             </div>
             
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white p-6 rounded-lg shadow-md border-2 border-black">
               <h3 className="text-xl font-bold mb-2">Can you detail my car at my office in Sacramento?</h3>
               <p className="text-gray-700">
                 Absolutely! We frequently provide detailing services at workplaces throughout Sacramento.
@@ -284,7 +284,7 @@ export default function SacramentoCarDetailing() {
               </p>
             </div>
             
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white p-6 rounded-lg shadow-md border-2 border-black">
               <h3 className="text-xl font-bold mb-2">How far in advance should I book?</h3>
               <p className="text-gray-700">
                 For Sacramento locations, we recommend booking at least 3-4 days in advance, especially
@@ -297,16 +297,18 @@ export default function SacramentoCarDetailing() {
       </div>
       
       {/* CTA Section */}
-      <div className="bg-[#EE432C] py-12 text-white">
+      <div className="bg-[#FFB375] py-12 border-y-2 border-black">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready for the Best Car Detailing in Sacramento?</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold mb-6 text-black">Ready for the Best Car Detailing in Sacramento?</h2>
+          <p className="text-xl mb-8 max-w-2xl mx-auto text-gray-800">
             Book your appointment today and experience premium mobile detailing service 
             delivered right to your location in Sacramento.
           </p>
-          <Button asChild size="lg" variant="secondary" className="bg-white text-[#EE432C] hover:bg-gray-100">
-            <Link href="/booking">Schedule Your Sacramento Detail</Link>
-          </Button>
+          <Link href="/booking">
+            <Button className="bg-[#EE432C] hover:bg-[#d13a26] text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] px-8 py-3 rounded text-lg font-bold transition-all">
+              Schedule Your Sacramento Detail
+            </Button>
+          </Link>
         </div>
       </div>
     </>
