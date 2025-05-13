@@ -26,10 +26,12 @@ import CarWashAndWax from "@/pages/services/car-wash-and-wax";
 
 // Import location pages for SEO
 import DavisCarDetailing from "@/pages/davis-car-detailing";
-import WoodlandCarDetailing from "@/pages/woodland-car-detailing";
-import DixonCarDetailing from "@/pages/dixon-car-detailing";
-import WintersCarDetailing from "@/pages/winters-car-detailing";
+import SacramentoCarDetailing from "@/pages/sacramento-car-detailing";
+import ElkGroveCarDetailing from "@/pages/elk-grove-car-detailing";
+import RosevilleCarDetailing from "@/pages/roseville-car-detailing";
+import FolsomCarDetailing from "@/pages/folsom-car-detailing";
 import WestSacramentoCarDetailing from "@/pages/west-sacramento-car-detailing";
+import WoodlandCarDetailing from "@/pages/woodland-car-detailing";
 
 function Router() {
   return (
@@ -57,10 +59,12 @@ function Router() {
             
             {/* Location pages for SEO */}
             <Route path="/davis-car-detailing" component={DavisCarDetailing} />
-            <Route path="/woodland-car-detailing" component={WoodlandCarDetailing} />
-            <Route path="/dixon-car-detailing" component={DixonCarDetailing} />
-            <Route path="/winters-car-detailing" component={WintersCarDetailing} />
+            <Route path="/sacramento-car-detailing" component={SacramentoCarDetailing} />
+            <Route path="/elk-grove-car-detailing" component={ElkGroveCarDetailing} />
+            <Route path="/roseville-car-detailing" component={RosevilleCarDetailing} />
+            <Route path="/folsom-car-detailing" component={FolsomCarDetailing} />
             <Route path="/west-sacramento-car-detailing" component={WestSacramentoCarDetailing} />
+            <Route path="/woodland-car-detailing" component={WoodlandCarDetailing} />
             
             <Route component={NotFound} />
           </Switch>

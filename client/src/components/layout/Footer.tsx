@@ -18,7 +18,7 @@ export default function Footer() {
           <div>
             <h3 className="text-2xl font-bold mb-5 font-heading">Hardys Wash N' Wax</h3>
             <p className="text-white/90 mb-6 leading-relaxed">
-              Premium mobile detailing services bringing luxury car care directly to your location. Proudly serving Davis, Woodland, Dixon, Winters & West Sacramento.
+              Premium mobile detailing services bringing luxury car care directly to your location. Proudly serving Davis, Sacramento, Elk Grove, Roseville, Folsom, West Sacramento, and Woodland.
             </p>
             <div className="flex space-x-5">
               <a href="#" className="text-white hover:text-[#FFB375] transition-colors">
@@ -64,10 +64,12 @@ export default function Footer() {
             <h3 className="text-xl font-bold mb-5 font-heading">Service Areas</h3>
             <ul className="space-y-3">
               <li><Link href="/davis-car-detailing" className="text-white hover:text-[#FFB375] transition-colors inline-block">Davis</Link></li>
-              <li><Link href="/woodland-car-detailing" className="text-white hover:text-[#FFB375] transition-colors inline-block">Woodland</Link></li>
-              <li><Link href="/dixon-car-detailing" className="text-white hover:text-[#FFB375] transition-colors inline-block">Dixon</Link></li>
-              <li><Link href="/winters-car-detailing" className="text-white hover:text-[#FFB375] transition-colors inline-block">Winters</Link></li>
+              <li><Link href="/sacramento-car-detailing" className="text-white hover:text-[#FFB375] transition-colors inline-block">Sacramento</Link></li>
+              <li><Link href="/elk-grove-car-detailing" className="text-white hover:text-[#FFB375] transition-colors inline-block">Elk Grove</Link></li>
+              <li><Link href="/roseville-car-detailing" className="text-white hover:text-[#FFB375] transition-colors inline-block">Roseville</Link></li>
+              <li><Link href="/folsom-car-detailing" className="text-white hover:text-[#FFB375] transition-colors inline-block">Folsom</Link></li>
               <li><Link href="/west-sacramento-car-detailing" className="text-white hover:text-[#FFB375] transition-colors inline-block">West Sacramento</Link></li>
+              <li><Link href="/woodland-car-detailing" className="text-white hover:text-[#FFB375] transition-colors inline-block">Woodland</Link></li>
             </ul>
           </div>
           
