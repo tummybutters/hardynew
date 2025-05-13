@@ -58,24 +58,21 @@ export default function SacramentoCarDetailing() {
       </Helmet>
       
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-gray-900 to-gray-800 text-white py-20">
+      <div className="bg-gradient-to-b from-[#FFB375] to-[#FFD7B5] py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Sacramento, CA Mobile Car Detailing Services
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Sacramento Mobile Car Detailing
             </h1>
-            <p className="text-xl text-gray-200 mb-8 speakable-content">
-              Hardys Wash N' Wax brings premium mobile car detailing directly to you in Sacramento, California. 
-              We serve the entire Sacramento area, including Midtown, Downtown, East Sacramento, and all residential neighborhoods.
+            <p className="text-xl text-gray-800 mb-8 speakable-content">
+              Premium mobile car wash and detailing service delivered right to your home or office in Sacramento.
+              Professional detailing, convenient booking, and luxury results without leaving your location.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Button asChild size="lg">
-                <Link href="/booking">Book Your Detail</Link>
+            <Link href="/booking">
+              <Button className="bg-[#EE432C] hover:bg-[#d13a26] text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] px-6 py-3 rounded text-lg font-bold transition-all">
+                Book Your Sacramento Detail
               </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="/services">View Services</Link>
-              </Button>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
@@ -148,50 +145,110 @@ export default function SacramentoCarDetailing() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Popular Services in Sacramento</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-[#F3F4E6] rounded-lg overflow-hidden shadow-md">
+            <div className="bg-[#FFB375] rounded-lg overflow-hidden shadow-md border-2 border-black">
               <div className="p-6">
-                <Car className="h-12 w-12 text-[#EE432C] mb-4" />
-                <h3 className="text-xl font-bold mb-2">Express Detail</h3>
-                <p className="text-gray-700 mb-4">
-                  Perfect for busy Sacramento professionals. A thorough exterior wash, tire 
-                  shine, and interior vacuum and wipe-down in just 90 minutes.
-                </p>
-                <p className="font-bold text-lg mb-4">From $99</p>
-                <Button asChild className="w-full">
-                  <Link href="/booking">Book Now</Link>
-                </Button>
+                <h3 className="text-2xl font-bold mb-2 text-center">Express Detail</h3>
+                <p className="text-3xl font-bold text-center mb-3">$199-$279</p>
+                <div className="bg-[#FFD7B5] text-center py-2 rounded-md mb-4 border border-black">
+                  <p className="font-medium">1.5-2.5 Hours</p>
+                </div>
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <p className="text-gray-800">Full interior vacuum and blowout with surface cleaning</p>
+                  </div>
+                  <div className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <p className="text-gray-800">Complete dashboard, infotainment, plastics, and door panel cleaning</p>
+                  </div>
+                  <div className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <p className="text-gray-800">Streak-free window cleaning and leather conditioning</p>
+                  </div>
+                </div>
+                <Link href="/booking">
+                  <Button className="w-full bg-[#EE432C] hover:bg-[#d13a26] text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-bold transition-all">
+                    BOOK NOW
+                  </Button>
+                </Link>
               </div>
             </div>
             
-            <div className="bg-[#F3F4E6] rounded-lg overflow-hidden shadow-md">
+            <div className="bg-[#FFB375] rounded-lg overflow-hidden shadow-md border-2 border-black">
               <div className="p-6">
-                <Car className="h-12 w-12 text-[#EE432C] mb-4" />
-                <h3 className="text-xl font-bold mb-2">Full Detail</h3>
-                <p className="text-gray-700 mb-4">
-                  Our most popular package in Sacramento. Complete interior and exterior detailing with clay 
-                  bar treatment and wax protection.
-                </p>
-                <p className="font-bold text-lg mb-4">From $189</p>
-                <Button asChild className="w-full">
-                  <Link href="/booking">Book Now</Link>
-                </Button>
+                <h3 className="text-2xl font-bold mb-2 text-center">Interior Deep Detail</h3>
+                <p className="text-3xl font-bold text-center mb-3">$199-$349</p>
+                <div className="bg-[#FFD7B5] text-center py-2 rounded-md mb-4 border border-black">
+                  <p className="font-medium">3-4 Hours</p>
+                </div>
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <p className="text-gray-800">Interior blowout with deep vacuuming of all surfaces and seats</p>
+                  </div>
+                  <div className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <p className="text-gray-800">Professional carpet shampoo and stain removal treatment</p>
+                  </div>
+                  <div className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <p className="text-gray-800">Premium leather conditioning and headliner cleaning</p>
+                  </div>
+                </div>
+                <Link href="/booking">
+                  <Button className="w-full bg-[#EE432C] hover:bg-[#d13a26] text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-bold transition-all">
+                    BOOK NOW
+                  </Button>
+                </Link>
               </div>
             </div>
             
-            <div className="bg-[#F3F4E6] rounded-lg overflow-hidden shadow-md">
+            <div className="bg-[#FFB375] rounded-lg overflow-hidden shadow-md border-2 border-black">
               <div className="p-6">
-                <Car className="h-12 w-12 text-[#EE432C] mb-4" />
-                <h3 className="text-xl font-bold mb-2">Ceramic Coating</h3>
-                <p className="text-gray-700 mb-4">
-                  Premium protection against the Sacramento climate. Long-lasting shine 
-                  and protection for your vehicle.
-                </p>
-                <p className="font-bold text-lg mb-4">From $349</p>
-                <Button asChild className="w-full">
-                  <Link href="/booking">Book Now</Link>
-                </Button>
+                <h3 className="text-2xl font-bold mb-2 text-center">Exterior Wash & Wax</h3>
+                <p className="text-3xl font-bold text-center mb-3">$249-$399</p>
+                <div className="bg-[#FFD7B5] text-center py-2 rounded-md mb-4 border border-black">
+                  <p className="font-medium">3-4.5 Hours</p>
+                </div>
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <p className="text-gray-800">Iron decontamination and professional pre-treatment soak</p>
+                  </div>
+                  <div className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <p className="text-gray-800">Clay bar decontamination to remove embedded contaminants</p>
+                  </div>
+                  <div className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                    <p className="text-gray-800">Professional drying and tire dressing for a showroom finish</p>
+                  </div>
+                </div>
+                <Link href="/booking">
+                  <Button className="w-full bg-[#EE432C] hover:bg-[#d13a26] text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-bold transition-all">
+                    BOOK NOW
+                  </Button>
+                </Link>
               </div>
             </div>
+          </div>
+          
+          {/* Pricing Disclaimer */}
+          <div className="mt-10 p-6 bg-[#FFD7B5] border-2 border-black rounded-lg max-w-3xl mx-auto">
+            <h3 className="text-xl font-bold mb-2 flex items-center">
+              <span className="mr-2">📋</span> Sacramento Pricing Guide
+            </h3>
+            <p className="text-gray-800 mb-2">
+              Prices vary based on vehicle size:
+            </p>
+            <ul className="space-y-1 mb-4">
+              <li className="flex items-center"><CheckCircle2 className="h-4 w-4 text-[#EE432C] mr-2" /> Sedan/Coupe: Lower price range</li>
+              <li className="flex items-center"><CheckCircle2 className="h-4 w-4 text-[#EE432C] mr-2" /> SUV/Truck: Mid price range</li>
+              <li className="flex items-center"><CheckCircle2 className="h-4 w-4 text-[#EE432C] mr-2" /> Van/Luxury/Oversized: Higher price range</li>
+            </ul>
+            <p className="text-sm text-gray-700">
+              Final pricing depends on vehicle condition, size, and service requirements. For a precise quote, book a consultation or call us directly.
+            </p>
           </div>
         </div>
       </div>
