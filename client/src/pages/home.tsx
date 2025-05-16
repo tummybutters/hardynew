@@ -10,8 +10,8 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>Mobile Car Detailing in Davis, CA | Hardys Wash N' Wax</title>
-        <meta name="description" content="Premium mobile car detailing in Davis, CA and surrounding areas including Woodland, Dixon, Winters, and UC Davis. We bring professional auto detailing services to your location." />
+        <title>First-Class Car Detailing Near Me | Full-Service Car Wash at Your Doorstep | Hardy's W&W</title>
+        <meta name="description" content="Return to perfection. Full service car wash at your driveway—Car detailing hand wash, interior care, flawless finish. Book in 60 seconds. We come to you." />
         <meta name="keywords" content="Car Detailing Davis CA, Mobile Car Detailing UC Davis, Auto Detailing Woodland, Premium Mobile Detailing Yolo County, Car Wash Near UC Davis" />
         <link rel="canonical" href="https://hardyswashnwax.com/" />
         

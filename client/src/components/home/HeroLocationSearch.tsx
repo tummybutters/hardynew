@@ -14,6 +14,7 @@ const CALIFORNIA_BOUNDS = {
   south: 32.5, // San Diego area
   west: -124.4, // Pacific Coast
   east: -114.1 // Eastern California
+
 };
 
 // Service area center
@@ -59,7 +60,7 @@ export default function HeroLocationSearch() {
     const lon = coords[0];
     const lat = coords[1];
     
-    return (
+    return {
       lat >= CALIFORNIA_BOUNDS.south &&
       lat <= CALIFORNIA_BOUNDS.north &&
       lon >= CALIFORNIA_BOUNDS.west &&
