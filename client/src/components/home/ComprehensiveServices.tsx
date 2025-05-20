@@ -1,10 +1,13 @@
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import expressImage from "@assets/express.jpg";
-import extImage from "@assets/ext.jpg";
-import luxImage from "@assets/lux.jpg";
-import hardImage from "@assets/hard.jpg"; // Import additional images for the new services
+// Import the new images
+import interiorImage from "@assets/interior detailing.jpg";
+import interiorImage2 from "@assets/interior detailing 2.jpg";
+import exteriorImage from "@assets/exterior detail.jpg";
+import fullHandWashImage from "@assets/full hand wash detail.jpg";
+import paintCorrectionImage from "@assets/Paint correction.jpg";
+import ceramicCoatingImage from "@assets/ceramic coating.webp";
 
 // Expanded service array with 6 services
 const services = [
@@ -13,7 +16,7 @@ const services = [
     id: 1,
     title: "FULL INTERIOR DETAIL",
     description: "Deep cleaning for a fresh, spotless interior, including stain and odor removal.",
-    image: expressImage,
+    image: interiorImage,
     link: "/services",
     primary: true,
   },
@@ -21,7 +24,7 @@ const services = [
     id: 2,
     title: "FULL EXTERIOR DETAIL",
     description: "A thorough washing and waxing for a clean, protected exterior.",
-    image: extImage,
+    image: exteriorImage,
     link: "/services",
     primary: true,
   },
@@ -29,7 +32,7 @@ const services = [
     id: 3,
     title: "FULL DETAIL",
     description: "Complete care for both the interior and exterior of your vehicle.",
-    image: luxImage,
+    image: fullHandWashImage,
     link: "/services",
     primary: true,
   },
@@ -38,7 +41,7 @@ const services = [
     id: 4,
     title: "PAINT CORRECTION",
     description: "Restore your car's shine by removing scratches, swirl marks, and imperfections for a flawless finish.",
-    image: hardImage,
+    image: paintCorrectionImage,
     link: "/services",
     primary: false,
   },
@@ -46,7 +49,7 @@ const services = [
     id: 5,
     title: "CERAMIC COATING",
     description: "8 year protection for your car's paint, providing a glossy finish and shielding against dirt, sun, and water.",
-    image: expressImage,
+    image: ceramicCoatingImage,
     link: "/services",
     primary: false,
   },
@@ -54,7 +57,7 @@ const services = [
     id: 6,
     title: "MAINTENANCE DETAILS",
     description: "Keep your car looking its best with routine cleaning and care for both the interior and exterior.",
-    image: extImage,
+    image: interiorImage2,
     link: "/services",
     primary: false,
   },
