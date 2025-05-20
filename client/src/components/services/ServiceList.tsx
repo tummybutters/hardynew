@@ -29,87 +29,96 @@ interface Service {
 const services: Service[] = [
   {
     id: 1,
-    title: "Express Detail",
-    originalPrice: "$199-$279",
-    salePrice: "$199-$279",
+    title: "Maintenance Detail",
+    originalPrice: "$149-$199",
+    salePrice: "$149-$199",
     discount: "",
     duration: "1.5-2.5 Hours",
     features: [
-      { text: "Full interior vacuum and blowout with surface cleaning" },
-      { text: "Complete dashboard, infotainment, plastics, and door panel cleaning" },
+      { text: "Interior blowout and surface-level vacuuming of seats and surfaces" },
+      { text: "Complete dashboard, infotainment, plastics, foot wells, pedals, and door cleaning" },
       { text: "Streak-free window cleaning and leather conditioning" },
-      { text: "Foam wash, wheel & tire cleaning with pre-soak" },
-      { text: "Towel dry and tire dressing for a finished look" }
+      { text: "All purpose cleaner pre-soak with wheel & tire cleaning" },
+      { text: "Foam and contact wash with towel dry and tire dressing" }
     ],
     bonuses: [
+      { text: "All Makes and Models", value: "$149-$199" },
       { text: "Optional: Spray wax", value: "$49-89" },
-      { text: "Optional: Clay bar decontamination", value: "$49-89" },
-      { text: "Optional: Headlight restoration", value: "$49-89" },
-      { text: "Optional: Plastic trim restore", value: "$49-89" }
+      { text: "Optional: Clay bar decontamination", value: "$39" },
+      { text: "Optional: Plastic trim restore", value: "$49-99" }
     ],
     bgColor: "bg-[#FFAA75]"
   },
   {
     id: 2,
-    title: "Interior Deep Detail",
-    originalPrice: "$199-$349",
-    salePrice: "$199-$349",
+    title: "Interior Detail",
+    originalPrice: "$159-$229",
+    salePrice: "$159-$229",
     discount: "",
-    duration: "3-4 Hours",
+    duration: "2-4 Hours",
     features: [
-      { text: "Interior blowout with deep vacuuming of all surfaces and seats" },
-      { text: "Comprehensive dashboard, infotainment, plastics, and door panel cleaning" },
-      { text: "Professional carpet shampoo and stain removal treatment" },
-      { text: "Premium leather conditioning and headliner cleaning" },
-      { text: "Complete interior dressing for a factory-fresh appearance" }
+      { text: "Interior blowout with thorough vacuuming of all surfaces and seats" },
+      { text: "Complete dashboard, infotainment, plastics, foot wells, pedals, and door cleaning" },
+      { text: "Premium leather conditioning" },
+      { text: "Interior dressing for a factory-fresh appearance" },
+      { text: "All surfaces cleaned and restored to like-new condition" }
     ],
     bonuses: [
-      { text: "Sedan/Coupe", value: "$199-$229" },
-      { text: "SUV/Truck", value: "$229-$279" },
-      { text: "Suburban/Large Truck/Mini Van", value: "$279-$349" }
+      { text: "Sedan/Coupe", value: "$159-$189" },
+      { text: "SUV/Truck", value: "$189-$209" },
+      { text: "Suburban/Large Truck/Mini Van", value: "$209-$229" },
+      { text: "Optional: Carpet Conditioner", value: "$99-$149" },
+      { text: "Optional: Spot Stain Removal", value: "$49-$99" },
+      { text: "Optional: Headliner Restoration", value: "$49" },
+      { text: "Optional: Floor Mat Restoration", value: "$49-$89" }
     ],
     bgColor: "bg-[#FFAA75]"
   },
   {
     id: 3,
-    title: "Exterior Wash & Wax",
-    originalPrice: "$249-$399",
-    salePrice: "$249-$399",
+    title: "Exterior Detail",
+    originalPrice: "$99-$159",
+    salePrice: "$99-$159",
     discount: "",
-    duration: "3-4.5 Hours",
+    duration: "1.5-3 Hours",
     features: [
-      { text: "Iron decontamination and professional pre-treatment soak" },
-      { text: "Complete wheel & tire cleaning with foam and contact wash" },
-      { text: "Clay bar decontamination to remove embedded contaminants" },
-      { text: "Machine Polisher Ceramic Wax (2-3 years protection) or Ceramic Spray Wax" },
-      { text: "Professional drying and tire dressing for a showroom finish" }
+      { text: "Iron decontamination and all purpose cleaner pre-soak" },
+      { text: "Complete wheel & tire cleaning" },
+      { text: "Foam and contact wash" },
+      { text: "Professional towel dry" },
+      { text: "Showroom-quality finish" }
     ],
     bonuses: [
-      { text: "Sedan/Coupe", value: "$249-$299" },
-      { text: "SUV/Truck", value: "$299-$349" },
-      { text: "Suburban/Mini Van/Large Truck", value: "$349-$399" },
-      { text: "Optional: Polishing (Paint Correction)", value: "$150" }
+      { text: "Sedan/Coupe", value: "$99-$119" },
+      { text: "SUV/Truck", value: "$119-$139" },
+      { text: "Suburban/Mini Van/Large Truck", value: "$139-$159" },
+      { text: "Optional: Ceramic Coating", value: "$750" },
+      { text: "Optional: Machine Polisher Ceramic Wax (2-3 years)", value: "$149-$199" },
+      { text: "Optional: Ceramic Spray Wax (3-6 months)", value: "$75-$100" },
+      { text: "Optional: Trim Restoration", value: "$49-$99" },
+      { text: "Optional: Clay Bar Service", value: "$39" }
     ],
     bgColor: "bg-[#FFAA75]"
   },
   {
     id: 4,
-    title: "Luxury Detail: Interior & Exterior Perfection",
-    originalPrice: "$549-$849",
-    salePrice: "$549-$849",
+    title: "Interior & Exterior Detail",
+    originalPrice: "$279-$379",
+    salePrice: "$279-$379",
     discount: "",
-    duration: "4-6 Hours",
+    duration: "3-5 Hours",
     features: [
-      { text: "Complete interior deep cleaning with shampoo and stain removal" },
-      { text: "Premium interior conditioning for all surfaces and materials" },
-      { text: "Full exterior decontamination with clay bar treatment" },
-      { text: "Professional foam wash and thorough wheel/tire cleaning" },
-      { text: "Machine polish ceramic wax application for long-lasting shine" }
+      { text: "Interior blowout with thorough vacuuming of all surfaces and seats" },
+      { text: "Complete dashboard, infotainment, plastics, foot wells, pedals, and door cleaning" },
+      { text: "Premium leather conditioning and interior dressing" },
+      { text: "Iron decontamination with all purpose cleaner pre-soak" },
+      { text: "Wheel & tire cleaning with foam and contact wash followed by towel dry" }
     ],
     bonuses: [
-      { text: "Sedan/Coupe", value: "$549-$649" },
-      { text: "SUV/Truck", value: "$649-$749" },
-      { text: "Suburban/Mini Van/Large Truck", value: "$749-$849" }
+      { text: "Sedan/Coupe", value: "$279-$299" },
+      { text: "SUV/Truck", value: "$309-$339" },
+      { text: "Suburban/Mini Van/Large Truck", value: "$349-$379" },
+      { text: "Available with all add-on options from individual services" }
     ],
     bgColor: "bg-[#FFAA75]"
   },
