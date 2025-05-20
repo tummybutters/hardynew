@@ -13,7 +13,7 @@ export default function Home() {
         <title>Mobile Car Detailing Near Me | Full-Service Car Wash | Hardy's W&W</title>
         <meta name="description" content="Top-rated mobile car detailing at your home or office. Interior detailing, ceramic coating, and full-service car wash in Davis, Sacramento & nearby." />
         <meta name="keywords" content="Car Detailing Davis CA, Mobile Car Detailing UC Davis, Auto Detailing Woodland, Premium Mobile Detailing Yolo County, Car Wash Near UC Davis" />
-        <link rel="canonical" href="https://hardyswashnwax.com/" />
+        <link rel="canonical" href="https://www.hardyswashnwax.com" />
         
         {/* Structured Data for Local Business with speakable content */}
         <script type="application/ld+json">
