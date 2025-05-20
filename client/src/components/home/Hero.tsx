@@ -28,7 +28,7 @@ export default function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-center min-h-[calc(70vh-12rem)] lg:min-h-[calc(80vh-12rem)]">
           {/* Left side content */}
           <div className="flex flex-col justify-center max-w-4xl">
-            <h2 className={`text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading leading-tight max-w-[650px] lg:max-w-[800px] ${isMobile ? 'mobile-hero-text' : ''}`}>
+            <h2 className={`text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading leading-normal w-full lg:w-[130%] ${isMobile ? 'mobile-hero-text' : ''}`}>
               Providing Interior Detailing, Exterior Detailing, Paint Correction, Ceramic Coating, and more!
             </h2>
             
