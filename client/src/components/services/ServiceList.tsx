@@ -139,9 +139,7 @@ const services: Service[] = [
     bonuses: [
       { text: "Sedan/Coupe", value: "$549-$649" },
       { text: "SUV/Truck", value: "$649-$749" },
-      { text: "Suburban/Mini Van/Large Truck", value: "$749-$849" },
-      { text: "Optional: Carpet conditioning", value: "$100" },
-      { text: "Optional: Leather Conditioning", value: "$50" }
+      { text: "Suburban/Mini Van/Large Truck", value: "$749-$849" }
     ],
     bgColor: "bg-[#FFAA75]"
   }
