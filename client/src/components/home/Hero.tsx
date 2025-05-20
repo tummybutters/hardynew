@@ -20,7 +20,7 @@ export default function Hero() {
       />
       
       <div className="relative container mx-auto px-4 py-12 md:py-16 lg:py-24">
-        {/* Main headline - optimized for mobile */}
+        {/* Main headline - optimized for mobile and SEO */}
         <h1 className={`text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-heading leading-tight text-left mb-6 sm:mb-10 max-w-5xl ${isMobile ? 'mobile-hero-text' : ''}`}>
           Mobile Car Detailing Near Me in Davis, CA
         </h1>
@@ -28,15 +28,12 @@ export default function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-center min-h-[calc(70vh-12rem)] lg:min-h-[calc(80vh-12rem)]">
           {/* Left side content */}
           <div className="flex flex-col justify-center">
-            <h2 className={`text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-heading leading-tight ${isMobile ? 'mobile-hero-text' : ''}`}>
+            <h2 className={`text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading leading-tight ${isMobile ? 'mobile-hero-text' : ''}`}>
               Mobile Car Detailing Specialists Serving Davis, Sacramento & Surrounding Areas
             </h2>
             
-            <p className={`text-gray-100 text-lg sm:text-xl mt-4 sm:mt-6 mb-2 sm:mb-4 font-light ${isMobile ? 'mobile-hero-text' : ''}`}>
+            <p className={`text-gray-100 text-lg sm:text-xl mt-4 sm:mt-6 mb-6 font-light ${isMobile ? 'mobile-hero-text' : ''}`}>
               Interior Detailing, Paint Correction, Ceramic Coating & Full-Service Car Wash — all delivered with precision, care, and professional-grade results.
-            </p>
-            <p className="text-gray-100 text-base sm:text-lg mb-4 sm:mb-6 font-light speakable-content">
-              Proudly serving <span className="font-medium">Davis, Woodland, Dixon, Winters & West Sacramento and more.</span>
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-4 sm:mt-6">
