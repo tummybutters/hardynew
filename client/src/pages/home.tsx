@@ -1,5 +1,5 @@
 import Hero from "@/components/home/Hero";
-import ComprehensiveServices from "@/components/home/ComprehensiveServices";
+import ServicesShowcase from "@/components/home/ServicesShowcase";
 import WhyChooseUs from "@/components/home/WhyChooseUs";
 import GoogleReviews from "@/components/home/GoogleReviews";
 import CallToAction from "@/components/home/CallToAction";
@@ -73,7 +73,7 @@ export default function Home() {
       </Helmet>
       <Hero />
       <GoogleReviews />
-      <ComprehensiveServices />
+      <ServicesShowcase />
       <WhyChooseUs />
       <CallToAction />
     </>

@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
+
 // Import the new images
 import interiorImage from "@assets/interior detailing.jpg";
 import interiorImage2 from "@assets/interior detailing 2.jpg";
@@ -19,7 +20,6 @@ const services = [
     image: interiorImage,
     link: "/services",
     primary: true,
-    imagePosition: "top",
   },
   {
     id: 2,
@@ -61,11 +61,10 @@ const services = [
     image: interiorImage2,
     link: "/services",
     primary: false,
-    imagePosition: "top",
   },
 ];
 
-export default function ComprehensiveServices() {
+export default function ServicesShowcase() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   
   return (
@@ -102,7 +101,8 @@ export default function ComprehensiveServices() {
                     alt={service.title} 
                     className="w-full h-full object-cover transition-transform duration-700 ease-out"
                     style={{
-                      transform: hoveredCard === service.id ? 'scale(1.05)' : 'scale(1)'
+                      transform: hoveredCard === service.id ? 'scale(1.05)' : 'scale(1)',
+                      objectPosition: service.id === 1 ? 'center 20%' : 'center center'
                     }}
                   />
                 </div>
@@ -173,7 +173,8 @@ export default function ComprehensiveServices() {
                     alt={service.title} 
                     className="w-full h-full object-cover transition-transform duration-700 ease-out"
                     style={{
-                      transform: hoveredCard === service.id ? 'scale(1.05)' : 'scale(1)'
+                      transform: hoveredCard === service.id ? 'scale(1.05)' : 'scale(1)',
+                      objectPosition: service.id === 6 ? 'center 20%' : 'center center'
                     }}
                   />
                 </div>
