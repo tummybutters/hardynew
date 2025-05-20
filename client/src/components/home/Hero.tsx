@@ -22,14 +22,14 @@ export default function Hero() {
       <div className="relative container mx-auto px-4 py-12 md:py-16 lg:py-24">
         {/* Main headline - optimized for mobile and SEO */}
         <h1 className={`text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-heading leading-tight text-left mb-6 sm:mb-10 max-w-5xl ${isMobile ? 'mobile-hero-text' : ''}`}>
-          Mobile Car Detailing Near Me in Davis, CA
+          Mobile Car Detailing Specialists Serving Davis, Sacramento & Surrounding Areas
         </h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-center min-h-[calc(70vh-12rem)] lg:min-h-[calc(80vh-12rem)]">
           {/* Left side content */}
           <div className="flex flex-col justify-center">
             <h2 className={`text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading leading-tight ${isMobile ? 'mobile-hero-text' : ''}`}>
-              Mobile Car Detailing Specialists Serving Davis, Sacramento & Surrounding Areas
+              Professional Car Detailing Near Me in Davis, CA
             </h2>
             
             <p className={`text-gray-100 text-lg sm:text-xl mt-4 sm:mt-6 mb-6 font-light ${isMobile ? 'mobile-hero-text' : ''}`}>
