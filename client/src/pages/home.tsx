@@ -13,6 +13,18 @@ export default function Home() {
         <title>Davis Mobile Car Detailing</title>
         <meta name="description" content="Interior detailing, Exterior Detailing, Paint correction, ceramic coat, car wash, carpet conditioning, car waxing, etc." />
         <meta name="keywords" content="Car Detailing Davis CA, Mobile Car Detailing UC Davis, Auto Detailing Woodland, Premium Mobile Detailing Yolo County, Car Wash Near UC Davis" />
+        
+        {/* Open Graph Meta Tags */}
+        <meta property="og:title" content="Davis Mobile Car Detailing" />
+        <meta property="og:description" content="Interior detailing, Exterior Detailing, Paint correction, ceramic coat, car wash, carpet conditioning, car waxing, etc." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.hardyswashnwax.com" />
+        
+        {/* Twitter Meta Tags */}
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Davis Mobile Car Detailing" />
+        <meta name="twitter:description" content="Interior detailing, Exterior Detailing, Paint correction, ceramic coat, car wash, carpet conditioning, car waxing, etc." />
+        
         <link rel="canonical" href="https://www.hardyswashnwax.com" />
         
         {/* Structured Data for Local Business with speakable content */}
