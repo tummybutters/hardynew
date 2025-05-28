@@ -9,7 +9,7 @@ export default function DavisCarDetailing() {
     <>
       <Helmet>
         <title>Mobile Car Detailing in Davis | First-Class Service at Home</title>
-        <meta name="description" content="Return to perfection in Davis. Premium hand wash and full service detailing, right in your driveway. Book in 60 seconds." />
+        <meta name="description" content="Interior detailing, Exterior Detailing, Paint correction, ceramic coat, car wash, carpet conditioning, car waxing, etc." />
         <link rel="canonical" href="https://www.hardyswashnwax.com/davis-car-detailing" />
         
         {/* Structured Data for Local Business */}

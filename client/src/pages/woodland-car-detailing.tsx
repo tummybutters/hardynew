@@ -9,7 +9,7 @@ export default function WoodlandCarDetailing() {
     <>
       <Helmet>
         <title>Woodland Mobile Car Detailing | Premium at Your Doorstep</title>
-        <meta name="description" content="First-class car wash and interior detailing in Woodland. Showroom results with mobile service convenience. Book in 60 seconds—we come to you." />
+        <meta name="description" content="Interior detailing, Exterior Detailing, Paint correction, ceramic coat, car wash, carpet conditioning, car waxing, etc." />
         <meta name="keywords" content="Woodland Mobile Car Detailing, Premium Doorstep Car Detailing, Car Detailing Woodland CA, Mobile Car Detailing Spring Lake, Auto Detailing Yolo County, Car Wash Woodland" />
         <link rel="canonical" href="https://www.hardyswashnwax.com/woodland-car-detailing" />
         
