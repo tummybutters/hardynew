@@ -7,6 +7,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Serve static files from public directory (favicon, images, etc.)
+app.use(express.static('public'));
+
 // Canonicalization middleware: redirect non-www to www
 app.use((req, res, next) => {
   const host = req.header('host');
