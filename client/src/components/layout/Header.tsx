@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import hardyLogoPath from "@assets/hardy logo-Photoroom.png";
 import CallOption from "../home/CallOption";
-import AskIan from "@/components/ui/ask-ian-chat";
+import TestChatButton from "@/components/ui/test-chat-button";
 import "../ui/custom-nav-button.css";
 
 const navLinks = [
@@ -53,8 +53,8 @@ export default function Header() {
                 </button>
               </Link>
             ))}
-            {/* Ask Ian chatbot */}
-            <AskIan variant="header" className="ml-2" />
+            {/* Test Chat Button */}
+            <TestChatButton />
             {/* Call button in header */}
             <CallOption 
               phone="19497340201" 
@@ -85,10 +85,10 @@ export default function Header() {
                   </Link>
                 ))}
                 
-                {/* Ask Ian chatbot for mobile */}
+                {/* Test Chat for mobile */}
                 <div className="mt-4 pt-4 border-t border-black/10">
                   <div className="text-center mb-3">
-                    <AskIan variant="header" className="mx-auto justify-center" />
+                    <TestChatButton />
                   </div>
                 </div>
                 
