@@ -110,6 +110,13 @@ The application follows a modern full-stack architecture with clear separation o
 
 ```
 Changelog:
+- July 02, 2025. Enhanced Ian's AI system prompt with improved personality constraints:
+  * Responses limited to 4 short, high-information sentences
+  * Better sentence structure variation to avoid repetition
+  * Refined tone and dry humor examples
+  * Updated guardrails for off-topic conversations
+  * More natural conversational flow while maintaining professional edge
+- July 02, 2025. Successfully integrated Gemini AI for Ask Ian chatbot
 - July 02, 2025. Initial setup
 ```
 
