@@ -11,8 +11,8 @@ const ContactInfo = () => {
           <div>
             <h3 className="font-medium">Phone</h3>
             <p className="text-gray-700">
-              <a href="tel:+17147134937" className="hover:text-orange-500 transition-colors">
-                (714) 713-4937
+              <a href="tel:+19497340201" className="hover:text-orange-500 transition-colors">
+                (949) 734-0201
               </a>
             </p>
           </div>
@@ -23,8 +23,8 @@ const ContactInfo = () => {
           <div>
             <h3 className="font-medium">Email</h3>
             <p className="text-gray-700">
-              <a href="mailto:info@hardyswashnwax.com" className="hover:text-orange-500 transition-colors">
-                info@hardyswashnwax.com
+              <a href="mailto:hardyswashnwax@gmail.com" className="hover:text-orange-500 transition-colors">
+                hardyswashnwax@gmail.com
               </a>
             </p>
           </div>
@@ -34,10 +34,10 @@ const ContactInfo = () => {
           <MapPin className="h-5 w-5 text-red-500 mt-1 mr-3" />
           <div>
             <h3 className="font-medium">Service Area</h3>
-            <p className="text-gray-700">Davis, CA | Woodland, CA | Yolo County</p>
+            <p className="text-gray-700">Sacramento, CA | Davis, CA | Woodland, CA</p>
             <p className="text-sm text-gray-500 mt-1">
-              We come to you! Our mobile detailing service travels throughout Davis, Woodland, Dixon, Winters, 
-              West Sacramento, and all of Yolo County within 30 minutes of our base.
+              We come to you! Our mobile detailing service travels throughout Sacramento, Davis, Woodland, Dixon, Winters, 
+              Elk Grove, and surrounding areas within 30 minutes of our base.
             </p>
           </div>
         </div>
@@ -46,9 +46,10 @@ const ContactInfo = () => {
           <Clock className="h-5 w-5 text-red-500 mt-1 mr-3" />
           <div>
             <h3 className="font-medium">Business Hours</h3>
-            <p className="text-gray-700">Monday - Friday: 8:00 AM - 6:00 PM</p>
-            <p className="text-gray-700">Saturday: 9:00 AM - 5:00 PM</p>
-            <p className="text-gray-700">Sunday: Closed</p>
+            <p className="text-gray-700">24/7 - By Appointment Only</p>
+            <p className="text-sm text-gray-500 mt-1">
+              We're available around the clock to schedule your detailing service at your convenience.
+            </p>
           </div>
         </div>
         

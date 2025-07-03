@@ -7,9 +7,9 @@ export default function Contact() {
   return (
     <>
       <Helmet>
-        <title>Contact Mobile Car Detailing in Davis & Woodland | Hardys Wash N' Wax</title>
-        <meta name="description" content="Get in touch with Hardys Wash N' Wax for premium mobile car detailing services in Davis, Woodland and throughout Yolo County. Contact us for quotes, custom services, or any questions about our mobile detailing." />
-        <meta name="keywords" content="Contact Car Detailer Davis CA, Mobile Car Detailing Quote Woodland, Auto Detailing Questions UC Davis, Premium Car Wash Contact Yolo County" />
+        <title>Contact Mobile Car Detailing in Sacramento & Davis | Hardys Wash N' Wax</title>
+        <meta name="description" content="Get in touch with Hardys Wash N' Wax for premium mobile car detailing services in Sacramento, Davis, Woodland and surrounding areas. Contact us for quotes, custom services, or any questions about our mobile detailing." />
+        <meta name="keywords" content="Contact Car Detailer Sacramento CA, Mobile Car Detailing Quote Davis, Auto Detailing Questions Woodland, Premium Car Wash Contact Sacramento County" />
         <link rel="canonical" href="https://www.hardyswashnwax.com/contact" />
         
         {/* Structured Data for Contact Page */}
@@ -18,23 +18,25 @@ export default function Contact() {
             "@context": "https://schema.org",
             "@type": "ContactPage",
             "name": "Contact Hardys Wash N' Wax",
-            "description": "Contact page for Hardys Wash N' Wax mobile car detailing services in Davis, Woodland and Yolo County.",
+            "description": "Contact page for Hardys Wash N' Wax mobile car detailing services in Sacramento, Davis, Woodland and surrounding areas.",
             "mainEntity": {
               "@type": "LocalBusiness",
               "name": "Hardys Wash N' Wax",
               "telephone": "+19497340201",
-              "email": "info@hardyswashnwax.com",
+              "email": "hardyswashnwax@gmail.com",
               "address": {
                 "@type": "PostalAddress",
-                "addressLocality": "Davis",
+                "addressLocality": "Sacramento",
                 "addressRegion": "CA",
-                "postalCode": "95616",
+                "postalCode": "95814",
                 "addressCountry": "US"
               },
-              "openingHours": "Mo-Sa 8:00-18:00",
+              "openingHours": "24/7",
               "areaServed": [
+                { "@type": "City", "name": "Sacramento, CA" },
                 { "@type": "City", "name": "Davis, CA" },
                 { "@type": "City", "name": "Woodland, CA" },
+                { "@type": "City", "name": "Elk Grove, CA" },
                 { "@type": "City", "name": "Dixon, CA" },
                 { "@type": "City", "name": "Winters, CA" },
                 { "@type": "City", "name": "West Sacramento, CA" }
