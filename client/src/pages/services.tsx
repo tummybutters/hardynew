@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { HeroButton } from "@/components/ui/hero-button";
 import { ChevronRight, Sparkles, Shield, Paintbrush, Droplets, Car, Star } from "lucide-react";
+import interiorDetailImage from "@assets/interior detailing_1755240294292.jpg";
 
 // Service gallery data with detailed descriptions and visual information
 const serviceGallery = [
@@ -39,7 +40,8 @@ const serviceGallery = [
       "Door panels & cup holders",
       "Air freshener application"
     ],
-    color: "from-purple-500 to-pink-500"
+    color: "from-purple-500 to-pink-500",
+    image: interiorDetailImage
   },
   {
     id: "exterior-detail",
@@ -255,9 +257,19 @@ export default function Services() {
 
                   {/* Service Image & CTA */}
                   <div className="lg:pl-8">
-                    <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg p-8 mb-6 text-center">
-                      <div className="text-6xl text-gray-400 mb-4">🚗</div>
-                      <p className="text-gray-600">Professional service visualization coming soon</p>
+                    <div className="rounded-lg overflow-hidden mb-6 shadow-lg">
+                      {selectedService.image ? (
+                        <img
+                          src={selectedService.image}
+                          alt={`${selectedService.title} - Professional car detailing service`}
+                          className="w-full h-64 object-cover"
+                        />
+                      ) : (
+                        <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg p-8 text-center">
+                          <div className="text-6xl text-gray-400 mb-4">🚗</div>
+                          <p className="text-gray-600">Professional service visualization coming soon</p>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="space-y-4">
