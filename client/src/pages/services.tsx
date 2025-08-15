@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { HeroButton } from "@/components/ui/hero-button";
 import { ChevronRight, Sparkles, Shield, Paintbrush, Droplets, Car, Star } from "lucide-react";
 import interiorDetailImage from "@assets/interior detailing_1755240294292.jpg";
+import acuraImage from "@assets/acura_1755241438565.jpg";
 
 // Service gallery data with detailed descriptions and visual information
 const serviceGallery = [
@@ -41,7 +42,15 @@ const serviceGallery = [
       "Air freshener application"
     ],
     color: "from-purple-500 to-pink-500",
-    image: interiorDetailImage
+    portfolioJobs: [
+      {
+        title: "Mercedes AMG",
+        description: "Interior Detail with Leather Conditioning",
+        image: interiorDetailImage,
+        services: ["Interior Detail", "Leather Conditioning"],
+        condition: "Premium interior restoration"
+      }
+    ]
   },
   {
     id: "exterior-detail",
@@ -59,7 +68,16 @@ const serviceGallery = [
       "High-quality wax protection",
       "Wheel & tire detailing"
     ],
-    color: "from-green-500 to-emerald-500"
+    color: "from-green-500 to-emerald-500",
+    portfolioJobs: [
+      {
+        title: "Acura A-Spec",
+        description: "Exterior Detail with Wash & Ceramic Spray Wax",
+        image: acuraImage,
+        services: ["Exterior Detail", "Ceramic Spray Wax"],
+        condition: "Maintaining premium finish"
+      }
+    ]
   },
   {
     id: "paint-correction",
@@ -233,113 +251,50 @@ export default function Services() {
             {/* Portfolio Grid */}
             <div className="bg-white border-2 border-black border-t-0 rounded-b-xl shadow-[8px_8px_0_0_#000] p-6 lg:p-8">
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Job Example 1 */}
-                <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
-                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-4xl text-gray-400 mb-2">📸</div>
-                      <p className="text-sm text-gray-500">Before/After Photos</p>
+                {selectedService.portfolioJobs ? (
+                  selectedService.portfolioJobs.map((job, index) => (
+                    <div key={index} className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
+                      <div className="aspect-video overflow-hidden">
+                        <img
+                          src={job.image}
+                          alt={`${job.title} - ${job.description}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-bold text-gray-900 mb-1">{job.title}</h3>
+                        <p className="text-sm text-gray-600 mb-2">{job.description}</p>
+                        <div className="flex flex-wrap gap-1 text-xs text-gray-500">
+                          {job.services.map((service, serviceIndex) => (
+                            <span key={serviceIndex} className="bg-[#FFD7B5] px-2 py-1 rounded">
+                              {service}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
-                    <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
-                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
+                  ))
+                ) : (
+                  // Placeholder cards for services without portfolio jobs yet
+                  Array.from({ length: 6 }, (_, index) => (
+                    <div key={index} className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
+                      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-4xl text-gray-400 mb-2">📸</div>
+                          <p className="text-sm text-gray-500">Portfolio Example Coming Soon</p>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
+                        <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
+                          <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* Job Example 2 */}
-                <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
-                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-4xl text-gray-400 mb-2">📸</div>
-                      <p className="text-sm text-gray-500">Before/After Photos</p>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
-                    <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
-                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Job Example 3 */}
-                <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
-                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-4xl text-gray-400 mb-2">📸</div>
-                      <p className="text-sm text-gray-500">Before/After Photos</p>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
-                    <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
-                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Job Example 4 */}
-                <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
-                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-4xl text-gray-400 mb-2">📸</div>
-                      <p className="text-sm text-gray-500">Before/After Photos</p>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
-                    <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
-                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Job Example 5 */}
-                <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
-                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-4xl text-gray-400 mb-2">📸</div>
-                      <p className="text-sm text-gray-500">Before/After Photos</p>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
-                    <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
-                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Job Example 6 */}
-                <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
-                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-4xl text-gray-400 mb-2">📸</div>
-                      <p className="text-sm text-gray-500">Before/After Photos</p>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
-                    <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
-                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
-                    </div>
-                  </div>
-                </div>
+                  ))
+                )}
               </div>
 
               {/* Call to Action */}
