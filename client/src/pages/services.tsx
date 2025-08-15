@@ -5,6 +5,10 @@ import { HeroButton } from "@/components/ui/hero-button";
 import { ChevronRight, Sparkles, Shield, Paintbrush, Droplets, Car, Star } from "lucide-react";
 import interiorDetailImage from "@assets/interior detailing_1755240294292.jpg";
 import acuraImage from "@assets/acura_1755241438565.jpg";
+import porschePanameraImage from "@assets/int_1755241550770.jpg";
+import porsche718Image from "@assets/718_1755241627534.jpg";
+import petHairBeforeImage from "@assets/hair before_1755241679282.jpg";
+import petHairAfterImage from "@assets/hair after_1755241684573.jpg";
 
 // Service gallery data with detailed descriptions and visual information
 const serviceGallery = [
@@ -49,6 +53,34 @@ const serviceGallery = [
         image: interiorDetailImage,
         services: ["Interior Detail", "Leather Conditioning"],
         condition: "Premium interior restoration"
+      },
+      {
+        title: "Porsche Panamera",
+        description: "Interior Detail - Leather Conditioner & Carpet Shampoo",
+        image: porschePanameraImage,
+        services: ["Interior Detail", "Leather Conditioning", "Carpet Shampoo"],
+        condition: "Luxury interior maintenance"
+      },
+      {
+        title: "Porsche Spyder 718",
+        description: "Interior Detail Before and After",
+        image: porsche718Image,
+        services: ["Interior Detail", "Deep Clean"],
+        condition: "Complete interior restoration"
+      },
+      {
+        title: "Pet Hair Removal - Before",
+        description: "Interior Detail with Pet Hair Removal",
+        image: petHairBeforeImage,
+        services: ["Interior Detail", "Pet Hair Removal"],
+        condition: "Heavy pet hair contamination"
+      },
+      {
+        title: "Pet Hair Removal - After",
+        description: "Interior Detail with Pet Hair Removal",
+        image: petHairAfterImage,
+        services: ["Interior Detail", "Pet Hair Removal"],
+        condition: "Complete hair removal & restoration"
       }
     ]
   },
