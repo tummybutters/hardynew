@@ -209,89 +209,149 @@ export default function Services() {
             ))}
           </div>
 
-          {/* Selected Service Display */}
-          <div className="max-w-6xl mx-auto">
-            <div className="bg-white rounded-xl shadow-[8px_8px_0_0_#000] border-2 border-black overflow-hidden neo-brutalist-card">
-              {/* Service Header */}
-              <div className={`bg-gradient-to-r ${selectedService.color} p-6 text-white`}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-white/20 rounded-lg">
-                      {selectedService.icon}
-                    </div>
-                    <div>
-                      <h2 className="text-3xl font-bold font-heading">{selectedService.title}</h2>
-                      <p className="text-lg text-white/90">{selectedService.subtitle}</p>
-                    </div>
+          {/* Portfolio Gallery for Selected Service */}
+          <div className="max-w-7xl mx-auto">
+            {/* Service Header */}
+            <div className={`bg-gradient-to-r ${selectedService.color} p-6 text-white rounded-t-xl`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 rounded-lg">
+                    {selectedService.icon}
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">{selectedService.price}</div>
-                    <div className="text-sm text-white/80">{selectedService.duration}</div>
+                  <div>
+                    <h2 className="text-3xl font-bold font-heading">{selectedService.title}</h2>
+                    <p className="text-lg text-white/90">{selectedService.subtitle}</p>
                   </div>
                 </div>
-                <p className="text-lg text-white/95 leading-relaxed">{selectedService.description}</p>
+                <div className="text-right">
+                  <div className="text-2xl font-bold">{selectedService.price}</div>
+                  <div className="text-sm text-white/80">{selectedService.duration}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Portfolio Grid */}
+            <div className="bg-white border-2 border-black border-t-0 rounded-b-xl shadow-[8px_8px_0_0_#000] p-6 lg:p-8">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Job Example 1 */}
+                <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-4xl text-gray-400 mb-2">📸</div>
+                      <p className="text-sm text-gray-500">Before/After Photos</p>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
+                    <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
+                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Job Example 2 */}
+                <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-4xl text-gray-400 mb-2">📸</div>
+                      <p className="text-sm text-gray-500">Before/After Photos</p>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
+                    <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
+                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Job Example 3 */}
+                <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-4xl text-gray-400 mb-2">📸</div>
+                      <p className="text-sm text-gray-500">Before/After Photos</p>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
+                    <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
+                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Job Example 4 */}
+                <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-4xl text-gray-400 mb-2">📸</div>
+                      <p className="text-sm text-gray-500">Before/After Photos</p>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
+                    <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
+                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Job Example 5 */}
+                <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-4xl text-gray-400 mb-2">📸</div>
+                      <p className="text-sm text-gray-500">Before/After Photos</p>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
+                    <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
+                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Job Example 6 */}
+                <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-4xl text-gray-400 mb-2">📸</div>
+                      <p className="text-sm text-gray-500">Before/After Photos</p>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-900 mb-1">[Car Make/Model]</h3>
+                    <p className="text-sm text-gray-600 mb-2">[Specific service description]</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Service type]</span>
+                      <span className="bg-[#FFD7B5] px-2 py-1 rounded">[Add-on]</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Service Content */}
-              <div className="p-6 lg:p-8">
-                <div className="grid lg:grid-cols-2 gap-8 items-start">
-                  {/* What's Included */}
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                      <div className="w-2 h-2 bg-[#EE432C] rounded-full"></div>
-                      What's Included
-                    </h3>
-                    <div className="space-y-3">
-                      {selectedService.includes.map((item, index) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <div className="w-5 h-5 bg-gradient-to-r from-[#EE432C] to-[#FFB375] rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
-                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <span className="text-gray-700 leading-relaxed">{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Service Image & CTA */}
-                  <div className="lg:pl-8">
-                    <div className="rounded-lg overflow-hidden mb-6 shadow-lg">
-                      {selectedService.image ? (
-                        <img
-                          src={selectedService.image}
-                          alt={`${selectedService.title} - Professional car detailing service`}
-                          className="w-full h-64 object-cover"
-                        />
-                      ) : (
-                        <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg p-8 text-center">
-                          <div className="text-6xl text-gray-400 mb-4">🚗</div>
-                          <p className="text-gray-600">Professional service visualization coming soon</p>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <Link href="/booking">
-                        <HeroButton className="w-full text-lg py-4">
-                          Book This Service
-                        </HeroButton>
-                      </Link>
-                      <Link href="/contact">
-                        <HeroButton variant="secondary" className="w-full text-lg py-4">
-                          Ask Questions
-                        </HeroButton>
-                      </Link>
-                    </div>
-                    
-                    <div className="mt-6 p-4 bg-[#FFD7B5]/30 rounded-lg">
-                      <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <Sparkles className="w-4 h-4 text-[#EE432C]" />
-                        <span className="font-medium">All services include free estimates and satisfaction guarantee</span>
-                      </div>
-                    </div>
-                  </div>
+              {/* Call to Action */}
+              <div className="mt-8 text-center border-t pt-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Ready to Get Your Car Detailed?</h3>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+                  <Link href="/booking">
+                    <HeroButton className="w-full sm:w-auto">Book This Service</HeroButton>
+                  </Link>
+                  <Link href="/contact">
+                    <HeroButton variant="secondary" className="w-full sm:w-auto">Ask Questions</HeroButton>
+                  </Link>
                 </div>
               </div>
             </div>
