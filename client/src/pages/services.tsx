@@ -1,19 +1,129 @@
-import ServicesHero from "@/components/services/ServicesHero";
-import ServiceList from "@/components/services/ServiceList";
-import ServiceProcess from "@/components/services/ServiceProcess";
-import FAQs from "@/components/services/FAQs";
-import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
 import { Helmet } from "react-helmet";
-import { ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { Link } from "wouter";
+import { HeroButton } from "@/components/ui/hero-button";
+import { ChevronRight, Sparkles, Shield, Paintbrush, Droplets, Car, Star } from "lucide-react";
+
+// Service gallery data with detailed descriptions and visual information
+const serviceGallery = [
+  {
+    id: "express-detail",
+    title: "Express Detail",
+    subtitle: "Quick & Professional",
+    price: "$149-199",
+    duration: "1.5-2.5 hours",
+    icon: <Sparkles className="w-8 h-8" />,
+    description: "Perfect for busy schedules. A comprehensive quick detail that refreshes your vehicle's appearance.",
+    includes: [
+      "Exterior hand wash & dry",
+      "Interior vacuum & wipe down", 
+      "Windows cleaned inside & out",
+      "Tire shine application",
+      "Dashboard & trim conditioning"
+    ],
+    color: "from-blue-500 to-cyan-500"
+  },
+  {
+    id: "interior-detail",
+    title: "Interior Detail",
+    subtitle: "Deep Clean & Restore",
+    price: "$199-299",
+    duration: "2-3 hours",
+    icon: <Car className="w-8 h-8" />,
+    description: "Complete interior transformation. Deep cleaning, stain removal, and protection for all surfaces.",
+    includes: [
+      "Deep vacuum (seats, carpets, crevices)",
+      "Steam cleaning & stain removal",
+      "Leather/fabric conditioning",
+      "Dashboard & console detailing",
+      "Door panels & cup holders",
+      "Air freshener application"
+    ],
+    color: "from-purple-500 to-pink-500"
+  },
+  {
+    id: "exterior-detail",
+    title: "Exterior Detail",
+    subtitle: "Shine & Protection",
+    price: "$249-349",
+    duration: "2.5-3.5 hours",
+    icon: <Droplets className="w-8 h-8" />,
+    description: "Restore your vehicle's exterior to showroom condition with professional washing, polishing, and protection.",
+    includes: [
+      "Pre-wash & foam treatment",
+      "Hand wash with premium soap",
+      "Clay bar decontamination",
+      "Machine polish application",
+      "High-quality wax protection",
+      "Wheel & tire detailing"
+    ],
+    color: "from-green-500 to-emerald-500"
+  },
+  {
+    id: "paint-correction",
+    title: "Paint Correction",
+    subtitle: "Remove Swirls & Scratches",
+    price: "$399-599",
+    duration: "4-6 hours",
+    icon: <Paintbrush className="w-8 h-8" />,
+    description: "Professional paint restoration to remove swirl marks, scratches, and oxidation for a flawless finish.",
+    includes: [
+      "Paint depth measurement",
+      "Multi-stage machine polishing",
+      "Scratch & swirl removal",
+      "Paint defect correction",
+      "High-grade polish application",
+      "Paint protection sealant"
+    ],
+    color: "from-orange-500 to-red-500"
+  },
+  {
+    id: "ceramic-coating",
+    title: "Ceramic Coating",
+    subtitle: "Ultimate Protection",
+    price: "$599-899",
+    duration: "6-8 hours",
+    icon: <Shield className="w-8 h-8" />,
+    description: "The ultimate paint protection. Long-lasting ceramic coating provides years of protection and enhanced gloss.",
+    includes: [
+      "Complete paint decontamination",
+      "Paint correction preparation",
+      "Professional ceramic coating application",
+      "Hydrophobic protection layer",
+      "UV & chemical resistance",
+      "5-year coating warranty"
+    ],
+    color: "from-violet-500 to-purple-500"
+  },
+  {
+    id: "full-detail",
+    title: "Full Detail Package",
+    subtitle: "Complete Transformation",
+    price: "$399-499",
+    duration: "4-5 hours",
+    icon: <Star className="w-8 h-8" />,
+    description: "The complete package. Interior and exterior detailing for a total vehicle transformation.",
+    includes: [
+      "Everything from Interior Detail",
+      "Everything from Exterior Detail", 
+      "Engine bay cleaning",
+      "Trunk/cargo area detail",
+      "Chrome & trim polishing",
+      "Comprehensive vehicle inspection"
+    ],
+    color: "from-yellow-500 to-orange-500"
+  }
+];
 
 export default function Services() {
+  const [selectedService, setSelectedService] = useState(serviceGallery[0]);
+
   return (
     <>
       <Helmet>
-        <title>Mobile Car Detailing Services in Davis, Woodland & Yolo County | Hardys Wash N' Wax</title>
-        <meta name="description" content="Comprehensive mobile car detailing services in Davis, Woodland, and throughout Yolo County. Premium express detail, interior cleaning, exterior wash & wax, ceramic coating, and paint correction at your location." />
-        <meta name="keywords" content="Car Detailing Services Davis CA, Mobile Car Wash Woodland CA, Auto Detail Packages UC Davis, Ceramic Coating Yolo County, Express Detail Near Me" />
+        <title>Premium Mobile Car Detailing Services | Sacramento, Davis & Woodland | Hardys Wash N' Wax</title>
+        <meta name="description" content="Explore our premium mobile car detailing services in Sacramento, Davis, and Woodland. From express details to ceramic coating - see exactly what's included in each service package." />
+        <meta name="keywords" content="Car Detailing Services Sacramento CA, Mobile Car Wash Davis CA, Auto Detail Packages Woodland, Ceramic Coating Sacramento County, Paint Correction Near Me" />
         <link rel="canonical" href="https://www.hardyswashnwax.com/services" />
         
         {/* Structured Data for Service */}
@@ -28,16 +138,18 @@ export default function Services() {
               "image": "https://hardyswashnwax.com/logo.png",
               "address": {
                 "@type": "PostalAddress",
-                "addressLocality": "Davis",
+                "addressLocality": "Sacramento",
                 "addressRegion": "CA",
-                "postalCode": "95616",
+                "postalCode": "95814",
                 "addressCountry": "US"
               },
               "telephone": "+19497340201"
             },
             "areaServed": [
+              { "@type": "City", "name": "Sacramento, CA" },
               { "@type": "City", "name": "Davis, CA" },
               { "@type": "City", "name": "Woodland, CA" },
+              { "@type": "City", "name": "Elk Grove, CA" },
               { "@type": "City", "name": "Dixon, CA" },
               { "@type": "City", "name": "Winters, CA" },
               { "@type": "City", "name": "West Sacramento, CA" }
@@ -45,75 +157,147 @@ export default function Services() {
             "serviceType": "Mobile Car Detailing",
             "offers": {
               "@type": "AggregateOffer",
-              "lowPrice": "99",
-              "highPrice": "499",
+              "lowPrice": "149",
+              "highPrice": "899",
               "priceCurrency": "USD",
-              "offerCount": "5"
+              "offerCount": "6"
             }
           })}
         </script>
       </Helmet>
       
-      <ServicesHero />
-      <ServiceList />
-      
-      {/* Specialized Services Section */}
-      <div className="bg-white py-16">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-br from-[#F3F4E6] to-[#FFD7B5] py-16 lg:py-24">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold font-heading text-gray-900 mb-4">Specialized Detailing Services</h2>
-            <p className="text-gray-700 max-w-xl mx-auto">
-              Discover our specialized services tailored to address specific needs for your vehicle's appearance and protection.
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-heading text-gray-900 mb-6">
+              Premium Car Detailing Services
+            </h1>
+            <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
+              Explore our complete range of mobile detailing services. Click any service below to see exactly what's included and discover the perfect package for your vehicle.
             </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <div className="bg-[#FFD7B5]/30 rounded-lg p-6 shadow-md">
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Interior Detailing</h3>
-              <p className="text-gray-700 mb-4">
-                Comprehensive interior cleaning, stain removal, and protection to refresh your vehicle's cabin and restore that new car feel.
-              </p>
-            </div>
-            
-            <div className="bg-[#FFD7B5]/30 rounded-lg p-6 shadow-md">
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Exterior Detailing</h3>
-              <p className="text-gray-700 mb-4">
-                Professional washing, waxing, and exterior protection to restore your vehicle's showroom shine and preserve its finish.
-              </p>
-            </div>
-            
-            <div className="bg-[#FFD7B5]/30 rounded-lg p-6 shadow-md">
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Ceramic Coating</h3>
-              <p className="text-gray-700 mb-4">
-                Long-lasting paint protection with our professional ceramic coating services for superior gloss and durability.
-              </p>
-            </div>
-            
-            <div className="bg-[#FFD7B5]/30 rounded-lg p-6 shadow-md">
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Paint Correction</h3>
-              <p className="text-gray-700 mb-4">
-                Remove scratches, swirl marks, and imperfections to restore your vehicle's paint to a perfect, mirror-like finish.
-              </p>
-            </div>
           </div>
         </div>
       </div>
-      
-      <ServiceProcess />
-      <FAQs />
-      
-      {/* CTA Section */}
-      <div className="bg-primary py-16">
+
+      {/* Interactive Service Gallery */}
+      <div className="bg-white py-16 lg:py-24">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="md:w-2/3 mb-8 md:mb-0">
-              <h2 className="text-3xl font-bold font-heading text-white mb-2">Ready to schedule your service?</h2>
-              <p className="text-gray-100/90 text-lg">Choose the perfect package for your vehicle and book your appointment today.</p>
+          {/* Service Selection Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
+            {serviceGallery.map((service) => (
+              <button
+                key={service.id}
+                onClick={() => setSelectedService(service)}
+                className={`p-4 rounded-lg border-2 transition-all duration-300 hover:scale-105 ${
+                  selectedService.id === service.id
+                    ? 'border-[#EE432C] bg-gradient-to-r from-[#EE432C] to-[#FFB375] text-white shadow-lg'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-[#FFB375] hover:bg-[#FFD7B5]/20'
+                }`}
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <div className={`${selectedService.id === service.id ? 'text-white' : 'text-[#EE432C]'}`}>
+                    {service.icon}
+                  </div>
+                  <span className="text-sm font-semibold text-center leading-tight">
+                    {service.title}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Selected Service Display */}
+          <div className="max-w-6xl mx-auto">
+            <div className="bg-white rounded-xl shadow-[8px_8px_0_0_#000] border-2 border-black overflow-hidden neo-brutalist-card">
+              {/* Service Header */}
+              <div className={`bg-gradient-to-r ${selectedService.color} p-6 text-white`}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-white/20 rounded-lg">
+                      {selectedService.icon}
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-bold font-heading">{selectedService.title}</h2>
+                      <p className="text-lg text-white/90">{selectedService.subtitle}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">{selectedService.price}</div>
+                    <div className="text-sm text-white/80">{selectedService.duration}</div>
+                  </div>
+                </div>
+                <p className="text-lg text-white/95 leading-relaxed">{selectedService.description}</p>
+              </div>
+
+              {/* Service Content */}
+              <div className="p-6 lg:p-8">
+                <div className="grid lg:grid-cols-2 gap-8 items-start">
+                  {/* What's Included */}
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                      <div className="w-2 h-2 bg-[#EE432C] rounded-full"></div>
+                      What's Included
+                    </h3>
+                    <div className="space-y-3">
+                      {selectedService.includes.map((item, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                          <div className="w-5 h-5 bg-gradient-to-r from-[#EE432C] to-[#FFB375] rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <span className="text-gray-700 leading-relaxed">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Service Image & CTA */}
+                  <div className="lg:pl-8">
+                    <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg p-8 mb-6 text-center">
+                      <div className="text-6xl text-gray-400 mb-4">🚗</div>
+                      <p className="text-gray-600">Professional service visualization coming soon</p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <Link href="/booking">
+                        <HeroButton className="w-full text-lg py-4">
+                          Book This Service
+                        </HeroButton>
+                      </Link>
+                      <Link href="/contact">
+                        <HeroButton variant="secondary" className="w-full text-lg py-4">
+                          Ask Questions
+                        </HeroButton>
+                      </Link>
+                    </div>
+                    
+                    <div className="mt-6 p-4 bg-[#FFD7B5]/30 rounded-lg">
+                      <div className="flex items-center gap-2 text-sm text-gray-700">
+                        <Sparkles className="w-4 h-4 text-[#EE432C]" />
+                        <span className="font-medium">All services include free estimates and satisfaction guarantee</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <Button asChild variant="secondary" size="lg">
-                <Link href="/booking">Book Now</Link>
-              </Button>
+          </div>
+
+          {/* Quick Action Section */}
+          <div className="mt-16 text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Get Started?</h3>
+            <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+              Not sure which service is right for you? Our team is ready to help you choose the perfect detailing package for your vehicle's needs.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+              <Link href="/booking">
+                <HeroButton className="w-full sm:w-auto">Book Now</HeroButton>
+              </Link>
+              <Link href="/contact">
+                <HeroButton variant="secondary" className="w-full sm:w-auto">Get Quote</HeroButton>
+              </Link>
             </div>
           </div>
         </div>
