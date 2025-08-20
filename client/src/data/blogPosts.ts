@@ -3,6 +3,142 @@ import { BlogPost } from "@/types/blogTypes";
 // Sample blog posts data
 export const blogPosts: BlogPost[] = [
   {
+    slug: "post-beach-car-care-orange-county",
+    title: "Post-Beach Car Care: Remove Salt, Sand & Prevent Corrosion After a SoCal Beach Day",
+    metaDescription: "Just got back from the beach in SoCal? Learn the fast checklist to remove salt and sand, what pros will do that a DIY rinse won't, and affordable post-beach detailing packages you can book today.",
+    date: "2025-08-23",
+    excerpt: "Nothing kills a beach day buzz faster than realizing your car is crusted in salt and sand. Learn the immediate checklist to prevent damage and professional services that stop long-term corrosion.",
+    coverImage: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1470&auto=format&fit=crop",
+    readTime: 5,
+    categories: ["Beach Care", "Orange County", "Salt Protection"],
+    serviceLink: "/orange-county",
+    content: [
+      {
+        type: "paragraph",
+        content: "Nothing kills a beach day buzz faster than realizing your car is crusted in salt and sand. Salt accelerates corrosion, sand grinds paint, and moisture plus sand in drains causes long-term problems. This guide gives you a quick step-by-step checklist for what to do immediately after a beach trip, what a professional detailer removes that DIY can't, and straightforward package options so you can book a post-beach cleanup and get back to cruising the coast."
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Immediate Checklist: What to Do as Soon as You Get Off the Sand"
+      },
+      {
+        type: "paragraph",
+        content: "Do these first to minimize damage before you can get to a professional detailer:"
+      },
+      {
+        type: "list",
+        items: [
+          "Rinse off visible salt and sand from exterior and undercarriage as soon as possible - a garden hose or touchless rinse is fine for now",
+          "Avoid automatic car washes with old brushes - they trap sand and cause swirl marks",
+          "Remove beach towels, sand-filled shoes, and loose debris from interior - shake mats outside the car",
+          "Check wheel wells and brake area for sand build-up - if brakes feel gritty, don't drive aggressively until cleaned",
+          "Dry door sills and trunk seals with microfiber towel to keep salt from sitting in crevices",
+          "For soft tops: brush off sand and let air-dry before folding - never fold a damp top"
+        ]
+      },
+      {
+        type: "paragraph",
+        content: "Schedule a professional post-beach detail within 24 to 72 hours depending on severity."
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "What a Professional Detailer Will Remove That a DIY Rinse Won't"
+      },
+      {
+        type: "paragraph",
+        content: "These services are worth paying for after a beach day because they actually stop long-term damage:"
+      },
+      {
+        type: "list",
+        items: [
+          "Underbody and wheel-well flush - professionals lift and flush undercarriage to remove trapped salt that causes corrosion",
+          "Iron and salt fallout removal - specialty decontamination chemicals dissolve mineral deposits and brake dust bonded to paint",
+          "Clay or chemical decontamination - removes embedded sand and contaminants that a hose can't, prevents micro-scratches",
+          "Wheel corrosion treatment - removes salt-induced pitting and treats lug nuts and rims to stop rust spreading",
+          "Door jamb cleaning and lubrication - salt collects in jambs, eats paint and hinges; pros clean and protect these areas",
+          "Interior sand removal and extraction - deep vacuuming, carpet shampoo, and door pocket cleaning to remove abrasive grit",
+          "Convertible top fabric protectant - professional cleaners apply protectants that block salt and UV damage",
+          "Spot repairs and protective add-ons - paint sealants, wheel sealants, and ceramic top-ups to prevent future problems"
+        ]
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Hardy's Post-Beach Care Packages"
+      },
+      {
+        type: "paragraph",
+        content: "We offer flat-fee packages that make buying easy for people who just want a fast solution after beach days:"
+      },
+      {
+        type: "list",
+        items: [
+          "Quick Post-Beach Rinse - Exterior power rinse, spot-free hand dry, door jamb wipe (best when you caught salt early)",
+          "Deluxe Post-Beach Cleanup - Undercarriage flush, wheel well rinse, hand wash with pH-neutral soap, interior vacuum and mat shakeout (ideal for most beach days)",
+          "Premium Post-Beach Detail - Everything in Deluxe plus clay decontamination, iron fallout remover, door jamb detail, interior carpet shampoo, leather conditioning (recommended for extended beach parking)",
+          "Add-on: Wheel Corrosion Treatment - Removes surface pitting, treats lug nuts and rim lips, applies wheel sealant",
+          "Add-on: Convertible Top Fabric Protectant - Deep clean and protectant that repels salt and water"
+        ]
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Why Waiting Costs You More"
+      },
+      {
+        type: "paragraph",
+        content: "Salt and sand don't just look bad — they accelerate paint oxidation, corrode brake components, and wear down seals and hinges. A quick professional detail now prevents expensive repairs later like repainting, brake replacement, or soft-top repair."
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "How Soon Should You Book?"
+      },
+      {
+        type: "list",
+        items: [
+          "Light dusting or quick rinse: book within 48 hours",
+          "Heavy salt or long beach sessions: book within 24 hours", 
+          "Signs of corrosion or brake grit: book immediately and avoid long drives"
+        ]
+      },
+      {
+        type: "quote",
+        content: "A quick professional detail now prevents expensive repairs later. Don't let salt eat your paint while you're still feeling the beach vibes.",
+        author: "Hardy's Beach Care Specialists"
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Ready to Protect Your Car After Beach Days?"
+      },
+      {
+        type: "paragraph",
+        content: "Got sand and salt on your car after a beach day? Our Post-Beach Care packages offer same-day availability when possible, with wheel corrosion treatment available as an add-on. Protect your car before the damage sets in and get back to cruising the coast worry-free."
+      }
+    ],
+    faqSchema: [
+      {
+        question: "How do I remove salt from my car after the beach?",
+        answer: "Rinse the exterior and undercarriage ASAP, avoid automatic brushes, and book a professional undercarriage flush and decontamination within 24–48 hours to prevent long-term damage."
+      },
+      {
+        question: "Will salt ruin my brakes?",
+        answer: "If left in wheel wells and on brake parts, salt can accelerate corrosion. A wheel-well flush and inspection prevents long-term damage to brake components."
+      },
+      {
+        question: "Can ceramic coating stop salt damage?",
+        answer: "Ceramic coating helps repel water and salt and makes cleaning easier, but it's not a substitute for undercarriage rinses and wheel corrosion treatment after heavy beach exposure."
+      },
+      {
+        question: "How much does it cost to repair salt damage?",
+        answer: "Minor salt staining can be removed with decontamination and polish. Advanced corrosion or pitting requires expensive repairs that cost far more than routine post-beach detailing."
+      }
+    ]
+  },
+  {
     slug: "convertible-care-southern-california-sun",
     title: "How to Keep Your Convertible Looking New in Southern California's Sun",
     metaDescription: "Essential convertible care for SoCal owners. Protect your soft top, leather, and paint from UV damage, salt air, and coastal elements with professional treatments.",
