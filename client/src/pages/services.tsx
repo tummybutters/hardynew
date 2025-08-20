@@ -253,6 +253,7 @@ export default function Services() {
                   <div>
                     <h2 className="text-3xl font-bold font-heading">{category.title}</h2>
                     <p className="text-lg text-white/90 max-w-2xl">{category.description}</p>
+                    <p className="text-sm text-white/80 mt-2 italic">Base service shown • Add-ons marked with +$ cost extra</p>
                   </div>
                 </div>
                 
@@ -320,11 +321,21 @@ export default function Services() {
                             <h3 className="font-bold text-gray-900 mb-1">{item.title}</h3>
                             <p className="text-sm text-gray-600 mb-2">{item.description}</p>
                             <div className="flex flex-wrap gap-1 text-xs text-gray-500">
-                              {item.services.map((service, serviceIndex) => (
-                                <span key={serviceIndex} className="bg-[#FFD7B5] px-2 py-1 rounded">
-                                  {service}
-                                </span>
-                              ))}
+                              {item.services.map((service, serviceIndex) => {
+                                const isMainService = serviceIndex === 0;
+                                return (
+                                  <span 
+                                    key={serviceIndex} 
+                                    className={`px-2 py-1 rounded ${
+                                      isMainService 
+                                        ? 'bg-[#FFD7B5]' 
+                                        : 'bg-green-100 text-green-700'
+                                    }`}
+                                  >
+                                    {isMainService ? service : `+$${service}`}
+                                  </span>
+                                );
+                              })}
                             </div>
                           </div>
                         </div>
@@ -342,11 +353,21 @@ export default function Services() {
                             <h3 className="font-bold text-gray-900 mb-1">{item.title}</h3>
                             <p className="text-sm text-gray-600 mb-2">{item.description}</p>
                             <div className="flex flex-wrap gap-1 text-xs text-gray-500">
-                              {item.services.map((service, serviceIndex) => (
-                                <span key={serviceIndex} className="bg-[#FFD7B5] px-2 py-1 rounded">
-                                  {service}
-                                </span>
-                              ))}
+                              {item.services.map((service, serviceIndex) => {
+                                const isMainService = serviceIndex === 0;
+                                return (
+                                  <span 
+                                    key={serviceIndex} 
+                                    className={`px-2 py-1 rounded ${
+                                      isMainService 
+                                        ? 'bg-[#FFD7B5]' 
+                                        : 'bg-green-100 text-green-700'
+                                    }`}
+                                  >
+                                    {isMainService ? service : `+$${service}`}
+                                  </span>
+                                );
+                              })}
                             </div>
                           </div>
                         </div>
