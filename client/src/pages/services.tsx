@@ -50,8 +50,8 @@ const serviceCategories = [
       },
       {
         title: "Porsche Spyder 718",
-        description: "Interior Detail Before and After",
-        image: porsche718Image,
+        description: "Interior Detail",
+        image: "/porsche-spyder-after.jpg",
         services: ["Deep Clean", "Interior Detail"],
         condition: "Complete interior restoration"
       },
