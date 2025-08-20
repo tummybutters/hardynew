@@ -3,6 +3,164 @@ import { BlogPost } from "@/types/blogTypes";
 // Sample blog posts data
 export const blogPosts: BlogPost[] = [
   {
+    slug: "convertible-care-southern-california-sun",
+    title: "How to Keep Your Convertible Looking New in Southern California's Sun",
+    metaDescription: "Essential convertible care for SoCal owners. Protect your soft top, leather, and paint from UV damage, salt air, and coastal elements with professional treatments.",
+    date: "2025-08-22",
+    excerpt: "SoCal's 280+ sunny days are perfect for convertibles but brutal on soft tops, leather, and paint. Learn specialized protection strategies for coastal driving and UV damage prevention.",
+    coverImage: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=1470&auto=format&fit=crop",
+    readTime: 7,
+    categories: ["Convertible Care", "Southern California", "UV Protection"],
+    serviceLink: "/orange-county",
+    content: [
+      {
+        type: "paragraph",
+        content: "Owning a convertible in Southern California is a dream — the open roads, coastal drives, and endless sunshine. But that same sunshine (plus salt air, dust, and smog) can do serious damage to your convertible if it isn't properly protected."
+      },
+      {
+        type: "paragraph",
+        content: "From fading paint and cracked leather to sun-damaged soft tops, SoCal convertibles face unique challenges. Here's how to keep yours looking showroom-new for years to come."
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "UV Damage: Your Convertible's Biggest Enemy"
+      },
+      {
+        type: "paragraph",
+        content: "Southern California gets over 280 days of sunshine per year — which is great for cruising PCH, but brutal on your car. UV rays don't just fade paint; they create multiple problems for convertible owners."
+      },
+      {
+        type: "list",
+        items: [
+          "Dry and crack leather seats faster than closed vehicles",
+          "Fade and weaken convertible tops (especially fabric)",
+          "Break down plastic trim and dashboard materials",
+          "Accelerate paint oxidation and clear coat damage"
+        ]
+      },
+      {
+        type: "heading",
+        level: 3,
+        content: "Best UV Protection Strategies:"
+      },
+      {
+        type: "list",
+        items: [
+          "Ceramic Coating for Convertibles - UV-blocking layer that preserves paint gloss and depth",
+          "Interior UV Conditioning - Professional leather and vinyl treatments prevent cracking",
+          "Windshield & Window Protection - UV-resistant glass coatings add extra defense"
+        ]
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Protecting Your Convertible Top (Fabric & Vinyl)"
+      },
+      {
+        type: "paragraph",
+        content: "Soft tops are especially vulnerable in SoCal's mix of sun, salt air, and dust. Without proper care, they fade, fray, and develop leaks that can damage your interior."
+      },
+      {
+        type: "heading",
+        level: 3,
+        content: "Professional Soft Top Protection:"
+      },
+      {
+        type: "list",
+        items: [
+          "Fabric Protectant Coatings - Create hydrophobic barriers against water, dirt, and bird droppings",
+          "Gentle Professional Cleaning - Harsh chemicals or brushes can weaken stitching",
+          "Quarterly Conditioning - Keeps vinyl or fabric supple, preventing drying and cracking"
+        ]
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Interior Care: Leather, Plastics & Carpets"
+      },
+      {
+        type: "paragraph",
+        content: "Convertibles let in more sun and dust than hardtops — which means your interior ages twice as fast if left untreated. The constant exposure requires specialized care."
+      },
+      {
+        type: "list",
+        items: [
+          "Leather Conditioning - Restores natural oils and prevents cracked-seat appearance",
+          "Plastic & Vinyl UV Protection - Stops fading and chalking on dashboards and trim",
+          "Deep Interior Detailing - Removes dust and allergens from open-air driving"
+        ]
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Why Detailing Matters More in SoCal"
+      },
+      {
+        type: "paragraph",
+        content: "Coastal living adds extra threats that convertible owners must consider:"
+      },
+      {
+        type: "list",
+        items: [
+          "Salt Air & Ocean Breeze - Accelerates corrosion on paint and wheels",
+          "Tree Sap & Bird Droppings - Common in beach parking, highly acidic if not removed",
+          "Dust & Smog Particles - Stick easily to paint, creating micro-scratches"
+        ]
+      },
+      {
+        type: "quote",
+        content: "Routine professional convertible detailing isn't just cosmetic — it's preventative maintenance that saves thousands in repairs and keeps your car ready for top-down drives year-round.",
+        author: "Hardy's Convertible Specialists"
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Hardy's Convertible Protection Packages"
+      },
+      {
+        type: "paragraph",
+        content: "We specialize in convertible detailing in Southern California, with services tailored to the unique challenges of sun and coastal elements:"
+      },
+      {
+        type: "list",
+        items: [
+          "Convertible Interior Detail - Leather conditioning, UV dash protection, carpet shampoo",
+          "Convertible Top Protection Add-On - Fabric/vinyl protectant for long-lasting durability", 
+          "Ceramic Coating for Convertibles - Multi-year paint and UV protection",
+          "Full Convertible Package - Complete interior and exterior protection for SoCal climate"
+        ]
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Keep Your Convertible Ready for Coastal Drives"
+      },
+      {
+        type: "paragraph",
+        content: "You bought your convertible to enjoy it — not to stress over fading paint, cracking leather, or a sun-damaged top. Professional convertible care ensures your ride stays protected, glossy, and ready for the next perfect Southern California day."
+      }
+    ],
+    faqSchema: [
+      {
+        question: "How often should convertibles be detailed in Southern California?",
+        answer: "Due to increased UV exposure and coastal elements, convertibles should be professionally detailed every 2-3 months, with soft top treatments quarterly and ceramic coating for long-term protection."
+      },
+      {
+        question: "Can you protect fabric convertible tops from sun damage?",
+        answer: "Yes, we apply specialized fabric protectants that create UV-resistant, hydrophobic barriers. Combined with proper conditioning, this prevents fading, cracking, and premature wear from Southern California sun."
+      },
+      {
+        question: "Is ceramic coating worth it for convertibles in SoCal?",
+        answer: "Absolutely. Convertibles face double the UV exposure of closed cars. Ceramic coating provides essential protection against paint fading, oxidation, and makes maintenance easier in our intense climate."
+      },
+      {
+        question: "What's different about convertible interior care?",
+        answer: "Convertible interiors need more frequent conditioning due to increased UV and dust exposure. We use specialized UV protectants for leather and plastics, plus deep cleaning to remove particles from open-air driving."
+      }
+    ]
+  },
+  {
     slug: "professional-car-detailing-cost-sacramento-2025",
     title: "How Much Does Professional Car Detailing Cost in Sacramento? A 2025 Guide",
     metaDescription: "Complete 2025 breakdown of car detailing prices in Sacramento. Compare basic washes to ceramic coating costs and discover Hardy's transparent pricing.",
