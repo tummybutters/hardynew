@@ -286,11 +286,11 @@ export default function Services() {
                 {selectedService.portfolioJobs ? (
                   selectedService.portfolioJobs.map((job, index) => (
                     <div key={index} className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
-                      <div className="aspect-video overflow-hidden">
+                      <div className="aspect-[4/3] overflow-hidden">
                         <img
                           src={job.image}
                           alt={`${job.title} - ${job.description}`}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                       <div className="p-4">
@@ -310,7 +310,7 @@ export default function Services() {
                   // Placeholder cards for services without portfolio jobs yet
                   Array.from({ length: 6 }, (_, index) => (
                     <div key={index} className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
-                      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                      <div className="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                         <div className="text-center">
                           <div className="text-4xl text-gray-400 mb-2">📸</div>
                           <p className="text-sm text-gray-500">Portfolio Example Coming Soon</p>
