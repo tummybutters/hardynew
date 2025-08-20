@@ -169,6 +169,7 @@ const serviceGallery = [
 
 export default function Services() {
   const [selectedService, setSelectedService] = useState(serviceGallery[0]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   return (
     <>
@@ -286,7 +287,7 @@ export default function Services() {
                 {selectedService.portfolioJobs ? (
                   selectedService.portfolioJobs.map((job, index) => (
                     <div key={index} className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-[#EE432C] transition-colors">
-                      <div className="aspect-[4/3] overflow-hidden">
+                      <div className="aspect-[4/3] overflow-hidden cursor-pointer" onClick={() => setSelectedImage(job.image)}>
                         <img
                           src={job.image}
                           alt={`${job.title} - ${job.description}`}
@@ -361,6 +362,28 @@ export default function Services() {
           </div>
         </div>
       </div>
+
+      {/* Image Popup Modal */}
+      {selectedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" onClick={() => setSelectedImage(null)}>
+          <div className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center">
+            <img
+              src={selectedImage}
+              alt="Full size preview"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors"
+            >
+              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
