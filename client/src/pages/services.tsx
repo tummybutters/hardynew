@@ -42,7 +42,7 @@ const serviceCategories = [
         condition: "Premium interior restoration"
       },
       {
-        title: "Porsche Panamera",
+        title: "Camaro ZL1",
         description: "Interior Detail - Leather Conditioner & Carpet Shampoo",
         image: porschePanameraImage,
         services: ["Interior Detail", "Leather Conditioning", "Carpet Shampoo"],
