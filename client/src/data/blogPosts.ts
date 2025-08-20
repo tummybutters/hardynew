@@ -564,7 +564,7 @@ export const blogPosts: BlogPost[] = [
     metaDescription: "Learn how Sacramento's intense UV rays, dust, and hard water damage your vehicle and discover professional protection services to save thousands in repairs.",
     date: "2025-08-20",
     excerpt: "Sacramento's triple-digit heat, agricultural dust, and hard water create the perfect storm for vehicle damage. Discover which threats cost the most in repairs and the proven protection strategies that save thousands.",
-    coverImage: "https://images.unsplash.com/photo-1621839673705-6617adf9e890?q=80&w=1470&auto=format&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1470&auto=format&fit=crop",
     readTime: 8,
     categories: ["Vehicle Protection", "Sacramento Climate", "Paint Protection"],
     serviceLink: "/services",
