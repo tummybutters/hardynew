@@ -18,7 +18,7 @@ const services = [
     title: "FULL INTERIOR DETAIL",
     description: "Revitalize your vehicle's cabin with our meticulous interior cleaning that eliminates stains, odors, and restores that showroom freshness.",
     image: interiorImage,
-    link: "/services",
+    link: "/booking",
     primary: true,
   },
   {
@@ -26,7 +26,7 @@ const services = [
     title: "FULL EXTERIOR DETAIL",
     description: "Transform your vehicle's exterior with our premium washing and waxing service that delivers a pristine finish and lasting protection against the elements.",
     image: exteriorImage,
-    link: "/services",
+    link: "/booking",
     primary: true,
   },
   {
@@ -34,7 +34,7 @@ const services = [
     title: "FULL DETAIL",
     description: "Experience the ultimate in automotive luxury with our comprehensive service that meticulously restores both your vehicle's interior comfort and exterior brilliance.",
     image: fullHandWashImage,
-    link: "/services",
+    link: "/booking",
     primary: true,
   },
   // Bottom row - Additional services
@@ -43,7 +43,7 @@ const services = [
     title: "PAINT CORRECTION",
     description: "Elevate your vehicle's appearance with our precision paint correction that eliminates scratches, swirls, and imperfections to reveal a mirror-like, flawless finish.",
     image: paintCorrectionImage,
-    link: "/services",
+    link: "/booking",
     primary: false,
   },
   {
@@ -51,7 +51,7 @@ const services = [
     title: "CERAMIC COATING",
     description: "Invest in your vehicle's longevity with our premium ceramic coating that provides up to 8 years of superior protection while enhancing depth, gloss, and resistance to environmental damage.",
     image: ceramicCoatingImage,
-    link: "/services",
+    link: "/booking",
     primary: false,
   },
   {
@@ -59,7 +59,7 @@ const services = [
     title: "MAINTENANCE DETAILS",
     description: "Preserve your vehicle's pristine condition with our regular maintenance service that keeps both interior comfort and exterior appearance at their peak between major detailing sessions.",
     image: interiorImage2,
-    link: "/services",
+    link: "/booking",
     primary: false,
   },
 ];

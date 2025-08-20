@@ -17,7 +17,7 @@ const services = [
     title: "FULL INTERIOR DETAIL",
     description: "Deep cleaning for a fresh, spotless interior, including stain and odor removal.",
     image: interiorImage,
-    link: "/services",
+    link: "/booking",
     primary: true,
     imagePosition: "top",
   },
@@ -26,7 +26,7 @@ const services = [
     title: "FULL EXTERIOR DETAIL",
     description: "A thorough washing and waxing for a clean, protected exterior.",
     image: exteriorImage,
-    link: "/services",
+    link: "/booking",
     primary: true,
   },
   {
@@ -34,7 +34,7 @@ const services = [
     title: "FULL DETAIL",
     description: "Complete care for both the interior and exterior of your vehicle.",
     image: fullHandWashImage,
-    link: "/services",
+    link: "/booking",
     primary: true,
   },
   // Bottom row - Additional services
@@ -43,7 +43,7 @@ const services = [
     title: "PAINT CORRECTION",
     description: "Restore your car's shine by removing scratches, swirl marks, and imperfections for a flawless finish.",
     image: paintCorrectionImage,
-    link: "/services",
+    link: "/booking",
     primary: false,
   },
   {
@@ -51,7 +51,7 @@ const services = [
     title: "CERAMIC COATING",
     description: "8 year protection for your car's paint, providing a glossy finish and shielding against dirt, sun, and water.",
     image: ceramicCoatingImage,
-    link: "/services",
+    link: "/booking",
     primary: false,
   },
   {
@@ -59,7 +59,7 @@ const services = [
     title: "MAINTENANCE DETAILS",
     description: "Keep your car looking its best with routine cleaning and care for both the interior and exterior.",
     image: interiorImage2,
-    link: "/services",
+    link: "/booking",
     primary: false,
     imagePosition: "top",
   },
