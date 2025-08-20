@@ -3,6 +3,124 @@ import { BlogPost } from "@/types/blogTypes";
 // Sample blog posts data
 export const blogPosts: BlogPost[] = [
   {
+    slug: "professional-car-detailing-cost-sacramento-2025",
+    title: "How Much Does Professional Car Detailing Cost in Sacramento? A 2025 Guide",
+    metaDescription: "Complete 2025 breakdown of car detailing prices in Sacramento. Compare basic washes to ceramic coating costs and discover Hardy's transparent pricing.",
+    date: "2025-08-21",
+    excerpt: "Detailing prices range from $80 basic washes to $2,000+ ceramic coating packages. Learn what drives costs, why Sacramento's climate demands protection, and Hardy's transparent pricing starting at $180.",
+    coverImage: "https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=1470&auto=format&fit=crop",
+    readTime: 6,
+    categories: ["Pricing", "Detailing Services", "Sacramento"],
+    serviceLink: "/booking",
+    content: [
+      {
+        type: "paragraph",
+        content: "If you're searching for car detailing prices in Sacramento, you're probably weighing whether a full detail is worth it — or trying to figure out the difference between a $40 car wash and a $400+ professional detail."
+      },
+      {
+        type: "paragraph",
+        content: "The truth is: detailing prices vary based on the type of service, the condition of your vehicle, and the level of protection you want. Here's a 2025 breakdown of what Sacramento drivers can expect to pay, plus how to choose the right package for your car."
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Average Car Detailing Prices in Sacramento (2025)"
+      },
+      {
+        type: "list",
+        items: [
+          "Basic Exterior Wash & Wax: $80 – $150 (Hand wash, wax, and tire shine)",
+          "Interior-Only Detail: $150 – $250 (Deep vacuum, carpet extraction, stain removal, conditioning)",
+          "Full Interior & Exterior Detail: $250 – $500 (Complete restoration, 3–5 hours)",
+          "Paint Correction & Ceramic Coating: $600 – $2,000+ (Long-term protection lasting years)",
+          "Paint Protection Film (PPF): $1,200 – $5,000 (Clear film for rock chip protection)"
+        ]
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Why Prices Vary So Much"
+      },
+      {
+        type: "paragraph",
+        content: "Not all 'details' are created equal. A drive-through wash might cost $20, but it won't remove oxidation or scratches, protect against Sacramento's harsh UV rays, eliminate deep interior stains or odors, or preserve your car's resale value."
+      },
+      {
+        type: "paragraph",
+        content: "Professional detailing is priced higher because you're paying for time, technique, and long-lasting results that actually protect your investment."
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Sacramento Climate = Higher Need for Protection"
+      },
+      {
+        type: "paragraph",
+        content: "Hot summers, agricultural dust, and hard water make Sacramento one of the toughest places to maintain a car's finish. Without protection, you'll spend more in the long run on repainting, trim replacement, and interior repairs."
+      },
+      {
+        type: "quote",
+        content: "Investing in ceramic coating or PPF now can save thousands in future paint damage.",
+        author: "Sacramento Detailing Expert"
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Hardy's Wash N' Wax Transparent Pricing"
+      },
+      {
+        type: "paragraph",
+        content: "We keep things simple with customizable packages depending on what your car needs. No payment is taken until we shake hands in person — booking online takes under a minute."
+      },
+      {
+        type: "list",
+        items: [
+          "Interior Detail (2–3 hrs) – Starting at $180",
+          "Exterior Detail (2–3 hrs) – Starting at $180", 
+          "Full Interior + Exterior Detail (3–5 hrs) – Starting at $320",
+          "Ceramic Coating Packages (multi-year protection) – Starting at $850",
+          "Paint Correction Add-Ons – Quote after inspection"
+        ]
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Is Professional Detailing Worth the Cost?"
+      },
+      {
+        type: "paragraph",
+        content: "Absolutely. When you choose a premium Sacramento detailer, you get paint that looks glossy and showroom-new, interior free of stains and odors, UV and dust protection that keeps your car clean longer, higher resale value, and peace of mind knowing your car is protected in Sacramento's climate."
+      },
+      {
+        type: "heading",
+        level: 2,
+        content: "Ready to Experience the Difference?"
+      },
+      {
+        type: "paragraph",
+        content: "Stop searching 'car detailing cost Sacramento' and actually experience professional results. Book your detail today and keep your car looking and feeling brand new in Sacramento's challenging climate."
+      }
+    ],
+    faqSchema: [
+      {
+        question: "What's included in a $320 full detail at Hardy's Wash N' Wax?",
+        answer: "Our full interior and exterior detail includes deep vacuum, carpet extraction, leather conditioning, hand wash, clay bar treatment, wax application, tire shine, and wheel detailing. Takes 3-5 hours for complete restoration."
+      },
+      {
+        question: "Why does ceramic coating cost $850+ when a basic detail is $180?",
+        answer: "Ceramic coating involves paint correction, multi-layer application, and provides 2+ years of UV protection, hydrophobic properties, and easier maintenance. It's a long-term investment that saves money on frequent washes and paint damage."
+      },
+      {
+        question: "Do I pay upfront for detailing services?",
+        answer: "No payment is required until we complete the service and you're satisfied with the results. We believe in earning your trust through quality work, not upfront payments."
+      },
+      {
+        question: "How often should I get professional detailing in Sacramento?",
+        answer: "Due to Sacramento's intense heat and dust, we recommend full detailing every 3-4 months, with ceramic coating extending time between services while providing superior protection."
+      }
+    ]
+  },
+  {
     slug: "sacramento-climate-damages-your-car",
     title: "How Sacramento's Climate Damages Your Car (and the Best Ways to Protect It)",
     metaDescription: "Learn how Sacramento's intense UV rays, dust, and hard water damage your vehicle and discover professional protection services to save thousands in repairs.",
