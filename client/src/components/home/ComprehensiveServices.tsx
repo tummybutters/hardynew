@@ -108,7 +108,10 @@ export default function ComprehensiveServices() {
                 </div>
                 
                 {/* Content */}
-                <div className="p-6 bg-[#FFB375] relative flex flex-col flex-grow">
+                <div className="p-6 relative flex flex-col flex-grow"
+                     style={{
+                       background: 'linear-gradient(135deg, #EE432C 0%, #FFB375 50%, #FFD7B5 100%)'
+                     }}>
                   <h3 className="text-xl font-bold text-black mb-3 transition-colors duration-300"
                       style={{
                         color: hoveredCard === service.id ? '#000' : '#000',
@@ -179,10 +182,13 @@ export default function ComprehensiveServices() {
                 </div>
                 
                 {/* Content */}
-                <div className="p-6 bg-[#222] relative flex flex-col flex-grow">
+                <div className="p-6 relative flex flex-col flex-grow"
+                     style={{
+                       background: 'linear-gradient(135deg, #EE432C 0%, #FFB375 50%, #FFD7B5 100%)'
+                     }}>
                   <h3 className="text-xl font-bold text-white mb-3 transition-colors duration-300"
                       style={{
-                        color: hoveredCard === service.id ? '#FFB375' : '#fff',
+                        color: hoveredCard === service.id ? '#fff' : '#fff',
                         fontSize: '1.5rem',
                         fontWeight: '800',
                         textTransform: 'uppercase',
