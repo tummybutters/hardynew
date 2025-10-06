@@ -91,8 +91,8 @@ export default function Footer() {
               </p>
             </div>
             <div className="flex space-x-8">
-              <a href="#" className="text-white/80 hover:text-[#FFB375] text-sm transition-colors">Privacy Policy</a>
-              <a href="#" className="text-white/80 hover:text-[#FFB375] text-sm transition-colors">Terms of Service</a>
+              <Link href="/privacy-policy" className="text-white/80 hover:text-[#FFB375] text-sm transition-colors">Privacy Policy</Link>
+              <Link href="/sms-terms" className="text-white/80 hover:text-[#FFB375] text-sm transition-colors">SMS Terms</Link>
             </div>
           </div>
         </div>

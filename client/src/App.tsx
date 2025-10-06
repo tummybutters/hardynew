@@ -38,6 +38,10 @@ import FolsomCarDetailing from "@/pages/folsom-car-detailing";
 import WestSacramentoCarDetailing from "@/pages/west-sacramento-car-detailing";
 import WoodlandCarDetailing from "@/pages/woodland-car-detailing";
 
+// Import legal pages
+import PrivacyPolicy from "@/pages/privacy-policy";
+import SmsTerms from "@/pages/sms-terms";
+
 function Router() {
   return (
     <Switch>
@@ -75,6 +79,10 @@ function Router() {
             <Route path="/folsom-car-detailing" component={FolsomCarDetailing} />
             <Route path="/west-sacramento-car-detailing" component={WestSacramentoCarDetailing} />
             <Route path="/woodland-car-detailing" component={WoodlandCarDetailing} />
+            
+            {/* Legal pages */}
+            <Route path="/privacy-policy" component={PrivacyPolicy} />
+            <Route path="/sms-terms" component={SmsTerms} />
             
             <Route component={NotFound} />
           </Switch>
