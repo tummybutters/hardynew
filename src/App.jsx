@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
   useGLTF,
@@ -8,12 +8,17 @@ import {
   Float,
   CameraControls,
   PerspectiveCamera,
-  useTexture
+  useTexture,
+  useProgress
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, Info, ChevronDown, ChevronRight, Check, Plus } from 'lucide-react';
+import { Phone, Info, ChevronDown, ChevronRight, Check, Plus, X, Share2 } from 'lucide-react';
 import { SERVICES_DATA } from './servicesData';
+import LoadingScreen from './LoadingScreen';
+
+// Preload the model
+useGLTF.preload('/bmw_m4_f82.glb');
 
 // --- Constants & Styles ---
 const THEME = {
@@ -23,6 +28,17 @@ const THEME = {
   cardBg: 'rgba(10, 10, 10, 0.90)',
   border: 'rgba(255, 255, 255, 0.1)'
 };
+
+// --- Hooks ---
+function useMobile() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  return isMobile;
+}
 
 // --- Debug Helper ---
 function ModelDebugger({ scene }) {
@@ -50,8 +66,9 @@ function CameraRig({ view }) {
       case 'interior':
         // User requested swap: Driver door is at +X.
         // Positioned to align with back of seat, further down the car (negative Z)
+        // Pulled back to avoid polygon glitching
         controls.current.setLookAt(
-          1.2, 1.0, -0.3,
+          1.5, 1.0, -0.5,
           0.0, 0.6, 0.0,
           true
         );
@@ -78,10 +95,27 @@ function CameraRig({ view }) {
         break;
 
       case 'exterior':
-      case 'paint':
         controls.current.setLookAt(
           4, 2, 5,
           0, 0.5, 0,
+          true
+        );
+        break;
+
+      case 'paint':
+        // Side profile view for Premium Protection
+        controls.current.setLookAt(
+          -5.5, 1.3, 0.2,
+          0, 0.6, 0,
+          true
+        );
+        break;
+
+      case 'paint_detail':
+        // Closer side profile for paint correction details - looking down the car
+        controls.current.setLookAt(
+          -3.2, 1.4, -1.5,
+          0, 0.8, 0.5,
           true
         );
         break;
@@ -116,6 +150,17 @@ function Background() {
       <meshBasicMaterial map={texture} toneMapped={false} />
     </mesh>
   );
+}
+
+// --- Canvas Loader Component ---
+function CanvasLoader({ setLoadingProgress }) {
+  const { progress } = useProgress();
+
+  useEffect(() => {
+    setLoadingProgress(progress);
+  }, [progress, setLoadingProgress]);
+
+  return null;
 }
 
 // --- 3D Car Component ---
@@ -362,6 +407,7 @@ const Sidebar = ({ activeService, setActiveService, activeAddOn, setActiveAddOn,
         </p>
       </div>
 
+      {/* Main Service Buttons - Always Visible */}
       <div>
         {SERVICES_DATA.map((service) => {
           const isActive = activeService?.id === service.id;
@@ -376,57 +422,260 @@ const Sidebar = ({ activeService, setActiveService, activeAddOn, setActiveAddOn,
                   setCameraView(service.target);
                 }}
               />
-
-              <AnimatePresence>
-                {isActive && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    style={{ overflow: 'hidden', background: 'rgba(0,0,0,0.2)' }}
-                  >
-                    <div style={{ padding: '12px 0' }}>
-                      <div style={{
-                        padding: '0 24px 8px',
-                        fontSize: '0.75rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '1px',
-                        color: '#666'
-                      }}>
-                        Recommended Add-ons
-                      </div>
-                      {service.addOns.map((addon, idx) => (
-                        <ServiceItem
-                          key={idx}
-                          item={addon}
-                          isActive={activeAddOn?.name === addon.name}
-                          isAddOn={true}
-                          onClick={() => {
-                            setActiveAddOn(activeAddOn?.name === addon.name ? null : addon);
-                            if (addon.target) setCameraView(addon.target);
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
           );
         })}
       </div>
+
+      {/* Add-ons Section - Shows below all three main buttons */}
+      <AnimatePresence>
+        {activeService && activeService.addOns && activeService.addOns.length > 0 && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            style={{ overflow: 'hidden', background: 'rgba(0,0,0,0.2)' }}
+          >
+            <div style={{ padding: '12px 0' }}>
+              <div style={{
+                padding: '0 24px 8px',
+                fontSize: '0.75rem',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                color: '#666'
+              }}>
+                Recommended Add-ons
+              </div>
+              {activeService.addOns.map((addon, idx) => (
+                <ServiceItem
+                  key={idx}
+                  item={addon}
+                  isActive={activeAddOn?.name === addon.name}
+                  isAddOn={true}
+                  onClick={() => {
+                    setActiveAddOn(activeAddOn?.name === addon.name ? null : addon);
+                    if (addon.target) setCameraView(addon.target);
+                  }}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
-// --- Main Application ---
+
+
+// --- Booking Modal ---
+const BookingModal = ({ isOpen, onClose, service, addOn }) => {
+  if (!isOpen) return null;
+  const total = (service?.price || 0) + (addOn?.price || 0);
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 100,
+      background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+    }} onClick={onClose}>
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: '#111', border: `1px solid ${THEME.border}`,
+          padding: '30px', borderRadius: '20px', width: '100%', maxWidth: '400px',
+          position: 'relative'
+        }}
+      >
+        <button onClick={onClose} style={{ position: 'absolute', top: 20, right: 20, background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>
+          <X size={24} />
+        </button>
+
+        <h2 style={{ color: 'white', fontFamily: '"Playfair Display", serif', marginTop: 0 }}>Request Booking</h2>
+        <div style={{ marginBottom: '20px', color: '#888', fontSize: '0.9rem' }}>
+          <p>Service: <span style={{ color: 'white' }}>{service?.title}</span></p>
+          {addOn && <p>Add-on: <span style={{ color: 'white' }}>{addOn.name}</span></p>}
+          <p style={{ color: THEME.primary, fontWeight: 'bold', fontSize: '1.1rem', marginTop: '10px' }}>Total Est: ${total}</p>
+        </div>
+
+        <form onSubmit={(e) => { e.preventDefault(); alert("Booking request sent! (Demo)"); onClose(); }}>
+          <input type="text" placeholder="Your Name" style={{ width: '100%', padding: '12px', background: '#222', border: '1px solid #333', borderRadius: '8px', color: 'white', marginBottom: '10px' }} required />
+          <input type="tel" placeholder="Phone Number" style={{ width: '100%', padding: '12px', background: '#222', border: '1px solid #333', borderRadius: '8px', color: 'white', marginBottom: '20px' }} required />
+          <button type="submit" style={{ width: '100%', padding: '14px', background: THEME.primary, color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer' }}>
+            Send Request
+          </button>
+        </form>
+      </motion.div>
+    </div>
+  );
+};
+
+// --- BottomSheet Component (Mobile) ---
+const BottomSheet = ({ activeService, setActiveService, activeAddOn, setActiveAddOn, setCameraView, onShare }) => {
+  const [isOpen, setIsOpen] = useState(true);
+
+  return (
+    <motion.div
+      initial={{ y: '100%' }}
+      animate={{ y: isOpen ? 0 : 'calc(100% - 60px)' }}
+      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: '70vh',
+        background: THEME.cardBg,
+        backdropFilter: 'blur(20px)',
+        borderTop: `1px solid ${THEME.border}`,
+        zIndex: 40,
+        borderRadius: '20px 20px 0 0',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      {/* Drag Handle / Header */}
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          padding: '16px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          cursor: 'pointer',
+          borderBottom: `1px solid ${THEME.border}`,
+          position: 'relative'
+        }}
+      >
+        <div style={{
+          width: '40px',
+          height: '4px',
+          background: 'rgba(255,255,255,0.3)',
+          borderRadius: '2px'
+        }} />
+
+        <button
+          onClick={(e) => { e.stopPropagation(); onShare(); }}
+          style={{
+            position: 'absolute',
+            right: 20,
+            top: 16,
+            background: 'none',
+            border: 'none',
+            color: 'rgba(255,255,255,0.6)',
+            cursor: 'pointer'
+          }}
+        >
+          <Share2 size={20} />
+        </button>
+      </div>
+
+      <div style={{ overflowY: 'auto', flex: 1, padding: '20px' }}>
+        <h2 style={{
+          fontFamily: '"Playfair Display", serif',
+          color: 'white',
+          fontSize: '1.5rem',
+          marginBottom: '8px'
+        }}>
+          Service Menu
+        </h2>
+
+        {/* Main Services */}
+        <div style={{ marginBottom: '20px' }}>
+          {SERVICES_DATA.map((service) => {
+            const isActive = activeService?.id === service.id;
+            return (
+              <ServiceItem
+                key={service.id}
+                item={service}
+                isActive={isActive}
+                onClick={() => {
+                  setActiveService(service);
+                  setActiveAddOn(null);
+                  setCameraView(service.target);
+                  setIsOpen(false); // Auto-minimize on selection for better view
+                }}
+              />
+            );
+          })}
+        </div>
+
+        {/* Add-ons */}
+        <AnimatePresence>
+          {activeService && activeService.addOns && activeService.addOns.length > 0 && (
+            <div style={{ marginTop: '10px' }}>
+              <div style={{
+                fontSize: '0.75rem',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                color: '#666',
+                marginBottom: '10px'
+              }}>
+                Available Add-ons
+              </div>
+              {activeService.addOns.map((addon, idx) => (
+                <ServiceItem
+                  key={idx}
+                  item={addon}
+                  isActive={activeAddOn?.name === addon.name}
+                  isAddOn={true}
+                  onClick={() => {
+                    setActiveAddOn(activeAddOn?.name === addon.name ? null : addon);
+                    if (addon.target) setCameraView(addon.target);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+};
+
 export default function App() {
+  const isMobile = useMobile();
   const [activeService, setActiveService] = useState(SERVICES_DATA[1]);
   const [activeAddOn, setActiveAddOn] = useState(null);
   const [cameraView, setCameraView] = useState('default');
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Hardy's Wash N' Wax",
+          text: `Check out this ${activeService.title} configuration!`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.log('Error sharing', error);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Link copied to clipboard!");
+    }
+  };
+
+  // Hide loading screen when model is fully loaded
+  useEffect(() => {
+    if (loadingProgress >= 100) {
+      const timer = setTimeout(() => setIsLoaded(true), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [loadingProgress]);
 
   return (
     <div style={{ width: '100%', height: '100vh', background: '#050505', position: 'relative', overflow: 'hidden' }}>
+
+      {/* LOADING SCREEN */}
+      <AnimatePresence>
+        {!isLoaded && <LoadingScreen progress={loadingProgress} />}
+      </AnimatePresence>
 
       {/* HEADER UI */}
       <header style={{
@@ -443,29 +692,30 @@ export default function App() {
         pointerEvents: 'none'
       }}>
         <div style={{
-          marginLeft: '320px',
+          marginLeft: isMobile ? '0' : '320px',
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
           pointerEvents: 'auto'
         }}>
           <div style={{
-            width: '40px',
-            height: '40px',
+            width: isMobile ? '32px' : '40px',
+            height: isMobile ? '32px' : '40px',
             background: THEME.primary,
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 'bold',
-            color: 'white'
+            color: 'white',
+            fontSize: isMobile ? '0.9rem' : '1rem'
           }}>H</div>
           <div>
             <h1 style={{
               margin: 0,
               color: 'white',
               fontFamily: '"Playfair Display", serif',
-              fontSize: '1.5rem',
+              fontSize: isMobile ? '1.2rem' : '1.5rem',
               letterSpacing: '0.5px',
               textShadow: '0 2px 10px rgba(0,0,0,0.5)'
             }}>
@@ -474,104 +724,197 @@ export default function App() {
           </div>
         </div>
 
-        <button style={{
-          pointerEvents: 'auto',
-          background: 'white',
-          color: 'black',
-          border: 'none',
-          padding: '12px 28px',
-          borderRadius: '30px',
-          fontWeight: '600',
-          fontSize: '0.9rem',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
-        }}>
-          <Phone size={16} />
-          Book Selection • ${(activeService?.price || 0) + (activeAddOn?.price || 0)}
-        </button>
+        {!isMobile && (
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={handleShare}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: 'none',
+                width: '46px',
+                height: '46px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                cursor: 'pointer',
+                backdropFilter: 'blur(10px)'
+              }}
+              title="Share Configuration"
+            >
+              <Share2 size={20} />
+            </button>
+
+            <button
+              onClick={() => setIsBookingOpen(true)}
+              style={{
+                pointerEvents: 'auto',
+                background: 'white',
+                color: 'black',
+                border: 'none',
+                padding: '12px 28px',
+                borderRadius: '30px',
+                fontWeight: '600',
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+              }}>
+              <Phone size={16} />
+              Book Selection • ${(activeService?.price || 0) + (activeAddOn?.price || 0)}
+            </button>
+          </div>
+        )}
       </header>
 
-      <Sidebar
-        activeService={activeService}
-        setActiveService={setActiveService}
-        activeAddOn={activeAddOn}
-        setActiveAddOn={setActiveAddOn}
-        setCameraView={setCameraView}
-      />
-
-      <Canvas shadows dpr={[1, 2]} style={{ marginLeft: '350px', width: 'calc(100% - 350px)' }}>
-        {/* <color attach="background" args={['#050505']} /> */}
-        {/* <fog attach="fog" args={['#050505', 5, 25]} /> */}
-        <Background />
-
-        <ambientLight intensity={0.5} />
-        <spotLight
-          position={[10, 10, 10]}
-          angle={0.15}
-          penumbra={1}
-          intensity={10}
-          castShadow
-          shadow-mapSize={[2048, 2048]}
+      {isMobile ? (
+        <BottomSheet
+          activeService={activeService}
+          setActiveService={setActiveService}
+          activeAddOn={activeAddOn}
+          setActiveAddOn={setActiveAddOn}
+          setCameraView={setCameraView}
+          onShare={handleShare}
         />
-        <pointLight position={[-10, -10, -10]} color={THEME.primary} intensity={5} />
+      ) : (
+        <Sidebar
+          activeService={activeService}
+          setActiveService={setActiveService}
+          activeAddOn={activeAddOn}
+          setActiveAddOn={setActiveAddOn}
+          setCameraView={setCameraView}
+        />
+      )}
 
-        <Environment preset="city" />
+      <Canvas
+        shadows
+        dpr={isMobile ? [1, 1.5] : [1, 2]} // Lower max DPR for better mobile performance
+        performance={{ min: 0.5 }} // Allow frame rate to drop if needed
+        gl={{
+          antialias: true,
+          alpha: false,
+          powerPreference: 'high-performance',
+          preserveDrawingBuffer: false
+        }}
+        style={{ marginLeft: isMobile ? '0' : '350px', width: isMobile ? '100%' : 'calc(100% - 350px)' }}
+      >
+        <Suspense fallback={<CanvasLoader setLoadingProgress={setLoadingProgress} />}>
+          <CanvasLoader setLoadingProgress={setLoadingProgress} />
+          <Background />
 
-        <Float speed={1} rotationIntensity={0.1} floatIntensity={0.1}>
-          <CarModel
-            activeService={activeService}
-            activeAddOn={activeAddOn}
-            onPartClick={setCameraView}
+          <ambientLight intensity={0.5} />
+          <spotLight
+            position={[10, 10, 10]}
+            angle={0.15}
+            penumbra={1}
+            intensity={10}
+            castShadow
+            shadow-mapSize={isMobile ? [512, 512] : [1024, 1024]} // Reduced for mobile performance
           />
-        </Float>
+          <pointLight position={[-10, -10, -10]} color={THEME.primary} intensity={5} />
 
-        <ContactShadows resolution={1024} scale={10} blur={1} opacity={1} far={10} color="#000000" />
+          <Environment preset="city" />
 
-        <CameraRig view={cameraView} />
+          <Float speed={1} rotationIntensity={0.1} floatIntensity={0.1}>
+            <CarModel
+              activeService={activeService}
+              activeAddOn={activeAddOn}
+              onPartClick={setCameraView}
+            />
+          </Float>
+
+          <ContactShadows
+            resolution={isMobile ? 512 : 1024}
+            scale={10}
+            blur={isMobile ? 2 : 1}
+            opacity={1}
+            far={10}
+            color="#000000"
+          />
+
+          <CameraRig view={cameraView} />
+        </Suspense>
       </Canvas>
 
       {/* HERO FOOTER */}
-      <div style={{
-        position: 'absolute',
-        bottom: '40px',
-        left: '390px', // Sidebar width + padding
-        zIndex: 25,
-        maxWidth: '600px',
-        pointerEvents: 'none'
-      }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <h2 style={{
+      {/* HERO FOOTER - Desktop Only or Simplified Mobile */}
+      {!isMobile && (
+        <div style={{
+          position: 'absolute',
+          bottom: '40px',
+          left: '390px', // Sidebar width + padding
+          zIndex: 25,
+          maxWidth: '600px',
+          pointerEvents: 'none'
+        }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <h2 style={{
+              color: 'white',
+              fontFamily: '"Playfair Display", serif',
+              fontSize: '3rem',
+              margin: '0 0 16px 0',
+              lineHeight: '1.1',
+              textShadow: '0 2px 20px rgba(0,0,0,0.8)'
+            }}>
+              Mobile Car Detailing<br />
+              <span style={{ color: THEME.primary }}>Sacramento, CA</span>
+            </h2>
+            <p style={{
+              color: '#e0e0e0',
+              fontSize: '1.1rem',
+              lineHeight: '1.6',
+              marginBottom: '24px',
+              textShadow: '0 1px 10px rgba(0,0,0,0.8)'
+            }}>
+              Providing Interior Detailing, Exterior Detailing, Paint Correction,
+              Ceramic Coating, and more! Serving Sacramento, Davis, Woodland,
+              Dixon, Winters, Elk Grove, and surrounding areas — all delivered
+              with precision, care, and professional-grade results.
+            </p>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Mobile Floating Action Button for Booking */}
+      {isMobile && (
+        <motion.button
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          onClick={() => setIsBookingOpen(true)}
+          style={{
+            position: 'absolute',
+            bottom: '80px', // Above bottom sheet collapsed state
+            right: '20px',
+            zIndex: 50,
+            background: THEME.primary,
             color: 'white',
-            fontFamily: '"Playfair Display", serif',
-            fontSize: '3rem',
-            margin: '0 0 16px 0',
-            lineHeight: '1.1',
-            textShadow: '0 2px 20px rgba(0,0,0,0.8)'
-          }}>
-            Mobile Car Detailing<br />
-            <span style={{ color: THEME.primary }}>Sacramento, CA</span>
-          </h2>
-          <p style={{
-            color: '#e0e0e0',
-            fontSize: '1.1rem',
-            lineHeight: '1.6',
-            marginBottom: '24px',
-            textShadow: '0 1px 10px rgba(0,0,0,0.8)'
-          }}>
-            Providing Interior Detailing, Exterior Detailing, Paint Correction,
-            Ceramic Coating, and more! Serving Sacramento, Davis, Woodland,
-            Dixon, Winters, Elk Grove, and surrounding areas — all delivered
-            with precision, care, and professional-grade results.
-          </p>
-        </motion.div>
-      </div>
+            border: 'none',
+            width: '60px',
+            height: '60px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 20px rgba(255, 127, 80, 0.4)'
+          }}
+        >
+          <Phone size={24} />
+        </motion.button>
+      )}
+
+      <BookingModal
+        isOpen={isBookingOpen}
+        onClose={() => setIsBookingOpen(false)}
+        service={activeService}
+        addOn={activeAddOn}
+      />
 
     </div>
   );

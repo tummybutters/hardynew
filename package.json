@@ -14,10 +14,11 @@
     "three": "^0.160.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-scripts eject",
+    "optimize": "node scripts/optimize-model.js"
   },
   "eslintConfig": {
     "extends": [
@@ -36,5 +37,13 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "^4.2.1",
+    "@gltf-transform/functions": "^4.2.1",
+    "compression-webpack-plugin": "^11.1.0",
+    "draco3dgltf": "^1.5.7",
+    "react-app-rewired": "^2.2.1",
+    "sharp": "^0.34.5"
   }
 }

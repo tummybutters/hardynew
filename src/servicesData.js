@@ -55,8 +55,8 @@ export const SERVICES_DATA = [
       'Long-term protection warranty'
     ],
     addOns: [
-      { name: 'Paint Correction Polish', price: 199, target: 'paint' },
-      { name: 'Ceramic Coating Layer', price: 299, target: 'paint' }
+      { name: 'Paint Correction Polish', price: 199, target: 'paint_detail' },
+      { name: 'Ceramic Coating Layer', price: 299, target: 'paint_detail' }
     ]
   }
 ];
