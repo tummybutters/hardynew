@@ -8,14 +8,15 @@ import {
   Float,
   CameraControls,
   PerspectiveCamera,
-  useTexture,
-  useProgress
+  useProgress,
+  useTexture
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Info, ChevronDown, ChevronRight, Check, Plus, X, Share2 } from 'lucide-react';
 import { SERVICES_DATA } from './servicesData';
 import LoadingScreen from './LoadingScreen';
+import { DirtShell, FoamParticles, FoamAccumulator, WaterParticles, EngineBrush } from './CleaningEffects';
 
 // Preload the model
 useGLTF.preload('/bmw_m4_f82.glb');
@@ -95,9 +96,10 @@ function CameraRig({ view }) {
         break;
 
       case 'exterior':
+        // Use the right-side profile view (same as demo target)
         controls.current.setLookAt(
-          4, 2, 5,
-          0, 0.5, 0,
+          -2.0, 1.0, 3.0, // Position
+          -0.8, 0.8, 0.0, // Target (Right Door approx)
           true
         );
         break;
@@ -130,6 +132,15 @@ function CameraRig({ view }) {
         );
         break;
 
+      case 'right_side':
+        // View of the right door
+        controls.current.setLookAt(
+          -2.0, 1.0, 3.0, // Position
+          -0.8, 0.8, 0.0, // Target (Right Door approx)
+          true
+        );
+        break;
+
       default:
         controls.current.setLookAt(4, 2, 5, 0, 0, 0, true);
         break;
@@ -139,18 +150,7 @@ function CameraRig({ view }) {
   return <CameraControls ref={controls} minPolarAngle={0} maxPolarAngle={Math.PI / 1.8} />;
 }
 
-// --- Background Component ---
-function Background() {
-  const texture = useTexture('/background.png');
-  texture.colorSpace = THREE.SRGBColorSpace;
 
-  return (
-    <mesh position={[0, 0, -5]} rotation={[0, 0, 0]}>
-      <planeGeometry args={[30, 15]} />
-      <meshBasicMaterial map={texture} toneMapped={false} />
-    </mesh>
-  );
-}
 
 // --- Canvas Loader Component ---
 function CanvasLoader({ setLoadingProgress }) {
@@ -164,15 +164,27 @@ function CanvasLoader({ setLoadingProgress }) {
 }
 
 // --- 3D Car Component ---
-function CarModel({ activeService, activeAddOn, onPartClick }) {
+function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engineCleaningState }) {
   const { scene } = useGLTF('/bmw_m4_f82.glb');
 
   // We store the *Pivot Groups* not the raw nodes for animation
   const [hoodGroup, setHoodGroup] = useState(null);
   const [leftDoorGroup, setLeftDoorGroup] = useState(null);
   const [rightDoorGroup, setRightDoorGroup] = useState(null);
+  const [rightDoorNodes, setRightDoorNodes] = useState([]); // Store nodes for DirtShell
+  const [engineGroup, setEngineGroup] = useState(null);
+  const [engineNodes, setEngineNodes] = useState([]);
+  const [engineBounds, setEngineBounds] = useState(null);
+
+  // Dirt Opacity State (Animation driven) - refs to avoid React churn per frame
+  const dirtOpacityRef = useRef(0);
+  const engineDirtOpacityRef = useRef(0);
+  const foamAccumRef = useRef();
 
   const isSetup = useRef(false);
+  const lastCleaningState = useRef(cleaningState);
+  const lastEngineState = useRef(engineCleaningState);
+  const engineFadeHold = useRef(0);
 
   // 1. Setup Grouping & Pivots (Run ONCE)
   useEffect(() => {
@@ -183,8 +195,17 @@ function CarModel({ activeService, activeAddOn, onPartClick }) {
     const rawHoodNodes = [];
     const rawLeftDoorNodes = [];
     const rawRightDoorNodes = [];
+    const rawEngineNodes = [];
+    let engineBayGroup = null;
 
     scene.traverse((node) => {
+      if (node.isGroup && !engineBayGroup) {
+        const groupName = node.name?.toLowerCase() || '';
+        if (groupName.includes('enginebay')) {
+          engineBayGroup = node;
+        }
+      }
+
       if (node.isMesh) {
         node.castShadow = true;
         node.receiveShadow = true;
@@ -197,6 +218,15 @@ function CarModel({ activeService, activeAddOn, onPartClick }) {
           !name.includes('light') &&
           !name.includes('lamp')) {
           rawHoodNodes.push(node);
+        }
+
+        // --- ENGINE BAY DETECTION ---
+        const isEngine =
+          (name.includes('enginebay') || parentName.includes('enginebay')) ||
+          ((name.includes('engine') || parentName.includes('engine')) && !name.includes('hood'));
+        if (isEngine) {
+          rawEngineNodes.push(node);
+          if (!engineBayGroup && node.parent?.isObject3D) engineBayGroup = node.parent;
         }
 
         // --- DOOR DETECTION ---
@@ -261,18 +291,37 @@ function CarModel({ activeService, activeAddOn, onPartClick }) {
     rawLeftDoorNodes.forEach(node => leftGroup.attach(node));
     setLeftDoorGroup(leftGroup);
 
-    // DISABLE RIGHT DOOR FOR NOW
-    // const rightGroup = new THREE.Group();
-    // rightGroup.position.copy(rightHinge);
-    // scene.add(rightGroup);
-    // rawRightDoorNodes.forEach(node => rightGroup.attach(node));
-    // setRightDoorGroup(rightGroup);
+    // RIGHT DOOR SETUP
+    const rightGroup = new THREE.Group();
+    const rightHinge = new THREE.Vector3(-0.830, 0.950, 0.670); // Symmetric to left
+    rightGroup.position.copy(rightHinge);
+    scene.add(rightGroup);
+    rawRightDoorNodes.forEach(node => rightGroup.attach(node));
+    setRightDoorGroup(rightGroup);
+    setRightDoorNodes(rawRightDoorNodes);
 
     const hGroup = new THREE.Group();
     hGroup.position.copy(hoodHinge);
     scene.add(hGroup);
     rawHoodNodes.forEach(node => hGroup.attach(node));
     setHoodGroup(hGroup);
+
+    // ENGINE BAY (no re-parenting to preserve transforms)
+    const engineBox = new THREE.Box3();
+    rawEngineNodes.forEach((node) => {
+      node.updateWorldMatrix(true, false);
+      engineBox.expandByObject(node);
+    });
+    const engineCenter = engineBox.isEmpty() ? null : engineBox.getCenter(new THREE.Vector3());
+    const engineSize = engineBox.isEmpty() ? null : engineBox.getSize(new THREE.Vector3());
+    let engineOverlayGroup = engineBayGroup;
+    if (!engineOverlayGroup) {
+      engineOverlayGroup = new THREE.Group();
+      scene.add(engineOverlayGroup);
+    }
+    setEngineGroup(engineOverlayGroup);
+    setEngineNodes(rawEngineNodes);
+    setEngineBounds(engineCenter && engineSize ? { center: engineCenter, size: engineSize } : null);
 
   }, [scene]); // Only run once per scene load
 
@@ -317,6 +366,54 @@ function CarModel({ activeService, activeAddOn, onPartClick }) {
     //   const targetY = isInteriorActive ? 1.15 : 0;
     //   rightDoorGroup.rotation.y = THREE.MathUtils.lerp(rightDoorGroup.rotation.y, targetY, easing);
     // }
+
+    // Cleaning Animation Logic
+    if (cleaningState !== lastCleaningState.current) {
+      if (cleaningState === 'foaming') {
+        dirtOpacityRef.current = 1;
+      } else if (cleaningState === 'clean') {
+        dirtOpacityRef.current = 0;
+      }
+      lastCleaningState.current = cleaningState;
+    }
+
+    const targetDirt =
+      cleaningState === 'dirty' ? 1 :
+        cleaningState === 'foaming' ? 0 :
+          cleaningState === 'rinsing' ? 0 : 0;
+    const dirtSpeed =
+      cleaningState === 'foaming' ? 7.0 :
+        cleaningState === 'rinsing' ? 8.5 :
+          4.0;
+    dirtOpacityRef.current = THREE.MathUtils.lerp(dirtOpacityRef.current, targetDirt, 1 - Math.exp(-dirtSpeed * delta));
+
+    // Engine bay muck fade
+    if (engineCleaningState !== lastEngineState.current) {
+      if (engineCleaningState === 'dirty') {
+        engineDirtOpacityRef.current = 1;
+        engineFadeHold.current = 0;
+      } else if (engineCleaningState === 'clean') {
+        engineDirtOpacityRef.current = 0;
+      }
+      lastEngineState.current = engineCleaningState;
+    }
+
+    // Keep muck solid for a short hold, then allow fade during brush/rinse
+    if (engineCleaningState === 'brushing' || engineCleaningState === 'rinsing') {
+      engineFadeHold.current += delta;
+    } else if (engineCleaningState === 'clean') {
+      engineFadeHold.current = 0;
+    }
+
+    const canFade =
+      engineCleaningState === 'clean' ||
+      ((engineCleaningState === 'brushing' || engineCleaningState === 'rinsing') && engineFadeHold.current >= 1.2);
+    const engineTarget = canFade ? 0 : 1;
+    const engineSpeed =
+      engineCleaningState === 'clean' ? 2.6 :
+        engineCleaningState === 'brushing' || engineCleaningState === 'rinsing' ? 1.6 :
+          1.8;
+    engineDirtOpacityRef.current = THREE.MathUtils.lerp(engineDirtOpacityRef.current, engineTarget, 1 - Math.exp(-engineSpeed * delta));
   });
 
   const handleClick = (e) => {
@@ -326,6 +423,25 @@ function CarModel({ activeService, activeAddOn, onPartClick }) {
     }
   };
 
+  // Expose cleaning function to parent via custom event or prop (simplified here)
+  // useEffect(() => {
+  //   window.handleClean = () => {
+  //     if (cleaningState === 'clean') {
+  //       setCleaningState('dirty');
+  //       setDirtOpacity(1);
+  //       return;
+  //     }
+
+  //     setCleaningState('foaming');
+  //     setTimeout(() => {
+  //       setCleaningState('rinsing');
+  //       setTimeout(() => {
+  //         setCleaningState('clean');
+  //       }, 4000);
+  //     }, 3000);
+  //   };
+  // }, [cleaningState]);
+
   return (
     <>
       <ModelDebugger scene={scene} />
@@ -334,9 +450,66 @@ function CarModel({ activeService, activeAddOn, onPartClick }) {
         scale={1.0}
         onPointerDown={handleClick}
       />
+
+
+      {/* Dirt Shell & Foam - Attached to the Right Door Group if it exists */}
+      {
+        rightDoorGroup && rightDoorNodes.length > 0 && (
+          <primitive object={rightDoorGroup}>
+            <DirtShell nodes={rightDoorNodes} opacityRef={dirtOpacityRef} />
+            <FoamAccumulator
+              ref={foamAccumRef}
+              foaming={cleaningState === 'foaming'}
+              rinsing={cleaningState === 'rinsing'}
+            />
+          </primitive>
+        )
+      }
+
+      {/* Engine Bay Dirt Overlay */}
+      {
+        engineGroup && engineNodes.length > 0 && (
+          <primitive object={engineGroup}>
+            <DirtShell
+              nodes={engineNodes}
+              opacityRef={engineDirtOpacityRef}
+              color="#5c4033"
+              texturePath="/engine_dirt.png"
+            />
+          </primitive>
+        )
+      }
+
+      {/* Engine Brush & Light Spray */}
+      {
+        engineBounds && engineCleaningState !== 'clean' && (
+          <EngineBrush
+            cleaningState={engineCleaningState}
+            center={engineBounds.center}
+            size={engineBounds.size}
+          />
+        )
+      }
+
+      {/* Foam Cannon - World Space */}
+      <FoamParticles
+        active={cleaningState === 'foaming'}
+        rinsing={false}
+        doorMeshes={rightDoorNodes}
+        onHit={(point, normal) => foamAccumRef.current?.addSplat(point, normal)}
+        count={isMobile ? 350 : 500}
+        position={[0, 0, 0]}
+      />
+      <WaterParticles
+        active={cleaningState === 'rinsing'}
+        doorMeshes={rightDoorNodes}
+        count={isMobile ? 180 : 280}
+      />
     </>
   );
 }
+
+
 
 // --- UI Components ---
 
@@ -639,10 +812,51 @@ export default function App() {
   const isMobile = useMobile();
   const [activeService, setActiveService] = useState(SERVICES_DATA[1]);
   const [activeAddOn, setActiveAddOn] = useState(null);
-  const [cameraView, setCameraView] = useState('default');
+  const [cameraView, setCameraView] = useState('exterior');
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+
+  // Cleaning State (Lifted)
+  const [cleaningState, setCleaningState] = useState('clean');
+  const [engineCleaningState, setEngineCleaningState] = useState('clean');
+  const engineTimers = useRef([]);
+
+  const handleClean = () => {
+    if (cleaningState === 'foaming' || cleaningState === 'rinsing') return;
+    // brief pause so camera can settle on the door
+    setCleaningState('dirty');
+    setTimeout(() => {
+      setCleaningState('foaming');
+      setTimeout(() => {
+        setCleaningState('rinsing');
+        setTimeout(() => {
+          setCleaningState('clean');
+        }, 4000);
+      }, 2500); // slightly longer foaming window before rinse
+    }, 1250); // linger on dirty view a bit longer before spraying
+  };
+
+  // Engine bay cleaning trigger (dirty snap -> brush & mist -> fade clean)
+  useEffect(() => {
+    engineTimers.current.forEach(clearTimeout);
+    engineTimers.current = [];
+
+    if (activeAddOn?.name?.includes('Engine')) {
+      setCameraView('engine');
+      setEngineCleaningState('dirty');
+      engineTimers.current.push(setTimeout(() => setEngineCleaningState('brushing'), 2000));
+      engineTimers.current.push(setTimeout(() => setEngineCleaningState('rinsing'), 3000));
+      engineTimers.current.push(setTimeout(() => setEngineCleaningState('clean'), 7000));
+    } else {
+      setEngineCleaningState('clean');
+    }
+
+    return () => {
+      engineTimers.current.forEach(clearTimeout);
+      engineTimers.current = [];
+    };
+  }, [activeAddOn, setCameraView]);
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -664,13 +878,13 @@ export default function App() {
   // Hide loading screen when model is fully loaded
   useEffect(() => {
     if (loadingProgress >= 100) {
-      const timer = setTimeout(() => setIsLoaded(true), 500);
+      const timer = setTimeout(() => setIsLoaded(true), 150);
       return () => clearTimeout(timer);
     }
   }, [loadingProgress]);
 
   return (
-    <div style={{ width: '100%', height: '100vh', background: '#050505', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100vh', background: 'linear-gradient(to bottom, #000000 0%, #1a0b05 70%, #4a1905 100%)', position: 'relative', overflow: 'hidden' }}>
 
       {/* LOADING SCREEN */}
       <AnimatePresence>
@@ -773,7 +987,10 @@ export default function App() {
       {isMobile ? (
         <BottomSheet
           activeService={activeService}
-          setActiveService={setActiveService}
+          setActiveService={(service) => {
+            setActiveService(service);
+            if (service?.id === 'exterior') handleClean();
+          }}
           activeAddOn={activeAddOn}
           setActiveAddOn={setActiveAddOn}
           setCameraView={setCameraView}
@@ -782,7 +999,10 @@ export default function App() {
       ) : (
         <Sidebar
           activeService={activeService}
-          setActiveService={setActiveService}
+          setActiveService={(service) => {
+            setActiveService(service);
+            if (service?.id === 'exterior') handleClean();
+          }}
           activeAddOn={activeAddOn}
           setActiveAddOn={setActiveAddOn}
           setCameraView={setCameraView}
@@ -795,44 +1015,54 @@ export default function App() {
         performance={{ min: 0.5 }} // Allow frame rate to drop if needed
         gl={{
           antialias: true,
-          alpha: false,
+          alpha: true,
           powerPreference: 'high-performance',
           preserveDrawingBuffer: false
         }}
         style={{ marginLeft: isMobile ? '0' : '350px', width: isMobile ? '100%' : 'calc(100% - 350px)' }}
       >
         <Suspense fallback={<CanvasLoader setLoadingProgress={setLoadingProgress} />}>
-          <CanvasLoader setLoadingProgress={setLoadingProgress} />
-          <Background />
-
-          <ambientLight intensity={0.5} />
+          <ambientLight intensity={0.45} />
           <spotLight
             position={[10, 10, 10]}
             angle={0.15}
             penumbra={1}
-            intensity={10}
+            intensity={8}
             castShadow
-            shadow-mapSize={isMobile ? [512, 512] : [1024, 1024]} // Reduced for mobile performance
+            shadow-mapSize={isMobile ? [384, 384] : [768, 768]} // Reduced for mobile performance
           />
           <pointLight position={[-10, -10, -10]} color={THEME.primary} intensity={5} />
 
           <Environment preset="city" />
 
-          <Float speed={1} rotationIntensity={0.1} floatIntensity={0.1}>
+          {isMobile ? (
             <CarModel
               activeService={activeService}
               activeAddOn={activeAddOn}
               onPartClick={setCameraView}
+              cleaningState={cleaningState}
+              engineCleaningState={engineCleaningState}
             />
-          </Float>
+          ) : (
+            <Float speed={1} rotationIntensity={0.1} floatIntensity={0.1}>
+              <CarModel
+                activeService={activeService}
+                activeAddOn={activeAddOn}
+                onPartClick={setCameraView}
+                cleaningState={cleaningState}
+                engineCleaningState={engineCleaningState}
+              />
+            </Float>
+          )}
 
           <ContactShadows
-            resolution={isMobile ? 512 : 1024}
-            scale={10}
-            blur={isMobile ? 2 : 1}
+            resolution={isMobile ? 384 : 768}
+            scale={isMobile ? 9 : 10}
+            blur={isMobile ? 1.8 : 1}
             opacity={1}
             far={10}
             color="#000000"
+            frames={1}
           />
 
           <CameraRig view={cameraView} />

@@ -19,9 +19,9 @@ const fs = require('fs');
 async function optimizeModel() {
     console.log('🚀 Starting model optimization...\n');
 
-    const inputPath = path.join(__dirname, '../public/bmw_m4_f82.glb');
-    const outputPath = path.join(__dirname, '../public/bmw_m4_f82_optimized.glb');
-    const backupPath = path.join(__dirname, '../public/bmw_m4_f82_original.glb');
+    const inputPath = path.join(__dirname, '../public/brush.glb');
+    const outputPath = path.join(__dirname, '../public/brush_optimized.glb');
+    const backupPath = path.join(__dirname, '../public/brush_original.glb');
 
     // Check if file exists
     if (!fs.existsSync(inputPath)) {
