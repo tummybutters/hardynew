@@ -30,6 +30,15 @@ const THEME = {
   border: 'rgba(255, 255, 255, 0.1)'
 };
 
+const HOME_MENU_ITEM = {
+  id: 'home',
+  title: 'Home',
+  description: 'Reset to a hero orbit view of the car.',
+  target: 'home'
+};
+
+const MENU_ITEMS = [HOME_MENU_ITEM, ...SERVICES_DATA];
+
 // --- Hooks ---
 function useMobile() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -59,6 +68,7 @@ function ModelDebugger({ scene }) {
 function CameraRig({ view }) {
   const controls = useRef();
   const { camera } = useThree();
+  const [homeOrbitEnabled, setHomeOrbitEnabled] = useState(false);
 
   useEffect(() => {
     if (!controls.current) return;
@@ -132,6 +142,26 @@ function CameraRig({ view }) {
         );
         break;
 
+      case 'paint_correction':
+        // Closer side sweep to showcase polishing passes
+        controls.current.setLookAt(
+          -3.0, 1.3, 1.6,
+          0.2, 0.9, 0.1,
+          true
+        );
+        controls.current.zoomTo(1.05, true);
+        break;
+
+      case 'ceramic_coating':
+        // Slightly higher, balanced three-quarter to show overall gloss
+        controls.current.setLookAt(
+          -2.8, 1.6, -1.8,
+          0.1, 0.9, 0.0,
+          true
+        );
+        controls.current.zoomTo(1.0, true);
+        break;
+
       case 'front':
         // Focus on headlight area (closer, lower angle)
         controls.current.setLookAt(
@@ -158,11 +188,36 @@ function CameraRig({ view }) {
         );
         break;
 
+      case 'home':
+        // Hero-style orbit that keeps the car prominent
+        controls.current.setLookAt(
+          2.6, 1.6, 3.2,
+          0.0, 0.9, 0.0,
+          true
+        );
+        controls.current.zoomTo(1.1, true);
+        break;
+
       default:
         controls.current.setLookAt(4, 2, 5, 0, 0, 0, true);
         break;
     }
   }, [view, camera]);
+
+  useEffect(() => {
+    if (view !== 'home') {
+      setHomeOrbitEnabled(false);
+      return;
+    }
+    const t = setTimeout(() => setHomeOrbitEnabled(true), 450); // let the camera settle first
+    return () => clearTimeout(t);
+  }, [view]);
+
+  useFrame((_, delta) => {
+    if (!controls.current || view !== 'home') return;
+    if (homeOrbitEnabled) controls.current.rotate(-0.2 * delta, 0, false);
+    controls.current.update(delta); // apply the gentle home orbit only
+  });
 
   return <CameraControls ref={controls} minPolarAngle={0} maxPolarAngle={Math.PI / 1.8} />;
 }
@@ -181,7 +236,7 @@ function CanvasLoader({ setLoadingProgress }) {
 }
 
 // --- 3D Car Component ---
-function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engineCleaningState, headlightCleaningState, petHairState, isMobile }) {
+function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engineCleaningState, headlightCleaningState, petHairState, isMobile, view }) {
   const { scene } = useGLTF('/bmw_m4_f82.glb');
 
   // We store the *Pivot Groups* not the raw nodes for animation
@@ -375,16 +430,17 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
   useEffect(() => {
     scene.traverse((node) => {
       if (node.isMesh && node.material) {
-        if (!node.userData.origEnvMapIntensity) {
-          node.userData.origEnvMapIntensity = node.material.envMapIntensity;
+        // Store original values on first run
+        if (node.userData.origEnvMapIntensity === undefined) {
+          node.userData.origEnvMapIntensity = node.material.envMapIntensity || 1.0;
+        }
+        if (node.userData.origRoughness === undefined) {
+          node.userData.origRoughness = node.material.roughness || 0.5;
         }
 
-        if (activeService?.id === 'premium') {
-          node.material.envMapIntensity = 3.0;
-          node.material.roughness = Math.max(0, node.material.roughness - 0.2);
-        } else {
-          node.material.envMapIntensity = 1.5;
-        }
+        // Restore original values
+        node.material.envMapIntensity = node.userData.origEnvMapIntensity;
+        node.material.roughness = node.userData.origRoughness;
         node.material.needsUpdate = true;
       }
     });
@@ -394,7 +450,7 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
   useFrame((state, delta) => {
     const easing = 2.0 * delta; // Smoother, slower easing
     const isEngineActive = activeAddOn?.name?.includes('Engine');
-    const isInteriorActive = activeService?.id === 'interior';
+    const isInteriorActive = activeService?.id === 'interior' && view !== 'home';
 
     // Animate Groups
     if (hoodGroup) {
@@ -488,19 +544,13 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
         onPointerDown={handleClick}
       />
 
-      {/* Pet hair shell wrapped to detected floor meshes; fallback decal if none found */}
-      {floorNodes.length > 0 ? (
-        <PetHairShell
-          state={petHairState}
-          nodes={floorNodes}
-        />
-      ) : (
-        <PetHairProxy
-          state={petHairState}
-          position={[0, 0.06, -0.2]}
-          size={[1.6, 1.0]}
-        />
-      )}
+      {/* Pet hair proxy floor - Forced as per user request */}
+      {/* Pet hair proxy floor - Forced as per user request */}
+      <PetHairProxy
+        state={petHairState}
+        position={[0, 0.35, -0.2]}
+        size={[3.0, 3.0]}
+      />
 
       {/* Dirt Shell & Foam - Attached to the Right Door Group if it exists */}
       {
@@ -592,9 +642,11 @@ const ServiceItem = ({ item, isActive, onClick, isAddOn = false }) => (
         {isAddOn && <Plus size={12} style={{ marginRight: 6, display: 'inline' }} />}
         {item.name || item.title}
       </span>
-      <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
-        ${item.price}
-      </span>
+      {item.price !== undefined && (
+        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+          ${item.price}
+        </span>
+      )}
     </div>
     {isActive && !isAddOn && (
       <motion.div
@@ -608,7 +660,7 @@ const ServiceItem = ({ item, isActive, onClick, isAddOn = false }) => (
   </motion.div>
 );
 
-const Sidebar = ({ activeService, setActiveService, activeAddOn, setActiveAddOn, setCameraView }) => {
+const Sidebar = ({ activeService, setActiveService, activeAddOn, setActiveAddOn, setCameraView, activeMenuItem, setActiveMenuItem }) => {
   return (
     <div style={{
       position: 'absolute',
@@ -639,14 +691,22 @@ const Sidebar = ({ activeService, setActiveService, activeAddOn, setActiveAddOn,
 
       {/* Main Service Buttons - Always Visible */}
       <div>
-        {SERVICES_DATA.map((service) => {
-          const isActive = activeService?.id === service.id;
+        {MENU_ITEMS.map((service) => {
+          const isHome = service.id === 'home';
+          const isActive = activeMenuItem === service.id;
           return (
             <div key={service.id}>
               <ServiceItem
                 item={service}
                 isActive={isActive}
                 onClick={() => {
+                  if (isHome) {
+                    setActiveMenuItem('home');
+                    setActiveAddOn(null);
+                    setCameraView('home');
+                    return;
+                  }
+                  setActiveMenuItem(service.id);
                   setActiveService(service);
                   setActiveAddOn(null);
                   setCameraView(service.target);
@@ -743,7 +803,16 @@ const BookingModal = ({ isOpen, onClose, service, addOn }) => {
 };
 
 // --- BottomSheet Component (Mobile) ---
-const BottomSheet = ({ activeService, setActiveService, activeAddOn, setActiveAddOn, setCameraView, onShare }) => {
+const BottomSheet = ({
+  activeService,
+  activeMenuItem,
+  setActiveMenuItem,
+  setActiveService,
+  activeAddOn,
+  setActiveAddOn,
+  setCameraView,
+  onShare
+}) => {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -814,14 +883,23 @@ const BottomSheet = ({ activeService, setActiveService, activeAddOn, setActiveAd
 
         {/* Main Services */}
         <div style={{ marginBottom: '20px' }}>
-          {SERVICES_DATA.map((service) => {
-            const isActive = activeService?.id === service.id;
+          {MENU_ITEMS.map((service) => {
+            const isHome = service.id === 'home';
+            const isActive = activeMenuItem === service.id;
             return (
               <ServiceItem
                 key={service.id}
                 item={service}
                 isActive={isActive}
                 onClick={() => {
+                  if (isHome) {
+                    setActiveMenuItem('home');
+                    setActiveAddOn(null);
+                    setCameraView('home');
+                    setIsOpen(false);
+                    return;
+                  }
+                  setActiveMenuItem(service.id);
                   setActiveService(service);
                   setActiveAddOn(null);
                   setCameraView(service.target);
@@ -868,6 +946,7 @@ const BottomSheet = ({ activeService, setActiveService, activeAddOn, setActiveAd
 export default function App() {
   const isMobile = useMobile();
   const [activeService, setActiveService] = useState(SERVICES_DATA[1]);
+  const [activeMenuItem, setActiveMenuItem] = useState(SERVICES_DATA[1].id);
   const [activeAddOn, setActiveAddOn] = useState(null);
   const [cameraView, setCameraView] = useState('exterior');
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -1088,8 +1167,11 @@ export default function App() {
       {isMobile ? (
         <BottomSheet
           activeService={activeService}
+          activeMenuItem={activeMenuItem}
+          setActiveMenuItem={setActiveMenuItem}
           setActiveService={(service) => {
             setActiveService(service);
+            setActiveMenuItem(service?.id || activeMenuItem);
             if (service?.id === 'exterior') handleClean();
           }}
           activeAddOn={activeAddOn}
@@ -1100,8 +1182,11 @@ export default function App() {
       ) : (
         <Sidebar
           activeService={activeService}
+          activeMenuItem={activeMenuItem}
+          setActiveMenuItem={setActiveMenuItem}
           setActiveService={(service) => {
             setActiveService(service);
+            setActiveMenuItem(service?.id || activeMenuItem);
             if (service?.id === 'exterior') handleClean();
           }}
           activeAddOn={activeAddOn}
@@ -1146,6 +1231,7 @@ export default function App() {
               headlightCleaningState={headlightCleaningState}
               petHairState={petHairState}
               isMobile={isMobile}
+              view={cameraView}
             />
           ) : (
             <Float speed={1} rotationIntensity={0.1} floatIntensity={0.1}>
@@ -1158,6 +1244,7 @@ export default function App() {
                 headlightCleaningState={headlightCleaningState}
                 petHairState={petHairState}
                 isMobile={isMobile}
+                view={cameraView}
               />
             </Float>
           )}

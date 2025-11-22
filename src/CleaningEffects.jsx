@@ -1314,9 +1314,9 @@ export function PetHairShell({ state, nodes = [], texturePath = '/pet_hair.png' 
 // Pet hair proxy plane positioned over the floor area
 export function PetHairProxy({
     state,
-    texturePath = '/pet_hair.png',
-    position = [0, 0.06, -0.2],
-    size = [1.6, 1.0],
+    texturePath = '/dog_hair_texture.png',
+    position = [0, 0.35, -0.2],
+    size = [3.0, 3.0],
     rotation = [-Math.PI / 2, 0, 0]
 }) {
     const hairMap = useTexture(texturePath);
@@ -1326,7 +1326,7 @@ export function PetHairProxy({
     useMemo(() => {
         if (!hairMap) return;
         hairMap.wrapS = hairMap.wrapT = THREE.RepeatWrapping;
-        hairMap.repeat.set(1.5, 1.0);
+        hairMap.repeat.set(6, 6); // More dense tiling for better visibility
         hairMap.minFilter = THREE.LinearFilter;
         hairMap.magFilter = THREE.LinearFilter;
         hairMap.needsUpdate = true;
@@ -1337,7 +1337,7 @@ export function PetHairProxy({
         fadeRef.current = THREE.MathUtils.lerp(fadeRef.current, target, 1 - Math.exp(-8 * delta));
         if (meshRef.current?.material) {
             meshRef.current.material.opacity = fadeRef.current;
-            meshRef.current.visible = fadeRef.current > 0.01;
+            meshRef.current.material.visible = fadeRef.current > 0.01;
         }
     });
 
@@ -1349,7 +1349,7 @@ export function PetHairProxy({
             castShadow={false}
             receiveShadow={false}
             frustumCulled={false}
-            renderOrder={18}
+            renderOrder={100}
         >
             <planeGeometry args={size} />
             <meshStandardMaterial
@@ -1357,13 +1357,13 @@ export function PetHairProxy({
                 alphaMap={hairMap}
                 transparent
                 opacity={0}
-                roughness={0.9}
+                roughness={1.0}
                 metalness={0}
                 depthWrite={false}
                 depthTest
-                side={THREE.FrontSide}
+                side={THREE.DoubleSide}
                 polygonOffset
-                polygonOffsetFactor={-0.5}
+                polygonOffsetFactor={-2}
             />
         </mesh>
     );

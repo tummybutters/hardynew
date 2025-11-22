@@ -41,22 +41,33 @@ export const SERVICES_DATA = [
     ]
   },
   {
-    id: 'premium',
-    title: 'Premium Protection',
-    price: 499,
-    description: 'Advanced paint correction, ceramic coating, and specialty treatments for ultimate vehicle protection.',
-    duration: '4-6 hours',
-    target: 'paint',
+    id: 'paint_correction',
+    title: 'Paint Correction Polish',
+    price: 299,
+    description: 'Machine polish to remove swirls and revive gloss across the full exterior.',
+    duration: '2-3 hours',
+    target: 'paint_correction',
     features: [
       'Multi-stage paint correction',
-      'Professional ceramic coating',
-      'Swirl & scratch removal',
-      'UV & chemical resistance',
-      'Long-term protection warranty'
+      'Swirl & light scratch reduction',
+      'Refined gloss finish',
+      'Panel-by-panel inspection'
     ],
-    addOns: [
-      { name: 'Paint Correction Polish', price: 199, target: 'paint_detail' },
-      { name: 'Ceramic Coating Layer', price: 299, target: 'paint_detail' }
-    ]
+    addOns: []
+  },
+  {
+    id: 'ceramic_coating',
+    title: 'Ceramic Coating',
+    price: 399,
+    description: 'Durable ceramic protection for deep gloss and easier maintenance.',
+    duration: '3-4 hours',
+    target: 'ceramic_coating',
+    features: [
+      'Professional ceramic application',
+      'Hydrophobic self-cleaning effect',
+      'UV and chemical resistance',
+      'Extended durability and shine'
+    ],
+    addOns: []
   }
 ];
