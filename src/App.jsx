@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Info, ChevronDown, ChevronRight, Check, Plus, X, Share2 } from 'lucide-react';
 import { SERVICES_DATA } from './servicesData';
 import LoadingScreen from './LoadingScreen';
-import { DirtShell, FoamParticles, FoamAccumulator, WaterParticles, EngineBrush } from './CleaningEffects';
+import { DirtShell, FoamParticles, FoamAccumulator, WaterParticles, EngineSparkles, HeadlightRestoration, PetHairShell, PetHairProxy } from './CleaningEffects';
 
 // Preload the model
 useGLTF.preload('/bmw_m4_f82.glb');
@@ -87,6 +87,16 @@ function CameraRig({ view }) {
         controls.current.zoomTo(1.0, true);
         break;
 
+      case 'interior_floor':
+        // Low angle toward the rear footwells to showcase pet hair removal
+        controls.current.setLookAt(
+          0.0, 0.85, -0.8, // Position: lower and slightly behind the seats
+          0.0, 0.15, 0.25, // Target: slightly lower toward the rear floor area
+          true
+        );
+        controls.current.zoomTo(1.1, true);
+        break;
+
       case 'engine':
         controls.current.setLookAt(
           0.8, 1.4, 2.0,
@@ -122,9 +132,16 @@ function CameraRig({ view }) {
         );
         break;
 
-      case 'wheel':
       case 'front':
-        // Focus on headlight area (front bumper, higher angle)
+        // Focus on headlight area (closer, lower angle)
+        controls.current.setLookAt(
+          1.0, 0.9, 2.2, // Position: Closer in
+          0.5, 0.7, 1.8, // Target: Headlight area
+          true
+        );
+        break;
+
+      case 'wheel':
         controls.current.setLookAt(
           1.5, 1.2, 2.5,
           0.5, 0.7, 1.8,
@@ -164,7 +181,7 @@ function CanvasLoader({ setLoadingProgress }) {
 }
 
 // --- 3D Car Component ---
-function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engineCleaningState }) {
+function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engineCleaningState, headlightCleaningState, petHairState, isMobile }) {
   const { scene } = useGLTF('/bmw_m4_f82.glb');
 
   // We store the *Pivot Groups* not the raw nodes for animation
@@ -175,6 +192,8 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
   const [engineGroup, setEngineGroup] = useState(null);
   const [engineNodes, setEngineNodes] = useState([]);
   const [engineBounds, setEngineBounds] = useState(null);
+  const [headlightNodes, setHeadlightNodes] = useState([]);
+  const [floorNodes, setFloorNodes] = useState([]);
 
   // Dirt Opacity State (Animation driven) - refs to avoid React churn per frame
   const dirtOpacityRef = useRef(0);
@@ -184,7 +203,6 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
   const isSetup = useRef(false);
   const lastCleaningState = useRef(cleaningState);
   const lastEngineState = useRef(engineCleaningState);
-  const engineFadeHold = useRef(0);
 
   // 1. Setup Grouping & Pivots (Run ONCE)
   useEffect(() => {
@@ -196,7 +214,12 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
     const rawLeftDoorNodes = [];
     const rawRightDoorNodes = [];
     const rawEngineNodes = [];
+    const rawHeadlightNodes = [];
+    const rawFloorNodes = [];
     let engineBayGroup = null;
+    const tmpBox = new THREE.Box3();
+    const tmpCenter = new THREE.Vector3();
+    const tmpSize = new THREE.Vector3();
 
     scene.traverse((node) => {
       if (node.isGroup && !engineBayGroup) {
@@ -218,6 +241,12 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
           !name.includes('light') &&
           !name.includes('lamp')) {
           rawHoodNodes.push(node);
+        }
+
+        // --- HEADLIGHT DETECTION ---
+        if (name.includes('headlight') || (name.includes('lamp') && !name.includes('tail'))) {
+          // console.log("Found Headlight Node:", name);
+          rawHeadlightNodes.push(node);
         }
 
         // --- ENGINE BAY DETECTION ---
@@ -262,6 +291,19 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
             (parentName.includes('door') && (parentName.includes('right') || parentName.includes('_r')))
           ) {
             rawRightDoorNodes.push(node);
+          }
+        }
+
+        // Floor detection: explicit interior meshes that cover cabin base
+        if (node.isMesh) {
+          const isNamedFloor =
+            name.includes('interior_ar4_interior_black_0'.toLowerCase()) ||
+            name.includes('interior_ar4_alcnt_0'.toLowerCase()) ||
+            name.includes('interior_ar4_main_0'.toLowerCase()) ||
+            name.includes('interior_ar4_int_decals_0'.toLowerCase()) ||
+            name.includes('interior_ar4_int_seams_0'.toLowerCase());
+          if (isNamedFloor) {
+            rawFloorNodes.push(node);
           }
         }
       }
@@ -322,6 +364,10 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
     setEngineGroup(engineOverlayGroup);
     setEngineNodes(rawEngineNodes);
     setEngineBounds(engineCenter && engineSize ? { center: engineCenter, size: engineSize } : null);
+    setHeadlightNodes(rawHeadlightNodes);
+    setFloorNodes(rawFloorNodes);
+
+    console.info('PetHair floor candidates:', rawFloorNodes.map(n => n.name));
 
   }, [scene]); // Only run once per scene load
 
@@ -391,28 +437,19 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
     if (engineCleaningState !== lastEngineState.current) {
       if (engineCleaningState === 'dirty') {
         engineDirtOpacityRef.current = 1;
-        engineFadeHold.current = 0;
       } else if (engineCleaningState === 'clean') {
         engineDirtOpacityRef.current = 0;
       }
       lastEngineState.current = engineCleaningState;
     }
 
-    // Keep muck solid for a short hold, then allow fade during brush/rinse
-    if (engineCleaningState === 'brushing' || engineCleaningState === 'rinsing') {
-      engineFadeHold.current += delta;
-    } else if (engineCleaningState === 'clean') {
-      engineFadeHold.current = 0;
-    }
-
-    const canFade =
-      engineCleaningState === 'clean' ||
-      ((engineCleaningState === 'brushing' || engineCleaningState === 'rinsing') && engineFadeHold.current >= 1.2);
-    const engineTarget = canFade ? 0 : 1;
+    // Fade grime immediately and slowly once cleaning starts; no hold
+    const engineTarget = engineCleaningState === 'dirty' ? 1 : 0;
+    // Slower, smoother fade to let sparkles feel like a gentle wash
     const engineSpeed =
-      engineCleaningState === 'clean' ? 2.6 :
-        engineCleaningState === 'brushing' || engineCleaningState === 'rinsing' ? 1.6 :
-          1.8;
+      engineCleaningState === 'clean' ? 1.4 :
+        engineCleaningState === 'brushing' || engineCleaningState === 'rinsing' ? 1.0 :
+          1.1;
     engineDirtOpacityRef.current = THREE.MathUtils.lerp(engineDirtOpacityRef.current, engineTarget, 1 - Math.exp(-engineSpeed * delta));
   });
 
@@ -451,6 +488,19 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
         onPointerDown={handleClick}
       />
 
+      {/* Pet hair shell wrapped to detected floor meshes; fallback decal if none found */}
+      {floorNodes.length > 0 ? (
+        <PetHairShell
+          state={petHairState}
+          nodes={floorNodes}
+        />
+      ) : (
+        <PetHairProxy
+          state={petHairState}
+          position={[0, 0.06, -0.2]}
+          size={[1.6, 1.0]}
+        />
+      )}
 
       {/* Dirt Shell & Foam - Attached to the Right Door Group if it exists */}
       {
@@ -480,13 +530,14 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
         )
       }
 
-      {/* Engine Brush & Light Spray */}
+      {/* Engine sparkles (world-space, avoid double transforms) */}
       {
-        engineBounds && engineCleaningState !== 'clean' && (
-          <EngineBrush
-            cleaningState={engineCleaningState}
+        engineBounds && activeAddOn?.name?.includes('Engine') && (
+          <EngineSparkles
             center={engineBounds.center}
             size={engineBounds.size}
+            active={activeAddOn?.name?.includes('Engine')}
+            dirtOpacityRef={engineDirtOpacityRef}
           />
         )
       }
@@ -504,6 +555,12 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, engi
         active={cleaningState === 'rinsing'}
         doorMeshes={rightDoorNodes}
         count={isMobile ? 180 : 280}
+      />
+
+      {/* Headlight Restoration Effect */}
+      <HeadlightRestoration
+        nodes={headlightNodes}
+        cleaningState={headlightCleaningState}
       />
     </>
   );
@@ -820,7 +877,11 @@ export default function App() {
   // Cleaning State (Lifted)
   const [cleaningState, setCleaningState] = useState('clean');
   const [engineCleaningState, setEngineCleaningState] = useState('clean');
+  const [headlightCleaningState, setHeadlightCleaningState] = useState('clean');
+  const [petHairState, setPetHairState] = useState('clean');
   const engineTimers = useRef([]);
+  const headlightTimers = useRef([]);
+  const petHairTimers = useRef([]);
 
   const handleClean = () => {
     if (cleaningState === 'foaming' || cleaningState === 'rinsing') return;
@@ -845,9 +906,9 @@ export default function App() {
     if (activeAddOn?.name?.includes('Engine')) {
       setCameraView('engine');
       setEngineCleaningState('dirty');
-      engineTimers.current.push(setTimeout(() => setEngineCleaningState('brushing'), 2000));
-      engineTimers.current.push(setTimeout(() => setEngineCleaningState('rinsing'), 3000));
-      engineTimers.current.push(setTimeout(() => setEngineCleaningState('clean'), 7000));
+      engineTimers.current.push(setTimeout(() => setEngineCleaningState('brushing'), 1800)); // linger dirty briefly
+      engineTimers.current.push(setTimeout(() => setEngineCleaningState('rinsing'), 5200)); // longer brushing phase
+      engineTimers.current.push(setTimeout(() => setEngineCleaningState('clean'), 11000)); // extended rinse/linger
     } else {
       setEngineCleaningState('clean');
     }
@@ -857,6 +918,46 @@ export default function App() {
       engineTimers.current = [];
     };
   }, [activeAddOn, setCameraView]);
+
+  // Headlight Restoration trigger
+  useEffect(() => {
+    headlightTimers.current.forEach(clearTimeout);
+    headlightTimers.current = [];
+
+    if (activeAddOn?.name === 'Headlight Restoration') {
+      setCameraView('front');
+      setHeadlightCleaningState('dirty');
+      // Sequence: Dirty (instant) -> Polishing (almost instant) -> Clean
+      headlightTimers.current.push(setTimeout(() => setHeadlightCleaningState('polishing'), 100));
+      headlightTimers.current.push(setTimeout(() => setHeadlightCleaningState('clean'), 4500));
+    } else {
+      setHeadlightCleaningState('clean');
+    }
+
+    return () => {
+      headlightTimers.current.forEach(clearTimeout);
+      headlightTimers.current = [];
+    };
+  }, [activeAddOn, setCameraView]);
+
+  // Pet Hair Removal trigger (rear floor focus)
+  useEffect(() => {
+    petHairTimers.current.forEach(clearTimeout);
+    petHairTimers.current = [];
+
+    const isPetHair = activeService?.id === 'interior' && activeAddOn?.name === 'Pet Hair Removal';
+    if (isPetHair) {
+      setCameraView('interior_floor');
+      setPetHairState('dirty');
+    } else {
+      setPetHairState('clean');
+    }
+
+    return () => {
+      petHairTimers.current.forEach(clearTimeout);
+      petHairTimers.current = [];
+    };
+  }, [activeAddOn, activeService, setCameraView]);
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -1042,6 +1143,9 @@ export default function App() {
               onPartClick={setCameraView}
               cleaningState={cleaningState}
               engineCleaningState={engineCleaningState}
+              headlightCleaningState={headlightCleaningState}
+              petHairState={petHairState}
+              isMobile={isMobile}
             />
           ) : (
             <Float speed={1} rotationIntensity={0.1} floatIntensity={0.1}>
@@ -1051,6 +1155,9 @@ export default function App() {
                 onPartClick={setCameraView}
                 cleaningState={cleaningState}
                 engineCleaningState={engineCleaningState}
+                headlightCleaningState={headlightCleaningState}
+                petHairState={petHairState}
+                isMobile={isMobile}
               />
             </Float>
           )}

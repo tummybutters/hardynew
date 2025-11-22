@@ -1,7 +1,7 @@
 import React, { useRef, useMemo, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree, createPortal } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useTexture, useGLTF } from '@react-three/drei';
+import { useTexture } from '@react-three/drei';
 
 // --- Dirt Shell Component ---
 // Renders a transparent "dirt" layer over the existing geometry
@@ -678,198 +678,693 @@ export const FoamAccumulator = forwardRef(function FoamAccumulator({ foaming, ri
     );
 });
 
-// --- Engine Brush & Light Wash (Engine Bay demo) ---
-export function EngineBrush({ cleaningState, center, size }) {
-    const { scene: brushScene } = useGLTF('/brush_optimized.glb');
-    const brushRef = useRef();
+// --- Engine Sparkles (GPU fairy dust points) ---
+// Shaders for the "fairy dust" sparkle field
+const sparkleVertexShader = `
+    uniform float uTime;
+    uniform float uFade;
+    uniform float uBaseSize;
+    uniform float uPixelRatio;
+    attribute float aRandom;
+    varying float vIntensity;
+
+    float hash(float n) {
+        return fract(sin(n) * 43758.5453123);
+    }
+
+    void main() {
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+
+        // Layered twinkle: fast stochastic gate + rapid sine flares
+        float t = uTime * (6.0 + aRandom * 8.0);
+        float noisy = hash(t + aRandom * 97.0);
+        float gate = step(0.4, noisy);
+        float strobe = pow(hash(t * 2.7 + aRandom * 211.0), 9.0) * gate;
+        float shimmer = pow(abs(sin(t * (1.6 + aRandom))), 8.0);
+        float sparkle = max(shimmer, strobe);
+
+        vIntensity = (0.18 + sparkle * 1.6) * uFade;
+
+        float size = uBaseSize * (0.8 + sparkle * 2.6) * uPixelRatio * uFade;
+        gl_PointSize = min(size, uPixelRatio * 8.0);
+        gl_Position = projectionMatrix * mvPosition;
+    }
+`;
+
+const sparkleFragmentShader = `
+    precision highp float;
+    uniform vec3 uColorA;
+    uniform vec3 uColorB;
+    varying float vIntensity;
+
+    void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float r = length(uv * 2.0);
+
+        // Crisp core + cross-shaped glints for a jewel-like pixel
+        float core = smoothstep(0.45, 0.05, r);
+        float cross = pow(max(0.0, 1.0 - (abs(uv.x) + abs(uv.y)) * 3.2), 3.0);
+        float sparkle = clamp(core + cross * 1.4, 0.0, 1.0);
+
+        float alpha = sparkle * vIntensity;
+        if (alpha <= 0.01) discard;
+
+        float hueMix = 0.5 + 0.5 * sin((uv.x + uv.y) * 28.0);
+        vec3 color = mix(uColorA, uColorB, hueMix);
+        gl_FragColor = vec4(color * (1.2 + vIntensity * 1.8), alpha);
+    }
+`;
+
+// --- Engine Sparkles (high-density, twinkling fairy dust) ---
+export function EngineSparkles({
+    center,
+    size,
+    active,
+    dirtOpacityRef,
+    count = 520,
+    depthTest = true,
+    renderOrder = 12,
+    viewOffset = 0,
+    fadeMultiplier = 1
+}) {
+    const pointsRef = useRef();
+    const geometryRef = useRef();
+    const materialRef = useRef();
+    const fadeRef = useRef(0);
+    const { gl } = useThree();
+    const tmpViewOffset = useMemo(() => new THREE.Vector3(), []);
+
+    // Precompute static positions and per-point phase offsets
+    const positions = useMemo(() => {
+        const arr = new Float32Array(count * 3);
+        const sx = size?.x ?? 1;
+        const sy = size?.y ?? 1;
+        const sz = size?.z ?? 1;
+        for (let i = 0; i < count; i++) {
+            const i3 = i * 3;
+            arr[i3 + 0] = (Math.random() - 0.5) * sx * 0.9;
+            arr[i3 + 1] = (Math.random() - 0.15) * sy * 0.7; // slight bias upward in the bay
+            arr[i3 + 2] = (Math.random() - 0.5) * sz * 0.9;
+        }
+        return arr;
+    }, [count, size?.x, size?.y, size?.z]);
+
+    const randoms = useMemo(
+        () => Float32Array.from({ length: count }, () => Math.random()),
+        [count]
+    );
+
+    // Stable uniforms so the material isn't recreated
+    const uniforms = useMemo(() => ({
+        uTime: { value: 0 },
+        uFade: { value: 0 },
+        uBaseSize: { value: 2.4 },
+        uPixelRatio: { value: Math.min(2, gl.getPixelRatio()) },
+        uColorA: { value: new THREE.Color('#ffe9b0') }, // gold core
+        uColorB: { value: new THREE.Color('#ffcd6b') }  // deeper gold edge
+    }), [gl]);
+
+    useEffect(() => {
+        if (!geometryRef.current) return;
+        geometryRef.current.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometryRef.current.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
+        geometryRef.current.computeBoundingSphere();
+    }, [positions, randoms]);
+
+    useFrame((state, delta) => {
+        const mat = materialRef.current;
+        if (!mat) return;
+        const dirtFactor = dirtOpacityRef?.current ?? 0;
+        const target = active ? Math.min(1, dirtFactor * fadeMultiplier) : 0;
+        // Keep sparkle brightness directly aligned with the dirt fade for perfect sync
+        fadeRef.current = THREE.MathUtils.lerp(fadeRef.current, target, 1 - Math.exp(-5 * delta));
+        mat.uniforms.uFade.value = fadeRef.current;
+        mat.uniforms.uTime.value = state.clock.elapsedTime;
+
+        // Nudge sparkles toward the camera to sit above surfaces when requested
+        if (pointsRef.current && center) {
+            if (viewOffset > 0) {
+                tmpViewOffset.copy(state.camera.position).sub(center).normalize().multiplyScalar(viewOffset);
+                pointsRef.current.position.copy(center).add(tmpViewOffset);
+            } else {
+                pointsRef.current.position.copy(center);
+            }
+        }
+    });
+
+    if (!center || !size) return null;
+
+    return (
+        <points
+            ref={pointsRef}
+            frustumCulled={false}
+            renderOrder={renderOrder}
+        >
+            <bufferGeometry ref={geometryRef} />
+            <shaderMaterial
+                ref={materialRef}
+                vertexShader={sparkleVertexShader}
+                fragmentShader={sparkleFragmentShader}
+                uniforms={uniforms}
+                transparent
+                depthWrite={false}
+                depthTest={depthTest}
+                blending={THREE.AdditiveBlending}
+                toneMapped={false}
+            />
+        </points>
+    );
+}
+
+// --- Headlight Sparkles (Fairy Dust) ---
+// --- Headlight Sparkles (Fairy Dust) ---
+// --- Headlight Sparkles (Fairy Dust) ---
+export function HeadlightSparkles({
+    center,
+    size,
+    active,
+    opacityRef,
+    count = 400
+}) {
+    const pointsRef = useRef();
+    const geometryRef = useRef();
+    const materialRef = useRef();
+    const fadeRef = useRef(0);
+    const { gl } = useThree();
+    const tmpViewOffset = useMemo(() => new THREE.Vector3(), []);
+
+    // Precompute static positions: Vertical Plane (XY) distribution
+    const positions = useMemo(() => {
+        const arr = new Float32Array(count * 3);
+        const sx = (size?.x ?? 0.5) * 0.6; // Narrower width
+        const sy = (size?.y ?? 0.3) * 0.6; // Narrower height
+        // Ignore depth (z) for the plane itself, we'll just offset it
+        for (let i = 0; i < count; i++) {
+            const i3 = i * 3;
+            // Scatter on a vertical plane relative to the headlight center
+            arr[i3 + 0] = (Math.random() - 0.5) * sx;
+            arr[i3 + 1] = (Math.random() - 0.5) * sy - 0.35; // Shift down significantly more
+            arr[i3 + 2] = (Math.random() - 0.5) * 0.05; // Very thin depth variation
+        }
+        return arr;
+    }, [count, size?.x, size?.y]);
+
+    const randoms = useMemo(
+        () => Float32Array.from({ length: count }, () => Math.random()),
+        [count]
+    );
+
+    const uniforms = useMemo(() => ({
+        uTime: { value: 0 },
+        uFade: { value: 0 },
+        uBaseSize: { value: 60.0 }, // Huge size for visibility
+        uPixelRatio: { value: Math.min(2, gl.getPixelRatio()) },
+        uColorA: { value: new THREE.Color('#ffe9b0') },
+        uColorB: { value: new THREE.Color('#ffcd6b') }
+    }), [gl]);
+
+    useEffect(() => {
+        if (!geometryRef.current) return;
+        geometryRef.current.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometryRef.current.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
+    }, [positions, randoms]);
+
+    useFrame((state, delta) => {
+        const mat = materialRef.current;
+        if (!mat) return;
+
+        // Force visibility if active
+        const targetFade = active ? 1.0 : 0.0;
+
+        // Instant fade-in (10.0), Slow fade-out (0.8) to match fog
+        const speed = active ? 10.0 : 0.8;
+        fadeRef.current = THREE.MathUtils.lerp(fadeRef.current, targetFade, 1 - Math.exp(-speed * delta));
+
+        mat.uniforms.uFade.value = fadeRef.current;
+        mat.uniforms.uTime.value = state.clock.elapsedTime;
+
+        // Offset towards camera to ensure it sits in front of the glass
+        if (pointsRef.current && center) {
+            const camPos = state.camera.position;
+            const dir = tmpViewOffset.copy(camPos).sub(center).normalize();
+            // Offset by 0.6 units towards camera (much closer for better visibility)
+            pointsRef.current.position.copy(center).addScaledVector(dir, 0.6);
+            pointsRef.current.lookAt(camPos); // Ensure the plane faces the camera
+        }
+    });
+
+    if (!center) return null;
+
+    return (
+        <points ref={pointsRef} renderOrder={999} frustumCulled={false}>
+            <bufferGeometry ref={geometryRef} />
+            <shaderMaterial
+                ref={materialRef}
+                vertexShader={sparkleVertexShader}
+                fragmentShader={sparkleFragmentShader}
+                uniforms={uniforms}
+                transparent
+                depthWrite={false}
+                depthTest={false}
+                blending={THREE.AdditiveBlending}
+                toneMapped={false}
+            />
+        </points>
+    );
+}
+
+// --- Headlight Restoration Component ---
+export function HeadlightRestoration({ nodes, cleaningState }) {
+    const opacityRef = useRef(0);
+    const lastState = useRef(cleaningState);
+    const texture = useTexture('/headlight_fog.png');
+
+    useFrame((state, delta) => {
+        // Animation logic - smooth transitions only
+        const targetOpacity =
+            cleaningState === 'dirty' ? 0.8 :
+                cleaningState === 'polishing' ? 0.4 : // Semi-transparent during polish
+                    0; // Clean
+
+        // Instant transition to polishing (10.0), Slow fade to clean (0.8)
+        const speed = cleaningState === 'polishing' ? 10.0 : 0.8;
+        opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, targetOpacity, 1 - Math.exp(-speed * delta));
+    });
+
+    // Calculate center and size for sparkles (World Space)
+    const { center, size } = useMemo(() => {
+        if (!nodes || nodes.length === 0) return { center: new THREE.Vector3(), size: new THREE.Vector3(1, 1, 1) };
+
+        const box = new THREE.Box3();
+        nodes.forEach(n => {
+            n.updateWorldMatrix(true, false);
+            box.expandByObject(n);
+        });
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        return { center: box.getCenter(new THREE.Vector3()), size };
+    }, [nodes]);
+
+    if (!nodes || nodes.length === 0) return null;
+
+    return (
+        <group>
+            {/* Foggy Overlay - Applied to all headlight nodes to ensure visibility */}
+            {nodes.map((node, i) => createPortal(
+                <mesh geometry={node.geometry} renderOrder={1} scale={[1.005, 1.005, 1.005]}>
+                    <meshStandardMaterial
+                        color="#2a2a2a" // Solid Dark Grey
+                        transparent
+                        opacity={1} // Controlled by FogMaterialUpdater
+                        roughness={0.9} // Matte plastic look
+                        metalness={0.1}
+                        depthWrite={false}
+                        side={THREE.FrontSide}
+                        polygonOffset
+                        polygonOffsetFactor={-1}
+                    />
+                    <FogMaterialUpdater opacityRef={opacityRef} />
+                </mesh>,
+                node
+            ))}
+
+            {/* Sparkles - Fairy Dust Effect */}
+            <HeadlightSparkles
+                center={center}
+                size={size}
+                active={cleaningState === 'polishing'}
+                opacityRef={opacityRef}
+                count={400}
+            />
+        </group>
+    );
+}
+
+// Helper to update material opacity inside the portal
+function FogMaterialUpdater({ opacityRef }) {
+    const mesh = useRef();
+    useFrame(() => {
+        if (mesh.current && mesh.current.parent && mesh.current.parent.material) {
+            const mat = mesh.current.parent.material;
+            mat.opacity = opacityRef.current;
+            mat.visible = opacityRef.current > 0.001;
+        }
+    });
+    // We attach a ref to a dummy object to get access to the parent mesh (the portal root)
+    return <primitive object={new THREE.Object3D()} ref={mesh} visible={false} />;
+}
+
+// --- Polishing Particles ---
+export function PolishingParticles({ center }) {
+    const count = 60;
     const meshRef = useRef();
     const dummy = useMemo(() => new THREE.Object3D(), []);
-    const tmpInverse = useMemo(() => new THREE.Matrix4(), []);
-    const tmpPos = useMemo(() => new THREE.Vector3(), []);
-    const tmpDir = useMemo(() => new THREE.Vector3(), []);
-    const tmpJitter = useMemo(() => new THREE.Vector3(), []);
-    const tmpQuat = useMemo(() => new THREE.Quaternion(), []);
-    const spawnIndex = useRef(0);
-    const count = 120;
-
-    // Clone the brush scene so we can use it multiple times if needed (though here just once)
-    const brushClone = useMemo(() => brushScene.clone(), [brushScene]);
-
     const particles = useMemo(() => {
         return Array.from({ length: count }, () => ({
             position: new THREE.Vector3(),
             velocity: new THREE.Vector3(),
             life: 0,
             maxLife: 0,
-            size: 0
+            scale: 0
         }));
     }, [count]);
 
+    useFrame((state, delta) => {
+        if (!meshRef.current) return;
+
+        particles.forEach((p, i) => {
+            if (p.life <= 0) {
+                // Respawn
+                p.life = 0.5 + Math.random() * 0.5;
+                p.maxLife = p.life;
+                const theta = Math.random() * Math.PI * 2;
+                const r = Math.random() * 0.3; // Radius around headlight center
+                p.position.set(
+                    center.x + (Math.random() - 0.5) * 0.5, // Spread across width
+                    center.y + Math.sin(theta) * r,
+                    center.z + Math.cos(theta) * r
+                );
+                p.velocity.set(
+                    (Math.random() - 0.5) * 0.2,
+                    (Math.random() - 0.5) * 0.2,
+                    (Math.random() - 0.5) * 0.2
+                );
+                p.scale = 0.02 + Math.random() * 0.03;
+            }
+
+            p.life -= delta;
+            p.position.addScaledVector(p.velocity, delta);
+
+            dummy.position.copy(p.position);
+            const fade = Math.sin((p.life / p.maxLife) * Math.PI);
+            dummy.scale.setScalar(p.scale * fade);
+            dummy.updateMatrix();
+            meshRef.current.setMatrixAt(i, dummy.matrix);
+        });
+
+        meshRef.current.instanceMatrix.needsUpdate = true;
+    });
+
+    return (
+        <instancedMesh ref={meshRef} args={[null, null, count]}>
+            <planeGeometry args={[1, 1]} />
+            <meshBasicMaterial
+                color="#ffffff"
+                transparent
+                opacity={0.6}
+                blending={THREE.AdditiveBlending}
+                depthWrite={false}
+            />
+        </instancedMesh>
+    );
+}
+
+// --- Pet Hair Strands (instanced thin hairs on interior floor) ---
+export function PetHairStrands({ state, count = 420 }) {
+    const meshRef = useRef();
+    const dummy = useMemo(() => new THREE.Object3D(), []);
+    const fadeRef = useRef(0);
+
+    // Scatter strands across a rectangular footprint on the floor
+    const strands = useMemo(() => {
+        const items = [];
+        for (let i = 0; i < count; i++) {
+            const x = (Math.random() - 0.5) * 1.2;  // width across rear footwell
+            const z = -0.9 + Math.random() * 1.45; // depth covering both sides, slightly under seats
+            const y = 0.05 + Math.random() * 0.03; // hover just above carpet plane
+            const height = 0.06 + Math.random() * 0.08;
+            const thickness = 0.0025 + Math.random() * 0.0013;
+            const leanX = (Math.random() - 0.5) * 0.25;
+            const leanZ = (Math.random() - 0.5) * 0.35;
+            const yaw = (Math.random() - 0.5) * Math.PI;
+
+            items.push({
+                position: new THREE.Vector3(x, y, z),
+                rotation: new THREE.Euler(leanX, yaw, leanZ),
+                scale: new THREE.Vector3(thickness, height, thickness)
+            });
+        }
+        return items;
+    }, [count]);
+
+    // Initialize hidden
     useEffect(() => {
         if (!meshRef.current) return;
-        for (let i = 0; i < count; i++) {
+        strands.forEach((_, i) => {
             dummy.scale.setScalar(0);
             dummy.updateMatrix();
             meshRef.current.setMatrixAt(i, dummy.matrix);
-        }
-        meshRef.current.count = count;
+        });
         meshRef.current.instanceMatrix.needsUpdate = true;
-    }, [count, dummy]);
+    }, [dummy, strands]);
 
-    useFrame((state, delta) => {
-        if (!center || !size) return;
-
-        const t = state.clock.getElapsedTime();
-        const isBrushing = cleaningState === 'brushing';
-        const isRinsing = cleaningState === 'rinsing';
-
-        // --- BRUSH ANIMATION ---
-        if (brushRef.current) {
-            const isBrushActive = isBrushing || isRinsing; // Show during both phases
-
-            if (isBrushActive) {
-                // Smooth painting motion - horizontal strokes like painting a canvas
-                const strokeSpeed = 0.8; // Calm, deliberate strokes
-                const stroke = Math.sin(t * strokeSpeed); // Main horizontal stroke
-                const microVariation = Math.sin(t * 3.2) * 0.03; // Subtle hand tremor
-
-                // Position: Smooth horizontal strokes across the engine
-                brushRef.current.position.set(
-                    center.x + stroke * size.x * 0.25 + microVariation, // Smooth side-to-side painting
-                    center.y + 0.65, // Positioned above engine
-                    center.z // Centered front-to-back
-                );
-
-                // Rotation: Brush tilts naturally with stroke direction
-                const tiltAngle = Math.cos(t * strokeSpeed) * 0.15; // Tilt follows stroke
-                brushRef.current.rotation.set(
-                    -Math.PI / 2, // Pointing down
-                    Math.PI / 2, // Oriented north-south (90 degrees)
-                    tiltAngle // Natural tilt matching stroke direction
-                );
-                brushRef.current.visible = true;
-            } else {
-                brushRef.current.visible = false;
-            }
-        }
-
-        // --- SPRAY ANIMATION ---
-        // Only active during rinsing
-        if (!isRinsing) {
-            // Clear particles if not rinsing
-            if (meshRef.current) {
-                meshRef.current.visible = false;
-            }
-            return;
-        }
-
-        if (meshRef.current) meshRef.current.visible = true;
-
-        // External Spray Motion (same as before)
-        const nozzlePos = new THREE.Vector3(
-            -2.5 + Math.sin(t * 0.8) * 0.5,
-            1.8 + Math.cos(t * 0.5) * 0.2,
-            1.5 + Math.sin(t * 1.1) * 0.3
-        );
-
-        const targetPos = center.clone().add(new THREE.Vector3(
-            Math.sin(t * 2.5) * size.x * 0.4,
-            0,
-            Math.cos(t * 1.8) * size.z * 0.3
-        ));
-
+    useFrame((_, delta) => {
         const mesh = meshRef.current;
         if (!mesh) return;
-        const parent = mesh.parent;
-        if (!parent) return;
 
-        parent.updateWorldMatrix(true, false);
-        tmpInverse.copy(parent.matrixWorld).invert();
+        const target =
+            state === 'dirty' ? 1 : 0;
+        const speed = state === 'dirty' ? 6.0 : 2.5;
+        fadeRef.current = THREE.MathUtils.lerp(fadeRef.current, target, 1 - Math.exp(-speed * delta));
 
-        const localEmitterPos = nozzlePos.clone().applyMatrix4(tmpInverse);
-        const sprayDir = targetPos.clone().sub(nozzlePos).normalize();
-        const localSprayDir = sprayDir.clone().transformDirection(tmpInverse);
-
-        const spawnPerFrame = 15;
-        for (let s = 0; s < spawnPerFrame; s++) {
-            const i = spawnIndex.current % count;
-            const p = particles[i];
-
-            p.position.copy(localEmitterPos);
-            p.position.add(new THREE.Vector3(
-                (Math.random() - 0.5) * 0.05,
-                (Math.random() - 0.5) * 0.05,
-                (Math.random() - 0.5) * 0.05
-            ));
-
-            tmpJitter.copy(localSprayDir);
-            tmpJitter.x += (Math.random() - 0.5) * 0.15;
-            tmpJitter.y += (Math.random() - 0.5) * 0.15;
-            tmpJitter.z += (Math.random() - 0.5) * 0.15;
-            tmpJitter.normalize();
-
-            const speed = 8.0 + Math.random() * 4.0;
-            p.velocity.copy(tmpJitter).multiplyScalar(speed);
-
-            p.life = 1.0 + Math.random() * 0.4;
-            p.maxLife = p.life;
-            p.size = 0.08 + Math.random() * 0.06;
-
-            spawnIndex.current++;
-        }
-
-        for (let i = 0; i < count; i++) {
-            const p = particles[i];
-            if (p.life > 0) {
-                p.life -= delta;
-                p.velocity.y -= 3.0 * delta;
-                p.velocity.multiplyScalar(0.98);
-                p.position.addScaledVector(p.velocity, delta);
-
-                dummy.position.copy(p.position);
-                const fade = Math.max(0, p.life / (p.maxLife || 1));
-                dummy.scale.setScalar(p.size * fade);
-            } else {
-                dummy.scale.setScalar(0);
-            }
-
+        const fade = fadeRef.current;
+        for (let i = 0; i < strands.length; i++) {
+            const s = strands[i];
+            dummy.position.copy(s.position);
+            dummy.rotation.copy(s.rotation);
+            dummy.scale.copy(s.scale).multiplyScalar(fade);
             dummy.updateMatrix();
             mesh.setMatrixAt(i, dummy.matrix);
         }
 
+        mesh.visible = fade > 0.01;
         mesh.instanceMatrix.needsUpdate = true;
     });
 
     return (
-        <group>
-            {/* Custom Brush Model */}
-            <primitive
-                ref={brushRef}
-                object={brushClone}
-                scale={0.15}
-                visible={false}
-                frustumCulled={true}
+        <instancedMesh
+            ref={meshRef}
+            args={[null, null, count]}
+            castShadow={false}
+            receiveShadow={false}
+            frustumCulled={false}
+            renderOrder={2}
+        >
+            <cylinderGeometry args={[1, 1, 1, 5, 1]} />
+            <meshStandardMaterial
+                color="#e6d6b5"
+                emissive="#bfae8c"
+                emissiveIntensity={0.35}
+                roughness={0.7}
+                metalness={0.05}
+                transparent
+                opacity={0.95}
+                depthWrite={false}
             />
+        </instancedMesh>
+    );
+}
 
-            {/* Water Spray Particles */}
-            <instancedMesh
-                ref={meshRef}
-                args={[null, null, count]}
-                castShadow={false}
-                receiveShadow={false}
-            >
-                <sphereGeometry args={[0.05, 8, 8]} />
-                <meshStandardMaterial
-                    color="#a4d7ff"
-                    emissive="#6bb7ff"
-                    emissiveIntensity={0.3}
-                    roughness={0.2}
-                    metalness={0.1}
-                    transparent
-                    opacity={0.6}
-                    depthWrite={false}
-                />
-            </instancedMesh>
+// Pet hair decal using provided texture; discards dark background so only hair shows
+export function PetHairDecal({
+    state,
+    texturePath = '/pet_hair.png',
+    position = [0, 0.05, -0.2],
+    rotation = [-Math.PI / 2, 0, 0],
+    size = [1.6, 1.0],
+    opacity = 1.0,
+    threshold = 0.08,
+    renderOrder = 15
+}) {
+    const hairMap = useTexture(texturePath);
+    const fadeRef = useRef(0);
+    const meshRef = useRef();
+
+    // Avoid mip blurring for crisp strands
+    useMemo(() => {
+        if (!hairMap) return;
+        hairMap.wrapS = hairMap.wrapT = THREE.ClampToEdgeWrapping;
+        hairMap.minFilter = THREE.LinearFilter;
+        hairMap.magFilter = THREE.LinearFilter;
+        hairMap.needsUpdate = true;
+    }, [hairMap]);
+
+    useFrame((_, delta) => {
+        const target = state === 'dirty' ? 1 : 0;
+        fadeRef.current = THREE.MathUtils.lerp(fadeRef.current, target, 1 - Math.exp(-8 * delta));
+        if (meshRef.current?.material) {
+            meshRef.current.material.uniforms.uFade.value = fadeRef.current * opacity;
+        }
+    });
+
+    const uniforms = useMemo(() => ({
+        uMap: { value: hairMap },
+        uFade: { value: 0 },
+        uThreshold: { value: threshold },
+        uTint: { value: new THREE.Color('#e6d6b5') }
+    }), [hairMap, threshold]);
+
+    // Custom shader to treat dark background as transparent and keep hair tinted
+    const vertexShader = `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `;
+
+    const fragmentShader = `
+        precision highp float;
+        uniform sampler2D uMap;
+        uniform float uFade;
+        uniform float uThreshold;
+        uniform vec3 uTint;
+        varying vec2 vUv;
+        void main() {
+            vec4 tex = texture2D(uMap, vUv);
+            float luma = dot(tex.rgb, vec3(0.299, 0.587, 0.114));
+            if (luma < uThreshold || uFade <= 0.001) discard;
+            vec3 color = mix(tex.rgb, uTint, 0.35);
+            gl_FragColor = vec4(color, uFade);
+        }
+    `;
+
+    return (
+        <mesh
+            ref={meshRef}
+            position={position}
+            rotation={rotation}
+            frustumCulled={false}
+            renderOrder={renderOrder}
+        >
+            <planeGeometry args={size} />
+            <shaderMaterial
+                uniforms={uniforms}
+                vertexShader={vertexShader}
+                fragmentShader={fragmentShader}
+                transparent
+                depthWrite={false}
+                depthTest={false}
+            />
+        </mesh>
+    );
+}
+
+// Pet hair shell that wraps existing floor geometry using the hair texture as alpha
+export function PetHairShell({ state, nodes = [], texturePath = '/pet_hair.png' }) {
+    const hairMap = useTexture(texturePath);
+    const fadeRef = useRef(0);
+    const matRefs = useRef([]);
+
+    useMemo(() => {
+        if (!hairMap) return;
+        hairMap.wrapS = hairMap.wrapT = THREE.RepeatWrapping;
+        hairMap.repeat.set(2, 2); // tile slightly for variation
+        hairMap.minFilter = THREE.LinearMipMapLinearFilter;
+        hairMap.magFilter = THREE.LinearFilter;
+        hairMap.needsUpdate = true;
+    }, [hairMap]);
+
+    useFrame((_, delta) => {
+        const target = state === 'dirty' ? 1 : 0;
+        const speed = state === 'dirty' ? 6.0 : 2.5;
+        fadeRef.current = THREE.MathUtils.lerp(fadeRef.current, target, 1 - Math.exp(-speed * delta));
+        matRefs.current.forEach((mat) => {
+            if (!mat) return;
+            mat.opacity = fadeRef.current;
+            mat.visible = mat.opacity > 0.01;
+        });
+    });
+
+    if (!nodes || nodes.length === 0) return null;
+
+    return (
+        <group renderOrder={12}>
+            {nodes.map((node, i) => (
+                <mesh
+                    key={i}
+                    geometry={node.geometry}
+                    position={node.position}
+                    rotation={node.rotation}
+                    scale={node.scale}
+                    castShadow={false}
+                    receiveShadow={false}
+                >
+                    <meshStandardMaterial
+                        color="#d8c6a4"
+                        map={hairMap}
+                        alphaMap={hairMap}
+                        transparent
+                        opacity={0}
+                        roughness={0.9}
+                        metalness={0.0}
+                        depthWrite={false}
+                        side={THREE.DoubleSide}
+                        polygonOffset
+                        polygonOffsetFactor={-1}
+                        blending={THREE.NormalBlending}
+                        ref={(ref) => { matRefs.current[i] = ref; }}
+                    />
+                </mesh>
+            ))}
         </group>
+    );
+}
+
+// Pet hair proxy plane positioned over the floor area
+export function PetHairProxy({
+    state,
+    texturePath = '/pet_hair.png',
+    position = [0, 0.06, -0.2],
+    size = [1.6, 1.0],
+    rotation = [-Math.PI / 2, 0, 0]
+}) {
+    const hairMap = useTexture(texturePath);
+    const fadeRef = useRef(0);
+    const meshRef = useRef();
+
+    useMemo(() => {
+        if (!hairMap) return;
+        hairMap.wrapS = hairMap.wrapT = THREE.RepeatWrapping;
+        hairMap.repeat.set(1.5, 1.0);
+        hairMap.minFilter = THREE.LinearFilter;
+        hairMap.magFilter = THREE.LinearFilter;
+        hairMap.needsUpdate = true;
+    }, [hairMap]);
+
+    useFrame((_, delta) => {
+        const target = state === 'dirty' ? 1 : 0;
+        fadeRef.current = THREE.MathUtils.lerp(fadeRef.current, target, 1 - Math.exp(-8 * delta));
+        if (meshRef.current?.material) {
+            meshRef.current.material.opacity = fadeRef.current;
+            meshRef.current.visible = fadeRef.current > 0.01;
+        }
+    });
+
+    return (
+        <mesh
+            ref={meshRef}
+            position={position}
+            rotation={rotation}
+            castShadow={false}
+            receiveShadow={false}
+            frustumCulled={false}
+            renderOrder={18}
+        >
+            <planeGeometry args={size} />
+            <meshStandardMaterial
+                map={hairMap}
+                alphaMap={hairMap}
+                transparent
+                opacity={0}
+                roughness={0.9}
+                metalness={0}
+                depthWrite={false}
+                depthTest
+                side={THREE.FrontSide}
+                polygonOffset
+                polygonOffsetFactor={-0.5}
+            />
+        </mesh>
     );
 }

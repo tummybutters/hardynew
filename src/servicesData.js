@@ -15,7 +15,7 @@ export const SERVICES_DATA = [
     addOns: [
       { name: 'Leather Conditioning', price: 49, target: 'interior_detail' },
       { name: 'Carpet Shampoo', price: 89, target: 'interior_detail' },
-      { name: 'Pet Hair Removal', price: 69, target: 'interior_detail' },
+      { name: 'Pet Hair Removal', price: 69, target: 'interior_floor' },
       { name: 'Rubber Floor Mat Restoration', price: 29, target: 'interior_detail' }
     ]
   },
@@ -60,4 +60,3 @@ export const SERVICES_DATA = [
     ]
   }
 ];
-
