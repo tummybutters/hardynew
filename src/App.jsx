@@ -1364,77 +1364,87 @@ export default function App() {
         top: 0,
         left: 0,
         right: 0,
-        height: '80px',
-        zIndex: 30,
+        padding: '20px',
+        zIndex: 50,
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0 40px',
+        alignItems: 'flex-start',
         pointerEvents: 'none'
       }}>
-        <div style={{
-          marginLeft: isMobile ? '0' : '320px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          pointerEvents: 'auto'
-        }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', pointerEvents: 'auto' }}>
           <div style={{
-            width: isMobile ? '32px' : '40px',
-            height: isMobile ? '32px' : '40px',
-            background: THEME.primary,
+            width: '40px',
+            height: '40px',
             borderRadius: '50%',
+            background: THEME.primary,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontWeight: 'bold',
             color: 'white',
-            fontSize: isMobile ? '0.9rem' : '1rem'
+            fontWeight: 'bold',
+            fontSize: '1.2rem',
+            boxShadow: '0 4px 12px rgba(255, 107, 0, 0.3)'
           }}>H</div>
-          <div>
-            <h1 style={{
-              margin: 0,
-              color: 'white',
-              fontFamily: '"Playfair Display", serif',
-              fontSize: isMobile ? '1.2rem' : '1.5rem',
-              letterSpacing: '0.5px',
-              textShadow: '0 2px 10px rgba(0,0,0,0.5)'
-            }}>
-              Hardy's Wash N' Wax
-            </h1>
-          </div>
+          <h1 style={{
+            fontFamily: 'Playfair Display, serif',
+            fontSize: '1.2rem',
+            margin: 0,
+            color: 'white',
+            textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+          }}>Hardy's Wash N' Wax</h1>
         </div>
 
-        {!isMobile && (
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              onClick={handleShare}
+        {/* Mobile Hero Text - Fades out when not on Home */}
+        <AnimatePresence>
+          {isMobile && activeMenuItem === 'home' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
               style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: 'none',
-                width: '46px',
-                height: '46px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                cursor: 'pointer',
-                backdropFilter: 'blur(10px)'
+                position: 'absolute',
+                top: '80px',
+                left: '20px',
+                right: '20px',
+                pointerEvents: 'none'
               }}
-              title="Share Configuration"
             >
-              <Share2 size={20} />
-            </button>
+              <h2 style={{
+                fontFamily: 'Playfair Display, serif',
+                fontSize: '2.5rem',
+                lineHeight: '1.1',
+                margin: '0 0 16px 0',
+                color: 'white',
+                textShadow: '0 2px 10px rgba(0,0,0,0.8)'
+              }}>
+                Mobile Car Detailing<br />
+                <span style={{ color: THEME.primary }}>Sacramento, CA</span>
+              </h2>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '1rem',
+                lineHeight: '1.5',
+                color: 'rgba(255,255,255,0.9)',
+                textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+                maxWidth: '90%'
+              }}>
+                Providing Interior Detailing, Exterior Detailing, Paint Correction, Ceramic Coating, and more! Serving Sacramento, Davis, Woodland, Dixon, Winters, Elk Grove, and surrounding areas — all delivered with precision, care, and professional-grade results.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
+        {/* Book Button (Top Right) */}
+        {!isBookingOpen && (activeService.id !== 'home' || activeAddOn) && (
+          <div style={{ pointerEvents: 'auto' }}>
             <button
               onClick={() => setIsBookingOpen(true)}
               style={{
-                pointerEvents: 'auto',
-                background: 'white',
-                color: 'black',
+                background: THEME.primary,
+                color: 'white',
                 border: 'none',
-                padding: '12px 28px',
+                padding: '10px 20px',
                 borderRadius: '30px',
                 fontWeight: '600',
                 fontSize: '0.9rem',
