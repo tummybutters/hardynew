@@ -939,7 +939,7 @@ const InfoCard = ({ visible, onClose, isMobile, view }) => {
             flexDirection: 'column',
             alignItems: 'center',
             textAlign: 'center',
-            ...content.position // Override position based on view
+            ...(isMobile ? { top: '80px', right: '16px', left: 'auto', bottom: 'auto', transform: 'none' } : content.position)
           }}
         >
           <button
@@ -1458,15 +1458,13 @@ export default function App() {
         )}
       </header>
 
-      {/* InfoCard - Desktop Only for now to keep mobile clean */}
-      {!isMobile && (
-        <InfoCard
-          visible={infoCardVisible}
-          onClose={() => setInfoCardVisible(false)}
-          isMobile={isMobile}
-          view={cameraView}
-        />
-      )}
+      {/* InfoCard - Now enabled for mobile too */}
+      <InfoCard
+        visible={infoCardVisible}
+        onClose={() => setInfoCardVisible(false)}
+        isMobile={isMobile}
+        view={cameraView}
+      />
 
       {isMobile ? (
         <>
