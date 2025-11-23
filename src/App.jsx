@@ -67,12 +67,22 @@ function ModelDebugger({ scene }) {
 const FLOOR_MAT_ROTATION_TOTAL = Math.PI / 2;
 const FLOOR_MAT_ROTATION_SPEED = 2.4; // snappier than before
 
-function CameraRig({ view, enableHomeOrbit = true }) {
+function CameraRig({ view, enableHomeOrbit = true, isMobile }) {
   const controls = useRef();
   const { camera } = useThree();
   const [homeOrbitEnabled, setHomeOrbitEnabled] = useState(false);
   const floorMatRotationRef = useRef(0);
   const floorMatAnimatingRef = useRef(false);
+
+  // Dynamic FOV: Wider on mobile to see more in portrait mode
+  const targetFOV = isMobile ? 65 : 45;
+
+  useEffect(() => {
+    if (camera) {
+      camera.fov = targetFOV;
+      camera.updateProjectionMatrix();
+    }
+  }, [isMobile, camera, targetFOV]);
 
   useEffect(() => {
     if (!controls.current) return;
@@ -107,7 +117,8 @@ function CameraRig({ view, enableHomeOrbit = true }) {
           0.0, 0.15, 0.25, // Target: slightly lower toward the rear floor area
           true
         );
-        controls.current.zoomTo(1.25, true);
+        // Slightly less zoom on mobile to avoid cropping
+        controls.current.zoomTo(isMobile ? 1.0 : 1.25, true);
         break;
 
       case 'floor_mat':
@@ -117,7 +128,7 @@ function CameraRig({ view, enableHomeOrbit = true }) {
           0.0, 0.15, 0.25,
           true
         );
-        controls.current.zoomTo(1.32, true);
+        controls.current.zoomTo(isMobile ? 1.1 : 1.32, true);
         break;
 
       case 'engine':
@@ -215,7 +226,7 @@ function CameraRig({ view, enableHomeOrbit = true }) {
         controls.current.setLookAt(4, 2, 5, 0, 0, 0, true);
         break;
     }
-  }, [view, camera]);
+  }, [view, camera, isMobile]);
 
   useEffect(() => {
     if (view === 'floor_mat') {
@@ -660,7 +671,7 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
         position={[0, 0.35, -0.2]}
         size={[3.0, 3.0]}
       />
-      <PetHairSparkles trigger={petHairTrigger} />
+      {!isMobile && petHairTrigger !== 0 && <PetHairSparkles trigger={petHairTrigger} />}
 
       {/* Dirt Shell & Foam - Attached to the Right Door Group if it exists */}
       {
@@ -693,7 +704,7 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
 
       {/* Engine sparkles (world-space, avoid double transforms) */}
       {
-        engineBounds && (
+        engineBounds && !isMobile && engineTrigger !== 0 && (
           <EngineSparkles
             center={engineBounds.center}
             size={engineBounds.size}
@@ -707,7 +718,8 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
         active={cleaningState === 'foaming'}
         rinsing={false}
         doorMeshes={rightDoorNodes}
-        onHit={(point, normal) => foamAccumRef.current?.addSplat(point, normal)}
+        onHit={!isMobile ? (point, normal) => foamAccumRef.current?.addSplat(point, normal) : undefined}
+        enableHitDetection={!isMobile}
         count={foamCount}
         position={[0, 0, 0]}
       />
@@ -722,28 +734,32 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
         nodes={headlightNodes}
         trigger={headlightTrigger}
       />
-      <HeadlightFrontSparkles
-        nodes={headlightLeftNodes}
-        center={headlightLeftBounds?.center}
-        size={headlightLeftBounds?.size}
-        fixedCenter={new THREE.Vector3(-0.7, 0.68, 1.85)}
-        trigger={headlightTrigger}
-        forward={new THREE.Vector3(0, 0, 1)}
-        yNudge={0.04}
-        zNudge={-0.05}
-        xNudge={0}
-      />
-      <HeadlightFrontSparkles
-        nodes={headlightRightNodes}
-        center={headlightRightBounds?.center}
-        size={headlightRightBounds?.size}
-        fixedCenter={new THREE.Vector3(0.7, 0.68, 1.85)}
-        trigger={headlightTrigger}
-        forward={new THREE.Vector3(0, 0, 1)}
-        yNudge={0.04}
-        zNudge={-0.05}
-        xNudge={0}
-      />
+      {!isMobile && headlightTrigger !== 0 && (
+        <>
+          <HeadlightFrontSparkles
+            nodes={headlightLeftNodes}
+            center={headlightLeftBounds?.center}
+            size={headlightLeftBounds?.size}
+            fixedCenter={new THREE.Vector3(-0.7, 0.68, 1.85)}
+            trigger={headlightTrigger}
+            forward={new THREE.Vector3(0, 0, 1)}
+            yNudge={0.04}
+            zNudge={-0.05}
+            xNudge={0}
+          />
+          <HeadlightFrontSparkles
+            nodes={headlightRightNodes}
+            center={headlightRightBounds?.center}
+            size={headlightRightBounds?.size}
+            fixedCenter={new THREE.Vector3(0.7, 0.68, 1.85)}
+            trigger={headlightTrigger}
+            forward={new THREE.Vector3(0, 0, 1)}
+            yNudge={0.04}
+            zNudge={-0.05}
+            xNudge={0}
+          />
+        </>
+      )}
     </>
   );
 }
@@ -991,14 +1007,14 @@ const InfoCard = ({ visible, onClose, isMobile, view }) => {
 
 
 // --- Booking Modal ---
-const BookingModal = ({ isOpen, onClose, service, addOn }) => {
+const BookingModal = ({ isOpen, onClose, service, addOn, isMobile }) => {
   if (!isOpen) return null;
   const total = (service?.price || 0) + (addOn?.price || 0);
 
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 100,
-      background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
+      background: 'rgba(0,0,0,0.8)', backdropFilter: isMobile ? 'none' : 'blur(5px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
     }} onClick={onClose}>
       <motion.div
@@ -1054,7 +1070,6 @@ const ServiceDock = ({
       minHeight: '100px', // Fixed minimum height instead of percentage
       maxHeight: '140px', // Cap the maximum height
       background: 'rgba(10, 10, 10, 0.95)',
-      backdropFilter: 'blur(20px)',
       borderTop: `1px solid ${THEME.border}`,
       zIndex: 40,
       display: 'flex',
@@ -1179,7 +1194,6 @@ const AddOnBar = ({ activeService, activeAddOn, setActiveAddOn, setCameraView, q
               color: 'white',
               fontSize: '0.8rem',
               whiteSpace: 'nowrap',
-              backdropFilter: 'blur(8px)',
               flexShrink: 0
             }}
           >
@@ -1205,9 +1219,15 @@ export default function App() {
     const score = (isMobile ? 1 : 0) + (dpr > 1.75 ? 1 : 0) + (cores <= 4 ? 1 : 0) + (memory && memory <= 4 ? 1 : 0);
     return score >= 2 ? 'low' : 'high';
   }, [isMobile]);
-  const foamCount = performanceTier === 'low' ? (isMobile ? 260 : 420) : (isMobile ? 350 : 500);
-  const waterCount = performanceTier === 'low' ? (isMobile ? 140 : 220) : (isMobile ? 180 : 280);
-  const foamSplatCount = performanceTier === 'low' ? 220 : 320;
+  const foamCount = isMobile
+    ? (performanceTier === 'low' ? 160 : 220)
+    : (performanceTier === 'low' ? 320 : 420);
+  const waterCount = isMobile
+    ? (performanceTier === 'low' ? 90 : 130)
+    : (performanceTier === 'low' ? 170 : 230);
+  const foamSplatCount = isMobile
+    ? 140
+    : (performanceTier === 'low' ? 220 : 280);
   const shouldFloat = !prefersReducedMotion && performanceTier !== 'low';
   const [activeService, setActiveService] = useState(HOME_MENU_ITEM);
   const [activeMenuItem, setActiveMenuItem] = useState('home');
@@ -1485,11 +1505,11 @@ export default function App() {
       )}
 
       <Canvas
-        shadows
-        dpr={isMobile ? [1, 1.5] : [1, 1.75]} // Clamp desktop DPR to reduce render target size
-        performance={{ min: 0.5 }} // Allow frame rate to drop if needed
+        shadows={!isMobile}
+        dpr={isMobile ? [0.75, 1.1] : [1, 1.75]} // Clamp DPR harder on mobile to shrink render targets
+        performance={{ min: isMobile ? 0.3 : 0.5 }} // Allow deeper frame drops on mobile
         gl={{
-          antialias: true,
+          antialias: !isMobile,
           alpha: true,
           powerPreference: 'high-performance',
           preserveDrawingBuffer: false
@@ -1503,7 +1523,7 @@ export default function App() {
             angle={0.15}
             penumbra={1}
             intensity={8}
-            castShadow
+            castShadow={!isMobile}
             shadow-mapSize={isMobile ? [384, 384] : [768, 768]} // Reduced for mobile performance
           />
           <pointLight position={[-10, -10, -10]} color={THEME.primary} intensity={5} />
@@ -1571,7 +1591,7 @@ export default function App() {
             frames={1}
           />
 
-          <CameraRig view={cameraView} enableHomeOrbit={!isMobile} />
+          <CameraRig view={cameraView} enableHomeOrbit={!isMobile} isMobile={isMobile} />
         </Suspense>
       </Canvas>
 
@@ -1658,6 +1678,7 @@ export default function App() {
         onClose={() => setIsBookingOpen(false)}
         service={activeService}
         addOn={activeAddOn}
+        isMobile={isMobile}
       />
 
     </div>
