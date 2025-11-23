@@ -16,7 +16,7 @@ export const SERVICES_DATA = [
       { name: 'Leather Conditioning', price: 49, target: 'interior_detail' },
       { name: 'Carpet Shampoo', price: 89, target: 'interior_detail' },
       { name: 'Pet Hair Removal', price: 69, target: 'interior_floor' },
-      { name: 'Rubber Floor Mat Restoration', price: 29, target: 'interior_detail' }
+      { name: 'Rubber Floor Mat Restoration', price: 29, target: 'floor_mat' }
     ]
   },
   {
@@ -127,6 +127,11 @@ export const VIEW_CONTENT = {
     title: "DEEP INTERIOR CARE",
     description: "Intensive treatment for leather and carpets. Revitalizes your cabin's feel.",
     position: { top: '20%', left: '400px' }
+  },
+  floor_mat: {
+    title: "FLOOR MAT RESTORATION",
+    description: "Detailed rubber mat cleaning and dressing. Focused on the driver's footwell.",
+    position: { top: '20%', left: '320px' }
   },
   paint_detail: {
     title: "PAINT INSPECTION",

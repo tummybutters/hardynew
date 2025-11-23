@@ -64,10 +64,15 @@ function ModelDebugger({ scene }) {
 }
 
 // --- Camera Rig ---
+const FLOOR_MAT_ROTATION_TOTAL = Math.PI / 2;
+const FLOOR_MAT_ROTATION_SPEED = 2.4; // snappier than before
+
 function CameraRig({ view, enableHomeOrbit = true }) {
   const controls = useRef();
   const { camera } = useThree();
   const [homeOrbitEnabled, setHomeOrbitEnabled] = useState(false);
+  const floorMatRotationRef = useRef(0);
+  const floorMatAnimatingRef = useRef(false);
 
   useEffect(() => {
     if (!controls.current) return;
@@ -86,14 +91,13 @@ function CameraRig({ view, enableHomeOrbit = true }) {
         break;
 
       case 'interior_detail':
-        // Dashboard/cockpit view for interior add-ons (from driver's perspective)
-        // Moved back to show rear seats
+        // Interior-facing cockpit view that feels like you're seated inside the car
         controls.current.setLookAt(
-          0.0, 1.1, -1.2,
-          0.0, 0.9, 0.5,
+          0.9, 1.15, 0.05,  // Position just inside the driver door, near the A-pillar
+          0.45, 0.9, -0.35, // Target the driver seat cushion and console
           true
         );
-        controls.current.zoomTo(1.0, true);
+        controls.current.zoomTo(1.2, true);
         break;
 
       case 'interior_floor':
@@ -103,7 +107,17 @@ function CameraRig({ view, enableHomeOrbit = true }) {
           0.0, 0.15, 0.25, // Target: slightly lower toward the rear floor area
           true
         );
-        controls.current.zoomTo(1.1, true);
+        controls.current.zoomTo(1.25, true);
+        break;
+
+      case 'floor_mat':
+        // Start from the pet-hair anchor and orbit right around the same footwell target
+        controls.current.setLookAt(
+          0.0, 0.85, -0.8,
+          0.0, 0.15, 0.25,
+          true
+        );
+        controls.current.zoomTo(1.32, true);
         break;
 
       case 'engine':
@@ -204,6 +218,15 @@ function CameraRig({ view, enableHomeOrbit = true }) {
   }, [view, camera]);
 
   useEffect(() => {
+    if (view === 'floor_mat') {
+      floorMatRotationRef.current = 0;
+      floorMatAnimatingRef.current = true;
+    } else {
+      floorMatAnimatingRef.current = false;
+    }
+  }, [view]);
+
+  useEffect(() => {
     if (view !== 'home' || !enableHomeOrbit) {
       setHomeOrbitEnabled(false);
       return;
@@ -213,9 +236,25 @@ function CameraRig({ view, enableHomeOrbit = true }) {
   }, [view, enableHomeOrbit]);
 
   useFrame((_, delta) => {
-    if (!controls.current || view !== 'home') return;
-    if (homeOrbitEnabled) controls.current.rotate(-0.2 * delta, 0, false);
-    controls.current.update(delta); // apply the gentle home orbit only
+    if (!controls.current) return;
+
+    if (view === 'home') {
+      if (homeOrbitEnabled) controls.current.rotate(-0.2 * delta, 0, false);
+      controls.current.update(delta);
+      return;
+    }
+
+    if (view === 'floor_mat' && floorMatAnimatingRef.current && floorMatRotationRef.current < FLOOR_MAT_ROTATION_TOTAL) {
+      const remaining = FLOOR_MAT_ROTATION_TOTAL - floorMatRotationRef.current;
+      const step = Math.min(FLOOR_MAT_ROTATION_SPEED * delta, remaining);
+      controls.current.rotate(-step, 0, false);
+      floorMatRotationRef.current += step;
+      if (floorMatRotationRef.current >= FLOOR_MAT_ROTATION_TOTAL - 1e-3) {
+        floorMatAnimatingRef.current = false;
+      }
+    }
+
+    controls.current.update(delta);
   });
 
   return <CameraControls ref={controls} minPolarAngle={0} maxPolarAngle={Math.PI / 1.8} />;
@@ -996,148 +1035,153 @@ const BookingModal = ({ isOpen, onClose, service, addOn }) => {
 };
 
 // --- BottomSheet Component (Mobile) ---
-const BottomSheet = ({
+// --- Service Dock (Mobile) ---
+const ServiceDock = ({
   activeService,
   activeMenuItem,
   setActiveMenuItem,
   setActiveService,
-  activeAddOn,
-  setActiveAddOn,
   setCameraView,
   queueInfoCard,
   onShare
 }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  return (
+    <div style={{
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: '18%', // Strict 20% max constraint
+      background: 'rgba(10, 10, 10, 0.95)',
+      backdropFilter: 'blur(20px)',
+      borderTop: `1px solid ${THEME.border}`,
+      zIndex: 40,
+      display: 'flex',
+      alignItems: 'center',
+      padding: '0 16px',
+      overflowX: 'auto',
+      gap: '12px',
+      scrollSnapType: 'x mandatory'
+    }}>
+      {MENU_ITEMS.map((service) => {
+        const isActive = activeMenuItem === service.id;
+        return (
+          <motion.div
+            key={service.id}
+            layout
+            onClick={() => {
+              setActiveMenuItem(service.id);
+              setActiveService(service);
+              setCameraView(service.target);
+              queueInfoCard(service.target);
+            }}
+            style={{
+              minWidth: '140px',
+              height: '80%',
+              background: isActive ? 'rgba(255, 127, 80, 0.15)' : 'rgba(255,255,255,0.03)',
+              border: isActive ? `1px solid ${THEME.primary}` : '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '12px',
+              padding: '12px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              scrollSnapAlign: 'center',
+              position: 'relative'
+            }}
+          >
+            <div style={{
+              color: isActive ? THEME.primary : 'white',
+              fontWeight: isActive ? '700' : '500',
+              fontSize: '0.9rem',
+              marginBottom: '4px',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {service.title || service.name}
+            </div>
+            {service.price !== undefined && (
+              <div style={{
+                color: 'rgba(255,255,255,0.6)',
+                fontSize: '0.8rem'
+              }}>
+                ${service.price}
+              </div>
+            )}
+            {isActive && (
+              <motion.div
+                layoutId="activeIndicator"
+                style={{
+                  position: 'absolute',
+                  bottom: '6px',
+                  left: '50%',
+                  x: '-50%',
+                  width: '4px',
+                  height: '4px',
+                  borderRadius: '50%',
+                  background: THEME.primary
+                }}
+              />
+            )}
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+};
+
+const AddOnBar = ({ activeService, activeAddOn, setActiveAddOn, setCameraView, queueInfoCard }) => {
+  if (!activeService?.addOns?.length) return null;
 
   return (
     <motion.div
-      initial={{ y: '100%' }}
-      animate={{ y: isOpen ? 0 : 'calc(100% - 60px)' }}
-      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
       style={{
         position: 'absolute',
+        bottom: '19%', // Just above the dock
         left: 0,
         right: 0,
-        bottom: 0,
-        height: '70vh',
-        background: THEME.cardBg,
-        backdropFilter: 'blur(20px)',
-        borderTop: `1px solid ${THEME.border}`,
-        zIndex: 40,
-        borderRadius: '20px 20px 0 0',
+        padding: '12px 16px',
         display: 'flex',
-        flexDirection: 'column'
+        gap: '10px',
+        overflowX: 'auto',
+        zIndex: 39,
+        background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
+        maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)'
       }}
     >
-      {/* Drag Handle / Header */}
-      <div
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          padding: '16px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          cursor: 'pointer',
-          borderBottom: `1px solid ${THEME.border}`,
-          position: 'relative'
-        }}
-      >
-        <div style={{
-          width: '40px',
-          height: '4px',
-          background: 'rgba(255,255,255,0.3)',
-          borderRadius: '2px'
-        }} />
-
-        <button
-          onClick={(e) => { e.stopPropagation(); onShare(); }}
-          style={{
-            position: 'absolute',
-            right: 20,
-            top: 16,
-            background: 'none',
-            border: 'none',
-            color: 'rgba(255,255,255,0.6)',
-            cursor: 'pointer'
-          }}
-        >
-          <Share2 size={20} />
-        </button>
-      </div>
-
-      <div style={{ overflowY: 'auto', flex: 1, padding: '20px' }}>
-        <h2 style={{
-          fontFamily: '"Playfair Display", serif',
-          color: 'white',
-          fontSize: '1.5rem',
-          marginBottom: '8px'
-        }}>
-          Service Menu
-        </h2>
-
-        {/* Main Services */}
-        <div style={{ marginBottom: '20px' }}>
-          {MENU_ITEMS.map((service) => {
-            const isHome = service.id === 'home';
-            const isActive = activeMenuItem === service.id;
-            return (
-              <ServiceItem
-                key={service.id}
-                item={service}
-                isActive={isActive}
-                onClick={() => {
-                  if (isHome) {
-                    setActiveMenuItem('home');
-                    setActiveAddOn(null);
-                    setCameraView('home');
-                    queueInfoCard('home');
-                    setIsOpen(false);
-                    return;
-                  }
-                  setActiveMenuItem(service.id);
-                  setActiveService(service);
-                  setActiveAddOn(null);
-                  setCameraView(service.target);
-                  queueInfoCard(service.target);
-                  setIsOpen(false); // Auto-minimize on selection for better view
-                }}
-              />
-            );
-          })}
-        </div>
-
-        {/* Add-ons */}
-        <AnimatePresence>
-          {activeService && activeService.addOns && activeService.addOns.length > 0 && (
-            <div style={{ marginTop: '10px' }}>
-              <div style={{
-                fontSize: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                color: '#666',
-                marginBottom: '10px'
-              }}>
-                Available Add-ons
-              </div>
-              {activeService.addOns.map((addon, idx) => (
-                <ServiceItem
-                  key={idx}
-                  item={addon}
-                  isActive={activeAddOn?.name === addon.name}
-                  isAddOn={true}
-                  onClick={() => {
-                    setActiveAddOn(activeAddOn?.name === addon.name ? null : addon);
-                    if (addon.target) {
-                      setCameraView(addon.target);
-                      queueInfoCard(addon.target);
-                    }
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </AnimatePresence>
-      </div>
+      {activeService.addOns.map((addon, idx) => {
+        const isSelected = activeAddOn?.name === addon.name;
+        return (
+          <button
+            key={idx}
+            onClick={() => {
+              setActiveAddOn(isSelected ? null : addon);
+              if (addon.target) {
+                setCameraView(addon.target);
+                queueInfoCard(addon.target);
+              }
+            }}
+            style={{
+              background: isSelected ? THEME.primary : 'rgba(0,0,0,0.6)',
+              border: `1px solid ${isSelected ? THEME.primary : 'rgba(255,255,255,0.2)'}`,
+              borderRadius: '20px',
+              padding: '8px 16px',
+              color: 'white',
+              fontSize: '0.8rem',
+              whiteSpace: 'nowrap',
+              backdropFilter: 'blur(8px)',
+              flexShrink: 0
+            }}
+          >
+            {isSelected && <Check size={12} style={{ marginRight: 6, display: 'inline' }} />}
+            {addon.name} (+${addon.price})
+          </button>
+        );
+      })}
     </motion.div>
   );
 };
@@ -1384,29 +1428,39 @@ export default function App() {
         )}
       </header>
 
-      <InfoCard
-        visible={infoCardVisible}
-        onClose={() => setInfoCardVisible(false)}
-        isMobile={isMobile}
-        view={cameraView}
-      />
+      {/* InfoCard - Desktop Only for now to keep mobile clean */}
+      {!isMobile && (
+        <InfoCard
+          visible={infoCardVisible}
+          onClose={() => setInfoCardVisible(false)}
+          isMobile={isMobile}
+          view={cameraView}
+        />
+      )}
 
       {isMobile ? (
-        <BottomSheet
-          activeService={activeService}
-          activeMenuItem={activeMenuItem}
-          setActiveMenuItem={setActiveMenuItem}
-          setActiveService={(service) => {
-            setActiveService(service);
-            setActiveMenuItem(service?.id || activeMenuItem);
-            if (service?.id === 'exterior') handleClean();
-          }}
-          activeAddOn={activeAddOn}
-          setActiveAddOn={setActiveAddOn}
-          setCameraView={setCameraView}
-          queueInfoCard={queueInfoCard}
-          onShare={handleShare}
-        />
+        <>
+          <AddOnBar
+            activeService={activeService}
+            activeAddOn={activeAddOn}
+            setActiveAddOn={setActiveAddOn}
+            setCameraView={setCameraView}
+            queueInfoCard={queueInfoCard}
+          />
+          <ServiceDock
+            activeService={activeService}
+            activeMenuItem={activeMenuItem}
+            setActiveMenuItem={setActiveMenuItem}
+            setActiveService={(service) => {
+              setActiveService(service);
+              setActiveMenuItem(service?.id || activeMenuItem);
+              if (service?.id === 'exterior') handleClean();
+            }}
+            setCameraView={setCameraView}
+            queueInfoCard={queueInfoCard}
+            onShare={handleShare}
+          />
+        </>
       ) : (
         <Sidebar
           activeService={activeService}
