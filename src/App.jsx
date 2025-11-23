@@ -40,9 +40,14 @@ const MENU_ITEMS = [HOME_MENU_ITEM, ...SERVICES_DATA];
 
 // --- Hooks ---
 function useMobile() {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const getIsMobile = () => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 768;
+  };
+  const [isMobile, setIsMobile] = useState(getIsMobile);
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    if (typeof window === 'undefined') return;
+    const handleResize = () => setIsMobile(getIsMobile());
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -74,15 +79,7 @@ function CameraRig({ view, enableHomeOrbit = true, isMobile }) {
   const floorMatRotationRef = useRef(0);
   const floorMatAnimatingRef = useRef(false);
 
-  // Dynamic FOV: Wider on mobile to see more in portrait mode
-  const targetFOV = isMobile ? 65 : 45;
 
-  useEffect(() => {
-    if (camera) {
-      camera.fov = targetFOV;
-      camera.updateProjectionMatrix();
-    }
-  }, [isMobile, camera, targetFOV]);
 
   useEffect(() => {
     if (!controls.current) return;
@@ -97,7 +94,7 @@ function CameraRig({ view, enableHomeOrbit = true, isMobile }) {
           0.0, 0.6, 0.0,
           true
         );
-        controls.current.zoomTo(1.0, true);
+        controls.current.zoomTo(isMobile ? 0.8 : 1.0, true);
         break;
 
       case 'interior_detail':
@@ -107,7 +104,7 @@ function CameraRig({ view, enableHomeOrbit = true, isMobile }) {
           0.45, 0.9, -0.35, // Target the driver seat cushion and console
           true
         );
-        controls.current.zoomTo(1.2, true);
+        controls.current.zoomTo(isMobile ? 0.9 : 1.2, true);
         break;
 
       case 'interior_floor':
@@ -117,8 +114,8 @@ function CameraRig({ view, enableHomeOrbit = true, isMobile }) {
           0.0, 0.15, 0.25, // Target: slightly lower toward the rear floor area
           true
         );
-        // Slightly less zoom on mobile to avoid cropping
-        controls.current.zoomTo(isMobile ? 1.0 : 1.25, true);
+        // Aggressive zoom out on mobile
+        controls.current.zoomTo(isMobile ? 0.7 : 1.25, true);
         break;
 
       case 'floor_mat':
@@ -128,7 +125,7 @@ function CameraRig({ view, enableHomeOrbit = true, isMobile }) {
           0.0, 0.15, 0.25,
           true
         );
-        controls.current.zoomTo(isMobile ? 1.1 : 1.32, true);
+        controls.current.zoomTo(isMobile ? 0.8 : 1.32, true);
         break;
 
       case 'engine':
@@ -1354,7 +1351,7 @@ export default function App() {
   }, [loadingProgress]);
 
   return (
-    <div style={{ width: '100%', height: '100vh', background: 'linear-gradient(to bottom, #000000 0%, #1a0b05 70%, #4a1905 100%)', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100vh', minWidth: '320px', background: 'linear-gradient(to bottom, #000000 0%, #1a0b05 70%, #4a1905 100%)', position: 'relative', overflow: 'hidden' }}>
 
       {/* LOADING SCREEN */}
       <AnimatePresence>
@@ -1505,6 +1502,7 @@ export default function App() {
       )}
 
       <Canvas
+        key={isMobile ? 'canvas-mobile' : 'canvas-desktop'}
         shadows={!isMobile}
         dpr={isMobile ? [0.75, 1.1] : [1, 1.75]} // Clamp DPR harder on mobile to shrink render targets
         performance={{ min: isMobile ? 0.3 : 0.5 }} // Allow deeper frame drops on mobile
@@ -1591,6 +1589,12 @@ export default function App() {
             frames={1}
           />
 
+          <PerspectiveCamera
+            makeDefault
+            position={[4, 2, 5]}
+            fov={isMobile ? 80 : 45}
+            onUpdate={(c) => c.updateProjectionMatrix()}
+          />
           <CameraRig view={cameraView} enableHomeOrbit={!isMobile} isMobile={isMobile} />
         </Suspense>
       </Canvas>
