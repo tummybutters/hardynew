@@ -1372,19 +1372,16 @@ export default function App() {
         pointerEvents: 'none'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', pointerEvents: 'auto' }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            background: THEME.primary,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontWeight: 'bold',
-            fontSize: '1.2rem',
-            boxShadow: '0 4px 12px rgba(255, 107, 0, 0.3)'
-          }}>H</div>
+          <img
+            src="/hardys_logo.png"
+            alt="Hardy's Wash N' Wax Logo"
+            style={{
+              width: '50px',
+              height: '50px',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))'
+            }}
+          />
           <h1 style={{
             fontFamily: 'Playfair Display, serif',
             fontSize: '1.2rem',
