@@ -1592,7 +1592,7 @@ export default function App() {
           <PerspectiveCamera
             makeDefault
             position={[4, 2, 5]}
-            fov={isMobile ? 80 : 45}
+            fov={isMobile ? 100 : 45}
             onUpdate={(c) => c.updateProjectionMatrix()}
           />
           <CameraRig view={cameraView} enableHomeOrbit={!isMobile} isMobile={isMobile} />
