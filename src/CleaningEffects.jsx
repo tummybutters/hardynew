@@ -61,6 +61,7 @@ export function FoamParticles({ active, rinsing, doorMeshes = [], onHit, count =
     const dummy = useMemo(() => new THREE.Object3D(), []);
     const spawnIndex = useRef(0);
     const raycaster = useMemo(() => new THREE.Raycaster(), []);
+    const spawnPerFrame = useMemo(() => Math.max(6, Math.floor(count / 36)), [count]);
 
     // World-space references for aiming/hit placement
     const cannonOrigin = useMemo(() => new THREE.Vector3(-2.5, 1.05, 0.52), []);
@@ -142,7 +143,6 @@ export function FoamParticles({ active, rinsing, doorMeshes = [], onHit, count =
 
         // Spawn burst while active
         if (active) {
-            const spawnPerFrame = 14; // fewer hits to keep perf high
             for (let s = 0; s < spawnPerFrame; s++) {
                 const i = spawnIndex.current % count;
                 const p = particles[i];
@@ -343,6 +343,7 @@ export function WaterParticles({ active, doorMeshes = [], count = 280 }) {
     const liveCountRef = useRef(0);
     const dummy = useMemo(() => new THREE.Object3D(), []);
     const spawnIndex = useRef(0);
+    const spawnPerFrame = useMemo(() => Math.max(5, Math.floor(count / 24)), [count]);
 
     const cannonOrigin = useMemo(() => new THREE.Vector3(-2.5, 1.05, 0.52), []);
     const fallbackTarget = useMemo(() => new THREE.Vector3(-0.83, 0.95, 0.67), []);
@@ -413,7 +414,6 @@ export function WaterParticles({ active, doorMeshes = [], count = 280 }) {
         }
 
         if (active) {
-            const spawnPerFrame = 12;
             for (let s = 0; s < spawnPerFrame; s++) {
                 const i = spawnIndex.current % count;
                 const p = particles[i];
@@ -549,8 +549,7 @@ export function WaterParticles({ active, doorMeshes = [], count = 280 }) {
 }
 
 // --- Foam Accumulation Splat Layer (sticks to door) ---
-export const FoamAccumulator = forwardRef(function FoamAccumulator({ foaming, rinsing }, ref) {
-    const count = 320;
+export const FoamAccumulator = forwardRef(function FoamAccumulator({ foaming, rinsing, count = 320 }, ref) {
     const meshRef = useRef();
 
     const foamAlpha = useMemo(() => {
@@ -634,10 +633,18 @@ export const FoamAccumulator = forwardRef(function FoamAccumulator({ foaming, ri
         const speed = rinsing ? 2.2 : foaming ? 6 : 1.2;
         globalAlpha.current = THREE.MathUtils.lerp(globalAlpha.current, target, 1 - Math.exp(-speed * delta));
 
+        // When idle and fully faded, skip updates to avoid unnecessary work
+        if (!foaming && !rinsing && globalAlpha.current < 1e-3) {
+            mesh.visible = false;
+            return;
+        }
+        mesh.visible = true;
+
         for (let i = 0; i < count; i++) {
             const s = splats[i];
             const fade = globalAlpha.current;
-            if (fade < 1e-3) {
+            // Safety check: prevent rendering artifacts at (0,0,0) if size is somehow set but position isn't
+            if (fade < 1e-3 || s.size < 0.001 || s.position.lengthSq() < 0.0001) {
                 dummy.scale.setScalar(0);
             } else {
                 dummy.position.copy(s.position);
@@ -739,17 +746,20 @@ const sparkleFragmentShader = `
 export function EngineSparkles({
     center,
     size,
-    active,
-    dirtOpacityRef,
-    count = 520,
+    trigger = 0,
+    count = 624,
     depthTest = true,
     renderOrder = 12,
     viewOffset = 0,
-    fadeMultiplier = 1
+    introDelay = 0.4,
+    holdDuration = 0.5,
+    fadeDuration = 2.1
 }) {
     const pointsRef = useRef();
     const geometryRef = useRef();
     const materialRef = useRef();
+    const delayRef = useRef(0);
+    const holdRef = useRef(0);
     const fadeRef = useRef(0);
     const { gl } = useThree();
     const tmpViewOffset = useMemo(() => new THREE.Vector3(), []);
@@ -791,14 +801,29 @@ export function EngineSparkles({
         geometryRef.current.computeBoundingSphere();
     }, [positions, randoms]);
 
+    useEffect(() => {
+        if (!trigger) return;
+        delayRef.current = introDelay;
+        holdRef.current = holdDuration;
+        fadeRef.current = fadeDuration;
+    }, [trigger, introDelay, holdDuration, fadeDuration]);
+
     useFrame((state, delta) => {
         const mat = materialRef.current;
         if (!mat) return;
-        const dirtFactor = dirtOpacityRef?.current ?? 0;
-        const target = active ? Math.min(1, dirtFactor * fadeMultiplier) : 0;
-        // Keep sparkle brightness directly aligned with the dirt fade for perfect sync
-        fadeRef.current = THREE.MathUtils.lerp(fadeRef.current, target, 1 - Math.exp(-5 * delta));
-        mat.uniforms.uFade.value = fadeRef.current;
+
+        let intensity = 0;
+        if (delayRef.current > 0) {
+            delayRef.current = Math.max(0, delayRef.current - delta);
+        } else if (holdRef.current > 0) {
+            holdRef.current = Math.max(0, holdRef.current - delta);
+            intensity = 1;
+        } else if (fadeRef.current > 0) {
+            intensity = fadeRef.current / fadeDuration;
+            fadeRef.current = Math.max(0, fadeRef.current - delta);
+        }
+
+        mat.uniforms.uFade.value = intensity;
         mat.uniforms.uTime.value = state.clock.elapsedTime;
 
         // Nudge sparkles toward the camera to sit above surfaces when requested
@@ -836,38 +861,50 @@ export function EngineSparkles({
     );
 }
 
-// --- Headlight Sparkles (Fairy Dust) ---
-// --- Headlight Sparkles (Fairy Dust) ---
-// --- Headlight Sparkles (Fairy Dust) ---
-export function HeadlightSparkles({
+// --- Headlight Front Sparkles (dense, compact oval in front of the lamp) ---
+export function HeadlightFrontSparkles({
     center,
     size,
-    active,
-    opacityRef,
-    count = 400
+    nodes = [],
+    count = 360,
+    offset = 0.08,
+    renderOrder = 15,
+    fixedCenter = null,
+    forward = new THREE.Vector3(0, 0, 1),
+    yNudge = 0.04,
+    zNudge = -0.05,
+    xNudge = 0,
+    trigger = 0
 }) {
     const pointsRef = useRef();
     const geometryRef = useRef();
     const materialRef = useRef();
-    const fadeRef = useRef(0);
+    const opacityRef = useRef(0);
+    const remainingRef = useRef(0);
+    const holdRef = useRef(0);
+    const lastLogRef = useRef(0);
     const { gl } = useThree();
-    const tmpViewOffset = useMemo(() => new THREE.Vector3(), []);
+    const tmpVec = useMemo(() => new THREE.Vector3(), []);
 
-    // Precompute static positions: Vertical Plane (XY) distribution
+    // Compact oval distribution
     const positions = useMemo(() => {
         const arr = new Float32Array(count * 3);
-        const sx = (size?.x ?? 0.5) * 0.6; // Narrower width
-        const sy = (size?.y ?? 0.3) * 0.6; // Narrower height
-        // Ignore depth (z) for the plane itself, we'll just offset it
+        const sx = (size?.x ?? 0.6) * 0.25;
+        const sy = (size?.y ?? 0.2) * 0.25;
+        const sz = (size?.z ?? 0.2) * 0.08;
         for (let i = 0; i < count; i++) {
+            const theta = Math.random() * Math.PI * 2;
+            const r = Math.sqrt(Math.random());
+            const x = Math.cos(theta) * r * sx;
+            const y = Math.sin(theta) * r * sy * 0.75; // Slightly flatter vertically
+            const z = (Math.random() - 0.5) * sz;
             const i3 = i * 3;
-            // Scatter on a vertical plane relative to the headlight center
-            arr[i3 + 0] = (Math.random() - 0.5) * sx;
-            arr[i3 + 1] = (Math.random() - 0.5) * sy - 0.35; // Shift down significantly more
-            arr[i3 + 2] = (Math.random() - 0.5) * 0.05; // Very thin depth variation
+            arr[i3 + 0] = x;
+            arr[i3 + 1] = y;
+            arr[i3 + 2] = z;
         }
         return arr;
-    }, [count, size?.x, size?.y]);
+    }, [count, size?.x, size?.y, size?.z]);
 
     const randoms = useMemo(
         () => Float32Array.from({ length: count }, () => Math.random()),
@@ -877,10 +914,10 @@ export function HeadlightSparkles({
     const uniforms = useMemo(() => ({
         uTime: { value: 0 },
         uFade: { value: 0 },
-        uBaseSize: { value: 60.0 }, // Huge size for visibility
+        uBaseSize: { value: 1.5 }, // small points
         uPixelRatio: { value: Math.min(2, gl.getPixelRatio()) },
-        uColorA: { value: new THREE.Color('#ffe9b0') },
-        uColorB: { value: new THREE.Color('#ffcd6b') }
+        uColorA: { value: new THREE.Color('#fff8e1') },
+        uColorB: { value: new THREE.Color('#ffd87a') }
     }), [gl]);
 
     useEffect(() => {
@@ -889,34 +926,185 @@ export function HeadlightSparkles({
         geometryRef.current.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
     }, [positions, randoms]);
 
+    const tmpBox = useMemo(() => new THREE.Box3(), []);
+    const tmpCenter = useMemo(() => new THREE.Vector3(), []);
+    const totalDuration = 3.0;
+    const introDelay = 0.4;
+    const holdDuration = 0.5;
+    const fadeDuration = Math.max(0.1, totalDuration - introDelay - holdDuration);
+    const delayRef = useRef(0);
+
+    useEffect(() => {
+        if (!trigger) return;
+        remainingRef.current = fadeDuration;
+        holdRef.current = holdDuration;
+        delayRef.current = introDelay;
+        opacityRef.current = 1;
+    }, [trigger]);
+
     useFrame((state, delta) => {
         const mat = materialRef.current;
         if (!mat) return;
 
-        // Force visibility if active
-        const targetFade = active ? 1.0 : 0.0;
+        if (delayRef.current > 0) {
+            delayRef.current = Math.max(0, delayRef.current - delta);
+            opacityRef.current = 0;
+        } else if (holdRef.current > 0) {
+            holdRef.current = Math.max(0, holdRef.current - delta);
+            opacityRef.current = 1;
+        } else if (remainingRef.current > 0) {
+            opacityRef.current = remainingRef.current / fadeDuration;
+            remainingRef.current = Math.max(0, remainingRef.current - delta);
+        } else {
+            opacityRef.current = 0;
+        }
 
-        // Instant fade-in (10.0), Slow fade-out (0.8) to match fog
-        const speed = active ? 10.0 : 0.8;
-        fadeRef.current = THREE.MathUtils.lerp(fadeRef.current, targetFade, 1 - Math.exp(-speed * delta));
-
-        mat.uniforms.uFade.value = fadeRef.current;
+        mat.uniforms.uFade.value = opacityRef.current;
         mat.uniforms.uTime.value = state.clock.elapsedTime;
 
-        // Offset towards camera to ensure it sits in front of the glass
-        if (pointsRef.current && center) {
-            const camPos = state.camera.position;
-            const dir = tmpViewOffset.copy(camPos).sub(center).normalize();
-            // Offset by 0.6 units towards camera (much closer for better visibility)
-            pointsRef.current.position.copy(center).addScaledVector(dir, 0.6);
-            pointsRef.current.lookAt(camPos); // Ensure the plane faces the camera
+        let liveCenter = fixedCenter || center;
+
+        // Recompute live center from headlight nodes so float/animations are respected
+        if (!liveCenter && nodes && nodes.length > 0) {
+            tmpBox.makeEmpty();
+            nodes.forEach((n) => {
+                n.updateWorldMatrix(true, false);
+                tmpBox.expandByObject(n);
+            });
+            if (!tmpBox.isEmpty()) {
+                liveCenter = tmpBox.getCenter(tmpCenter);
+            }
+        }
+
+        if (pointsRef.current && liveCenter) {
+            // Nudge downward slightly and forward in car space (not toward camera) to sit on the headlight
+            const baseCenter = tmpCenter.copy(liveCenter);
+            baseCenter.y += yNudge;
+            baseCenter.z += zNudge;
+            baseCenter.x += xNudge;
+
+            tmpVec.copy(forward).normalize().multiplyScalar(offset);
+            pointsRef.current.position.copy(baseCenter).add(tmpVec);
+            pointsRef.current.lookAt(baseCenter.clone().add(forward));
+
+            // Throttle debug logs to ~2/sec
+            const now = state.clock.elapsedTime;
+            if (now - lastLogRef.current > 0.5 && opacityRef.current > 0) {
+                lastLogRef.current = now;
+                console.info('[HeadlightSparkles] fade:', opacityRef.current.toFixed(2), 'center:', liveCenter.toArray().map(n => n.toFixed(2)).join(','));
+            }
         }
     });
 
-    if (!center) return null;
+    if (!center && (!nodes || nodes.length === 0)) return null;
 
     return (
-        <points ref={pointsRef} renderOrder={999} frustumCulled={false}>
+        <>
+            <points ref={pointsRef} renderOrder={renderOrder} frustumCulled={false}>
+                <bufferGeometry ref={geometryRef} />
+                <shaderMaterial
+                    ref={materialRef}
+                    vertexShader={sparkleVertexShader}
+                    fragmentShader={sparkleFragmentShader}
+                    uniforms={uniforms}
+                    transparent
+                    depthWrite={false}
+                    depthTest={false}
+                    blending={THREE.AdditiveBlending}
+                    toneMapped={false}
+                />
+            </points>
+            {/* Debug helper: tiny magenta plane showing sparkle anchor (dev only) */}
+            <mesh position={center} visible={false}>
+                <planeGeometry args={[0.05, 0.05]} />
+                <meshBasicMaterial color="magenta" />
+            </mesh>
+        </>
+    );
+}
+
+// --- Pet Hair Sparkles above proxy floor ---
+export function PetHairSparkles({
+    trigger = 0,
+    position = new THREE.Vector3(0, 0.05, -0.8),
+    size = new THREE.Vector3(2.2, 0.001, 1.6),
+    count = 420,
+    holdDuration = 0.5,
+    fadeDuration = 2.5
+}) {
+    const pointsRef = useRef();
+    const geometryRef = useRef();
+    const materialRef = useRef();
+    const delayRef = useRef(0);
+    const holdRef = useRef(0);
+    const fadeRef = useRef(0);
+    const { gl } = useThree();
+
+    const positions = useMemo(() => {
+        const arr = new Float32Array(count * 3);
+        for (let i = 0; i < count; i++) {
+            const i3 = i * 3;
+            arr[i3 + 0] = (Math.random() - 0.5) * (size.x ?? 2);
+            arr[i3 + 1] = (Math.random() * 0.08); // slight vertical jitter
+            arr[i3 + 2] = (Math.random() - 0.5) * (size.z ?? 1);
+        }
+        return arr;
+    }, [count, size.x, size.z]);
+
+    const randoms = useMemo(
+        () => Float32Array.from({ length: count }, () => Math.random()),
+        [count]
+    );
+
+    const uniforms = useMemo(() => ({
+        uTime: { value: 0 },
+        uFade: { value: 0 },
+        uBaseSize: { value: 3.0 },
+        uPixelRatio: { value: Math.min(2, gl.getPixelRatio()) },
+        uColorA: { value: new THREE.Color('#fff8e1') },
+        uColorB: { value: new THREE.Color('#ffd87a') }
+    }), [gl]);
+
+    useEffect(() => {
+        if (!geometryRef.current) return;
+        geometryRef.current.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometryRef.current.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
+    }, [positions, randoms]);
+
+    useEffect(() => {
+        if (!trigger) return;
+        delayRef.current = 0.2;
+        holdRef.current = holdDuration;
+        fadeRef.current = fadeDuration;
+    }, [trigger, holdDuration, fadeDuration]);
+
+    useFrame((state, delta) => {
+        const mat = materialRef.current;
+        if (!mat) return;
+
+        let opacity = 0;
+        if (delayRef.current > 0) {
+            delayRef.current = Math.max(0, delayRef.current - delta);
+        } else if (holdRef.current > 0) {
+            holdRef.current = Math.max(0, holdRef.current - delta);
+            opacity = 1;
+        } else if (fadeRef.current > 0) {
+            opacity = fadeRef.current / fadeDuration;
+            fadeRef.current = Math.max(0, fadeRef.current - delta);
+        }
+
+        mat.uniforms.uFade.value = opacity;
+        mat.uniforms.uTime.value = state.clock.elapsedTime;
+
+        if (pointsRef.current && position) {
+            pointsRef.current.position.set(position.x, position.y, position.z);
+        }
+    });
+
+    if (!position) return null;
+
+    return (
+        <points ref={pointsRef} frustumCulled={false} renderOrder={20}>
             <bufferGeometry ref={geometryRef} />
             <shaderMaterial
                 ref={materialRef}
@@ -933,85 +1121,89 @@ export function HeadlightSparkles({
     );
 }
 
-// --- Headlight Restoration Component ---
-export function HeadlightRestoration({ nodes, cleaningState }) {
+// --- Headlight Glow Overlay (uses native headlight meshes, no textures) ---
+export function HeadlightGlow({ nodes = [], trigger = 0 }) {
+    const entriesRef = useRef([]);
     const opacityRef = useRef(0);
-    const lastState = useRef(cleaningState);
-    const texture = useTexture('/headlight_fog.png');
+    const { scene } = useThree();
+    const remainingRef = useRef(0);
+    const holdRef = useRef(0);
+    const fadeDuration = 2.5; // seconds
+    const holdDuration = 0.5; // seconds
+    const maxOpacity = 0.82;
 
-    useFrame((state, delta) => {
-        // Animation logic - smooth transitions only
-        const targetOpacity =
-            cleaningState === 'dirty' ? 0.8 :
-                cleaningState === 'polishing' ? 0.4 : // Semi-transparent during polish
-                    0; // Clean
+    // Kick off a new flash when trigger changes
+    useEffect(() => {
+        if (!trigger) return;
+        remainingRef.current = fadeDuration;
+        holdRef.current = holdDuration;
+        opacityRef.current = maxOpacity;
+    }, [trigger]);
 
-        // Instant transition to polishing (10.0), Slow fade to clean (0.8)
-        const speed = cleaningState === 'polishing' ? 10.0 : 0.8;
-        opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, targetOpacity, 1 - Math.exp(-speed * delta));
+    useFrame((_, delta) => {
+        if (holdRef.current > 0) {
+            holdRef.current = Math.max(0, holdRef.current - delta);
+            opacityRef.current = maxOpacity;
+        } else if (remainingRef.current > 0) {
+            // Compute opacity before consuming this frame's delta to avoid an initial pop
+            opacityRef.current = maxOpacity * (remainingRef.current / fadeDuration);
+            remainingRef.current = Math.max(0, remainingRef.current - delta);
+        } else {
+            opacityRef.current = 0;
+        }
+
+        entriesRef.current.forEach((entry) => {
+            if (!entry || !entry.mesh || !entry.source || !entry.material) return;
+
+            entry.source.updateWorldMatrix(true, false);
+            entry.mesh.matrix.copy(entry.source.matrixWorld);
+            entry.mesh.matrixWorldNeedsUpdate = true;
+            entry.mesh.visible = opacityRef.current > 0.01;
+
+            entry.material.opacity = opacityRef.current * 0.7; // keep body color bleeding through
+            entry.material.emissiveIntensity = 0.35 + 0.45 * opacityRef.current; // mostly white with a hint of warmth
+            entry.material.needsUpdate = true;
+        });
     });
 
-    // Calculate center and size for sparkles (World Space)
-    const { center, size } = useMemo(() => {
-        if (!nodes || nodes.length === 0) return { center: new THREE.Vector3(), size: new THREE.Vector3(1, 1, 1) };
+    if (!nodes.length || !scene) return null;
 
-        const box = new THREE.Box3();
-        nodes.forEach(n => {
-            n.updateWorldMatrix(true, false);
-            box.expandByObject(n);
-        });
-        const size = new THREE.Vector3();
-        box.getSize(size);
-        return { center: box.getCenter(new THREE.Vector3()), size };
-    }, [nodes]);
-
-    if (!nodes || nodes.length === 0) return null;
-
-    return (
+    // Portal to the scene root to avoid inheriting Float/parent transforms twice
+    return createPortal(
         <group>
-            {/* Foggy Overlay - Applied to all headlight nodes to ensure visibility */}
-            {nodes.map((node, i) => createPortal(
-                <mesh geometry={node.geometry} renderOrder={1} scale={[1.005, 1.005, 1.005]}>
+            {nodes.map((node, i) => (
+                <mesh
+                    key={node.uuid || i}
+                    geometry={node.geometry}
+                    matrixAutoUpdate={false}
+                    ref={(mesh) => {
+                        entriesRef.current[i] = mesh
+                            ? {
+                                mesh,
+                                source: node,
+                                material: mesh.material
+                            }
+                            : null;
+                    }}
+                >
                     <meshStandardMaterial
-                        color="#2a2a2a" // Solid Dark Grey
+                        color="#fff8e1" // off-white base
+                        emissive="#ffd87a" // subtle warm tint
+                        emissiveIntensity={0}
                         transparent
-                        opacity={1} // Controlled by FogMaterialUpdater
-                        roughness={0.9} // Matte plastic look
-                        metalness={0.1}
+                        opacity={0}
+                        roughness={0.2}
+                        metalness={0.15}
                         depthWrite={false}
-                        side={THREE.FrontSide}
+                        side={THREE.DoubleSide}
                         polygonOffset
                         polygonOffsetFactor={-1}
                     />
-                    <FogMaterialUpdater opacityRef={opacityRef} />
-                </mesh>,
-                node
+                </mesh>
             ))}
-
-            {/* Sparkles - Fairy Dust Effect */}
-            <HeadlightSparkles
-                center={center}
-                size={size}
-                active={cleaningState === 'polishing'}
-                opacityRef={opacityRef}
-                count={400}
-            />
-        </group>
+        </group>,
+        scene
     );
-}
-
-// Helper to update material opacity inside the portal
-function FogMaterialUpdater({ opacityRef }) {
-    const mesh = useRef();
-    useFrame(() => {
-        if (mesh.current && mesh.current.parent && mesh.current.parent.material) {
-            const mat = mesh.current.parent.material;
-            mat.opacity = opacityRef.current;
-            mat.visible = opacityRef.current > 0.001;
-        }
-    });
-    // We attach a ref to a dummy object to get access to the parent mesh (the portal root)
-    return <primitive object={new THREE.Object3D()} ref={mesh} visible={false} />;
 }
 
 // --- Polishing Particles ---
@@ -1312,16 +1504,24 @@ export function PetHairShell({ state, nodes = [], texturePath = '/pet_hair.png' 
 }
 
 // Pet hair proxy plane positioned over the floor area
+// Pet hair proxy plane positioned over the floor area
+// Pet hair proxy plane positioned over the floor area
 export function PetHairProxy({
-    state,
+    trigger = 0,
     texturePath = '/dog_hair_texture.png',
     position = [0, 0.35, -0.2],
     size = [3.0, 3.0],
     rotation = [-Math.PI / 2, 0, 0]
 }) {
     const hairMap = useTexture(texturePath);
+    const opacityRef = useRef(0);
+    const holdRef = useRef(0);
     const fadeRef = useRef(0);
-    const meshRef = useRef();
+    const meshRef1 = useRef();
+    const meshRef2 = useRef();
+    const meshRef3 = useRef();
+    const HOLD_DURATION = 0.5;
+    const FADE_DURATION = 2.5;
 
     useMemo(() => {
         if (!hairMap) return;
@@ -1332,39 +1532,113 @@ export function PetHairProxy({
         hairMap.needsUpdate = true;
     }, [hairMap]);
 
+    useEffect(() => {
+        if (!trigger) return;
+        holdRef.current = HOLD_DURATION;
+        fadeRef.current = FADE_DURATION;
+        opacityRef.current = 1;
+    }, [trigger]);
+
     useFrame((_, delta) => {
-        const target = state === 'dirty' ? 1 : 0;
-        fadeRef.current = THREE.MathUtils.lerp(fadeRef.current, target, 1 - Math.exp(-8 * delta));
-        if (meshRef.current?.material) {
-            meshRef.current.material.opacity = fadeRef.current;
-            meshRef.current.material.visible = fadeRef.current > 0.01;
+        if (holdRef.current > 0) {
+            holdRef.current = Math.max(0, holdRef.current - delta);
+            opacityRef.current = 1;
+        } else if (fadeRef.current > 0) {
+            fadeRef.current = Math.max(0, fadeRef.current - delta);
+            opacityRef.current = fadeRef.current / FADE_DURATION;
+        } else {
+            opacityRef.current = 0;
         }
+
+        const opacity = opacityRef.current;
+
+        const setMaterial = (meshRef) => {
+            if (!meshRef.current?.material) return;
+            meshRef.current.material.opacity = opacity;
+            meshRef.current.material.visible = opacity > 0.01;
+        };
+
+        setMaterial(meshRef1);
+        setMaterial(meshRef2);
+        setMaterial(meshRef3);
     });
 
     return (
-        <mesh
-            ref={meshRef}
-            position={position}
-            rotation={rotation}
-            castShadow={false}
-            receiveShadow={false}
-            frustumCulled={false}
-            renderOrder={100}
-        >
-            <planeGeometry args={size} />
-            <meshStandardMaterial
-                map={hairMap}
-                alphaMap={hairMap}
-                transparent
-                opacity={0}
-                roughness={1.0}
-                metalness={0}
-                depthWrite={false}
-                depthTest
-                side={THREE.DoubleSide}
-                polygonOffset
-                polygonOffsetFactor={-2}
-            />
-        </mesh>
+        <group renderOrder={100}>
+            {/* First Layer */}
+            <mesh
+                ref={meshRef1}
+                position={position}
+                rotation={rotation}
+                castShadow={false}
+                receiveShadow={false}
+                frustumCulled={false}
+            >
+                <planeGeometry args={size} />
+                <meshStandardMaterial
+                    map={hairMap}
+                    alphaMap={hairMap}
+                    transparent
+                    opacity={0}
+                    roughness={1.0}
+                    metalness={0}
+                    depthWrite={false}
+                    depthTest
+                    side={THREE.DoubleSide}
+                    polygonOffset
+                    polygonOffsetFactor={-2}
+                />
+            </mesh>
+
+            {/* Second Layer - Rotated 90 degrees for density */}
+            <mesh
+                ref={meshRef2}
+                position={[position[0], position[1] + 0.005, position[2]]}
+                rotation={[rotation[0], rotation[1], rotation[2] + Math.PI / 2]}
+                castShadow={false}
+                receiveShadow={false}
+                frustumCulled={false}
+            >
+                <planeGeometry args={size} />
+                <meshStandardMaterial
+                    map={hairMap}
+                    alphaMap={hairMap}
+                    transparent
+                    opacity={0}
+                    roughness={1.0}
+                    metalness={0}
+                    depthWrite={false}
+                    depthTest
+                    side={THREE.DoubleSide}
+                    polygonOffset
+                    polygonOffsetFactor={-2}
+                />
+            </mesh>
+
+            {/* Third Layer - Rotated 45 degrees for even more density */}
+            <mesh
+                ref={meshRef3}
+                position={[position[0], position[1] + 0.01, position[2]]}
+                rotation={[rotation[0], rotation[1], rotation[2] + Math.PI / 4]}
+                castShadow={false}
+                receiveShadow={false}
+                frustumCulled={false}
+            >
+                <planeGeometry args={size} />
+                <meshStandardMaterial
+                    map={hairMap}
+                    alphaMap={hairMap}
+                    transparent
+                    opacity={0}
+                    roughness={1.0}
+                    metalness={0}
+                    depthWrite={false}
+                    depthTest
+                    side={THREE.DoubleSide}
+                    polygonOffset
+                    polygonOffsetFactor={-2}
+                />
+            </mesh>
+        </group>
     );
 }

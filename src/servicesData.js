@@ -71,3 +71,71 @@ export const SERVICES_DATA = [
     addOns: []
   }
 ];
+
+export const VIEW_CONTENT = {
+  home: {
+    title: "WELCOME TO HARDY'S",
+    description: "The ultimate mobile detailing experience. Spin to explore.",
+    position: { top: '120px', right: '32px' }
+  },
+  exterior: {
+    title: "EXTERIOR DETAIL",
+    description: "Signature hand wash and wax restoration. Protects paint, enhances shine.",
+    position: { top: '120px', right: '32px' }
+  },
+  interior: {
+    title: "INTERIOR DETAIL",
+    description: "Complete cabin restoration. Deep vacuuming, leather conditioning, and sanitization.",
+    position: { top: '20%', left: '400px' }
+  },
+  engine: {
+    title: "ENGINE BAY DETAIL",
+    description: "Safe degreasing and dressing. Keeps your powertrain looking showroom new.",
+    position: { bottom: '100px', right: '32px' }
+  },
+  front: {
+    title: "HEADLIGHT RESTORATION",
+    description: "Restore clarity and brightness. Improves visibility and safety.",
+    position: { top: '150px', left: '400px' }
+  },
+  interior_floor: {
+    title: "PET HAIR REMOVAL",
+    description: "Specialized removal of stubborn hair. Clears what standard vacuums miss.",
+    position: { bottom: '15%', left: '50%', transform: 'translateX(-50%)' }
+  },
+  paint_correction: {
+    title: "PAINT CORRECTION",
+    description: "Multi-stage machine polishing. Removes swirls for a mirror-like finish.",
+    position: { top: '120px', right: '32px' }
+  },
+  ceramic_coating: {
+    title: "CERAMIC COATING",
+    description: "Long-lasting nano-protection. Repels water, dirt, and UV rays for years.",
+    position: { top: '120px', right: '32px' }
+  },
+  wheel: {
+    title: "WHEEL & TIRE PACKAGE",
+    description: "Deep cleaning of faces and barrels. Finished with a premium satin dressing.",
+    position: { bottom: '100px', left: '400px' }
+  },
+  paint: {
+    title: "PREMIUM PAINT CARE",
+    description: "Decontamination and protection. Ensures a smooth, glass-like surface.",
+    position: { top: '120px', right: '32px' }
+  },
+  interior_detail: {
+    title: "DEEP INTERIOR CARE",
+    description: "Intensive treatment for leather and carpets. Revitalizes your cabin's feel.",
+    position: { top: '20%', left: '400px' }
+  },
+  paint_detail: {
+    title: "PAINT INSPECTION",
+    description: "Close-up analysis of paint defects to determine the perfect correction approach.",
+    position: { top: '120px', right: '32px' }
+  },
+  right_side: {
+    title: "SIDE PROFILE",
+    description: "A comprehensive view of the vehicle's profile and door finish.",
+    position: { top: '120px', right: '32px' }
+  }
+};
