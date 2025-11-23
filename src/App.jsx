@@ -1595,7 +1595,7 @@ export default function App() {
             fov={isMobile ? 100 : 45}
             onUpdate={(c) => c.updateProjectionMatrix()}
           />
-          <CameraRig view={cameraView} enableHomeOrbit={!isMobile} isMobile={isMobile} />
+          <CameraRig view={cameraView} enableHomeOrbit={true} isMobile={isMobile} />
         </Suspense>
       </Canvas>
 
