@@ -1047,21 +1047,25 @@ const ServiceDock = ({
 }) => {
   return (
     <div style={{
-      position: 'absolute',
+      position: 'fixed', // Changed from absolute to fixed for better mobile support
       bottom: 0,
       left: 0,
       right: 0,
-      height: '18%', // Strict 20% max constraint
+      minHeight: '100px', // Fixed minimum height instead of percentage
+      maxHeight: '140px', // Cap the maximum height
       background: 'rgba(10, 10, 10, 0.95)',
       backdropFilter: 'blur(20px)',
       borderTop: `1px solid ${THEME.border}`,
       zIndex: 40,
       display: 'flex',
       alignItems: 'center',
-      padding: '0 16px',
+      padding: '12px 16px',
+      paddingBottom: 'max(12px, env(safe-area-inset-bottom))', // Account for iOS safe area
       overflowX: 'auto',
+      overflowY: 'hidden',
       gap: '12px',
-      scrollSnapType: 'x mandatory'
+      scrollSnapType: 'x mandatory',
+      WebkitOverflowScrolling: 'touch' // Smooth scrolling on iOS
     }}>
       {MENU_ITEMS.map((service) => {
         const isActive = activeMenuItem === service.id;
@@ -1140,17 +1144,19 @@ const AddOnBar = ({ activeService, activeAddOn, setActiveAddOn, setCameraView, q
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       style={{
-        position: 'absolute',
-        bottom: '19%', // Just above the dock
+        position: 'fixed', // Changed to fixed for consistency
+        bottom: 'calc(100px + env(safe-area-inset-bottom, 0px))', // Position above the dock
         left: 0,
         right: 0,
         padding: '12px 16px',
         display: 'flex',
         gap: '10px',
         overflowX: 'auto',
+        overflowY: 'hidden',
         zIndex: 39,
         background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
-        maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)'
+        maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+        WebkitOverflowScrolling: 'touch'
       }}
     >
       {activeService.addOns.map((addon, idx) => {
