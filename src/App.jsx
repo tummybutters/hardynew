@@ -668,7 +668,7 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
         position={[0, 0.35, -0.2]}
         size={[3.0, 3.0]}
       />
-      {!isMobile && petHairTrigger !== 0 && <PetHairSparkles trigger={petHairTrigger} />}
+      {petHairTrigger !== 0 && <PetHairSparkles trigger={petHairTrigger} />}
 
       {/* Dirt Shell & Foam - Attached to the Right Door Group if it exists */}
       {
@@ -701,7 +701,7 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
 
       {/* Engine sparkles (world-space, avoid double transforms) */}
       {
-        engineBounds && !isMobile && engineTrigger !== 0 && (
+        engineBounds && engineTrigger !== 0 && (
           <EngineSparkles
             center={engineBounds.center}
             size={engineBounds.size}
@@ -731,7 +731,7 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
         nodes={headlightNodes}
         trigger={headlightTrigger}
       />
-      {!isMobile && headlightTrigger !== 0 && (
+      {headlightTrigger !== 0 && (
         <>
           <HeadlightFrontSparkles
             nodes={headlightLeftNodes}
