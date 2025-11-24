@@ -17,6 +17,7 @@ import LoadingScreen from './LoadingScreen';
 import { DirtShell, FoamParticles, FoamAccumulator, WaterParticles, EngineSparkles, PetHairProxy, PetHairSparkles, HeadlightGlow, HeadlightFrontSparkles } from './CleaningEffects';
 import Navbar from './Navbar';
 import ReviewsSection from './ReviewsSection';
+import { LegacyServices, LegacyWhyChoose, LegacyCTA } from './LegacySections';
 
 // Preload the model
 useGLTF.preload('/bmw_m4_f82_optimized.glb');
@@ -1686,6 +1687,11 @@ export default function App() {
 
       </div>
       {/* End Hero Section */}
+
+      {/* Legacy content sections */}
+      <LegacyServices />
+      <LegacyWhyChoose />
+      <LegacyCTA />
 
       {/* REVIEWS SECTION */}
       <ReviewsSection />
