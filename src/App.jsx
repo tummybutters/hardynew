@@ -316,6 +316,8 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
   const engineFadeRef = useRef(0);
   const engineDelayRef = useRef(0);
   const foamAccumRef = useRef();
+  const [waterActive, setWaterActive] = useState(false);
+  const waterActiveRef = useRef(false);
 
   const isSetup = useRef(false);
   const lastCleaningState = useRef(cleaningState);
@@ -631,6 +633,20 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
           4.0;
     dirtOpacityRef.current = THREE.MathUtils.lerp(dirtOpacityRef.current, targetDirt, 1 - Math.exp(-dirtSpeed * delta));
 
+    if (cleaningState === 'rinsing') {
+      const foamAlpha = foamAccumRef.current?.getAlpha?.() ?? 0;
+      const hasFoam = foamAlpha > 0.05;
+      const hasDirt = dirtOpacityRef.current > 0.035;
+      const shouldSprayWater = hasFoam || hasDirt;
+      if (shouldSprayWater !== waterActiveRef.current) {
+        waterActiveRef.current = shouldSprayWater;
+        setWaterActive(shouldSprayWater);
+      }
+    } else if (waterActiveRef.current) {
+      waterActiveRef.current = false;
+      setWaterActive(false);
+    }
+
     // Engine bay overlay timeline (matching headlight logic)
     let engineOpacity = 0;
     if (engineDelayRef.current > 0) {
@@ -749,7 +765,7 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
         position={[0, 0, 0]}
       />
       <WaterParticles
-        active={cleaningState === 'rinsing'}
+        active={waterActive && cleaningState === 'rinsing'}
         doorMeshes={rightDoorNodes}
         count={waterCount}
       />

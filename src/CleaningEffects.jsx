@@ -692,6 +692,9 @@ export const FoamAccumulator = forwardRef(function FoamAccumulator({ foaming, ri
             s.quaternion.copy(tmpQuat.setFromUnitVectors(baseNormal, localNormal));
             s.size = 0.12 + Math.random() * 0.12;
             writeIndex.current++;
+        },
+        getAlpha() {
+            return globalAlpha.current;
         }
     }), [baseNormal, count, splats, tmpMatrix, tmpQuat]);
 
