@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
   useGLTF,
-  Html,
   Environment,
   ContactShadows,
   Float,
@@ -12,10 +11,12 @@ import {
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, Info, ChevronDown, ChevronRight, Check, Plus, X, Share2 } from 'lucide-react';
+import { Phone, Check, Plus, X } from 'lucide-react';
 import { SERVICES_DATA, VIEW_CONTENT } from './servicesData';
 import LoadingScreen from './LoadingScreen';
 import { DirtShell, FoamParticles, FoamAccumulator, WaterParticles, EngineSparkles, PetHairProxy, PetHairSparkles, HeadlightGlow, HeadlightFrontSparkles } from './CleaningEffects';
+import Navbar from './Navbar';
+import ReviewsSection from './ReviewsSection';
 
 // Preload the model
 useGLTF.preload('/bmw_m4_f82_optimized.glb');
@@ -114,8 +115,7 @@ function CameraRig({ view, enableHomeOrbit = true, isMobile }) {
           0.0, 0.15, 0.25, // Target: slightly lower toward the rear floor area
           true
         );
-        // Aggressive zoom out on mobile
-        controls.current.zoomTo(isMobile ? 0.7 : 1.25, true);
+        controls.current.zoomTo(isMobile ? 0.8 : 0.65, true);
         break;
 
       case 'floor_mat':
@@ -265,7 +265,15 @@ function CameraRig({ view, enableHomeOrbit = true, isMobile }) {
     controls.current.update(delta);
   });
 
-  return <CameraControls ref={controls} minPolarAngle={0} maxPolarAngle={Math.PI / 1.8} />;
+  return (
+    <CameraControls
+      ref={controls}
+      minPolarAngle={0}
+      maxPolarAngle={Math.PI / 1.8}
+      mouseButtons={{ left: 0, middle: 0, right: 0, wheel: 0 }}
+      touches={{ one: 0, two: 0, three: 0 }}
+    />
+  );
 }
 
 
@@ -298,7 +306,7 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
   const [headlightRightNodes, setHeadlightRightNodes] = useState([]);
   const [headlightLeftBounds, setHeadlightLeftBounds] = useState(null);
   const [headlightRightBounds, setHeadlightRightBounds] = useState(null);
-  const [floorNodes, setFloorNodes] = useState([]);
+  const dirtRepeat = useMemo(() => [4, 4], []);
 
   // Dirt Opacity State (Animation driven) - refs to avoid React churn per frame
   const dirtOpacityRef = useRef(0);
@@ -331,9 +339,7 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
     const rawHeadlightRight = [];
     const rawFloorNodes = [];
     let engineBayGroup = null;
-    const tmpBox = new THREE.Box3();
     const tmpCenter = new THREE.Vector3();
-    const tmpSize = new THREE.Vector3();
     const headlightNames = [];
 
     scene.traverse((node) => {
@@ -349,6 +355,9 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
         node.receiveShadow = true;
         const name = node.name.toLowerCase();
         const parentName = node.parent?.name.toLowerCase() || '';
+        node.updateWorldMatrix(true, false);
+        const worldCenter = tmpCenter;
+        node.getWorldPosition(worldCenter);
 
         // --- HOOD DETECTION ---
         if ((name.includes('hood') || name.includes('bonnet')) &&
@@ -414,19 +423,34 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
           name.includes('badge');
 
         if (!isBlocked) {
+          const isExplicitLeft =
+            name.includes('left') || name.includes('_l') ||
+            parentName.includes('left') || parentName.includes('_l');
+          const isExplicitRight =
+            name.includes('right') || name.includes('_r') ||
+            parentName.includes('right') || parentName.includes('_r');
+          const isRightSide = worldCenter.x < 0;
+          const isLeftSide = worldCenter.x >= 0;
+          const isDoorish = name.includes('door') || parentName.includes('door');
+
           // Explicit Left Door parts
-          if (
-            (name.includes('door') && (name.includes('left') || name.includes('_l'))) ||
-            (parentName.includes('door') && (parentName.includes('left') || parentName.includes('_l')))
-          ) {
+          if (isDoorish && (isExplicitLeft || (!isExplicitRight && isLeftSide))) {
             rawLeftDoorNodes.push(node);
           }
-          // Explicit Right Door parts
-          else if (
-            (name.includes('door') && (name.includes('right') || name.includes('_r'))) ||
-            (parentName.includes('door') && (parentName.includes('right') || parentName.includes('_r')))
-          ) {
+          // Explicit Right Door parts (Hierarchy based)
+          else if (node.parent && (
+            node.parent.name === 'ARm4_door_R' ||
+            node.parent.name === 'ARm4_doorglass_R' ||
+            node.parent.name === 'ARm4_door_R_handle_carbon'
+          )) {
+            console.log("Found Right Door Mesh (Hierarchy):", node.name);
             rawRightDoorNodes.push(node);
+          }
+          else if (isDoorish && (isExplicitRight || (!isExplicitLeft && isRightSide))) {
+            // Fallback
+            if (!rawRightDoorNodes.includes(node)) {
+              rawRightDoorNodes.push(node);
+            }
           }
         }
 
@@ -447,13 +471,7 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
 
     // --- PIVOT CREATION ---
     // 1. Calculate Bounding Box to understand Scale
-    const box = new THREE.Box3().setFromObject(scene);
-    const size = box.getSize(new THREE.Vector3());
-    const center = box.getCenter(new THREE.Vector3());
-    // console.log("Model Size:", size);
-    // console.log("Model Center:", center);
-
-    // 2. Final Hinge Setup (User Calibrated)
+    // Final Hinge Setup (User Calibrated)
     // ISOLATING LEFT DOOR AS REQUESTED
     // User verified coordinates: X=0.830, Y=0.950, Z=0.670
     // User verified rotation: -1.15 (from the Hinge Tuner test)
@@ -522,7 +540,6 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
     const rightSize = rightBox.isEmpty() ? null : rightBox.getSize(new THREE.Vector3());
     setHeadlightLeftBounds(leftCenter && leftSize ? { center: leftCenter, size: leftSize } : null);
     setHeadlightRightBounds(rightCenter && rightSize ? { center: rightCenter, size: rightSize } : null);
-    setFloorNodes(rawFloorNodes);
 
     console.info('Headlight node count:', rawHeadlightNodes.length, 'names:', headlightNames);
     console.info('PetHair floor candidates:', rawFloorNodes.map(n => n.name));
@@ -594,7 +611,8 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
 
     // Cleaning Animation Logic
     if (cleaningState !== lastCleaningState.current) {
-      if (cleaningState === 'foaming') {
+      if (cleaningState === 'dirty' || cleaningState === 'foaming') {
+        // Force the dirt layer fully on as soon as we enter the dirty/foam phase
         dirtOpacityRef.current = 1;
       } else if (cleaningState === 'clean') {
         dirtOpacityRef.current = 0;
@@ -674,13 +692,22 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
       {
         rightDoorGroup && rightDoorNodes.length > 0 && (
           <primitive object={rightDoorGroup}>
-            <DirtShell nodes={rightDoorNodes} opacityRef={dirtOpacityRef} />
-            <FoamAccumulator
-              ref={foamAccumRef}
-              foaming={cleaningState === 'foaming'}
-              rinsing={cleaningState === 'rinsing'}
-              count={foamSplatCount}
+            <DirtShell
+              nodes={rightDoorNodes}
+              opacityRef={dirtOpacityRef}
+              color="#5c4033"
+              texturePath="/engine_dirt.png"
+              textureRepeat={dirtRepeat}
+              usePlanar={true}
             />
+            {(cleaningState === 'foaming' || cleaningState === 'rinsing') && (
+              <FoamAccumulator
+                ref={foamAccumRef}
+                foaming={cleaningState === 'foaming'}
+                rinsing={cleaningState === 'rinsing'}
+                count={foamSplatCount}
+              />
+            )}
           </primitive>
         )
       }
@@ -1351,131 +1378,109 @@ export default function App() {
   }, [loadingProgress]);
 
   return (
-    <div style={{ width: '100%', height: '100vh', minWidth: '320px', background: 'linear-gradient(to bottom, #000000 0%, #1a0b05 70%, #4a1905 100%)', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', minHeight: '100vh', minWidth: '320px', background: 'linear-gradient(to bottom, #000000 0%, #1a0b05 70%, #4a1905 100%)', position: 'relative', overflowX: 'hidden' }}>
 
       {/* LOADING SCREEN */}
       <AnimatePresence>
         {!isLoaded && <LoadingScreen progress={loadingProgress} />}
       </AnimatePresence>
 
-      {/* HEADER UI */}
-      <header style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        padding: '20px',
-        zIndex: 50,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        pointerEvents: 'none'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', pointerEvents: 'auto' }}>
-          <img
-            src="/hardys_logo.png"
-            alt="Hardy's Wash N' Wax Logo"
-            style={{
-              width: '50px',
-              height: '50px',
-              objectFit: 'contain',
-              filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))'
-            }}
-          />
-          <h1 style={{
-            fontFamily: 'Playfair Display, serif',
-            fontSize: '1.2rem',
-            margin: 0,
-            color: 'white',
-            textShadow: '0 2px 4px rgba(0,0,0,0.5)'
-          }}>Hardy's Wash N' Wax</h1>
-        </div>
+      {/* NAVBAR */}
+      <Navbar onBookClick={() => setIsBookingOpen(true)} />
 
-        {/* Mobile Hero Text - Fades out when not on Home */}
-        <AnimatePresence>
-          {isMobile && activeMenuItem === 'home' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-              style={{
-                position: 'absolute',
-                top: '80px',
-                left: '20px',
-                right: '20px',
-                pointerEvents: 'none'
+      {/* HERO SECTION - 3D Canvas */}
+      <div id="hero" style={{ width: '100%', height: '100vh', minWidth: '320px', background: 'linear-gradient(to bottom, #000000 0%, #1a0b05 70%, #4a1905 100%)', position: 'relative' }}>
+
+        <header style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          padding: '20px',
+          zIndex: 50,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          pointerEvents: 'none'
+        }}>
+          {/* Removed duplicate logo/title - now in Navbar */}
+
+          {/* Mobile Hero Text - Fades out when not on Home */}
+          <AnimatePresence>
+            {isMobile && activeMenuItem === 'home' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                style={{
+                  position: 'absolute',
+                  top: '80px',
+                  left: '20px',
+                  right: '20px',
+                  pointerEvents: 'none'
+                }}
+              >
+                <h2 style={{
+                  fontFamily: 'Playfair Display, serif',
+                  fontSize: '2.5rem',
+                  lineHeight: '1.1',
+                  margin: '0 0 16px 0',
+                  color: 'white',
+                  textShadow: '0 2px 10px rgba(0,0,0,0.8)'
+                }}>
+                  Mobile Car Detailing<br />
+                  <span style={{ color: THEME.primary }}>Sacramento, CA</span>
+                </h2>
+                <p style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '1rem',
+                  lineHeight: '1.5',
+                  color: 'rgba(255,255,255,0.9)',
+                  textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+                  maxWidth: '90%'
+                }}>
+                  Providing Interior Detailing, Exterior Detailing, Paint Correction, Ceramic Coating, and more! Serving Sacramento, Davis, Woodland, Dixon, Winters, Elk Grove, and surrounding areas — all delivered with precision, care, and professional-grade results.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+        </header>
+
+        {/* InfoCard - Now enabled for mobile too */}
+        <InfoCard
+          visible={infoCardVisible}
+          onClose={() => setInfoCardVisible(false)}
+          isMobile={isMobile}
+          view={cameraView}
+        />
+
+        {isMobile ? (
+          <>
+            <AddOnBar
+              activeService={activeService}
+              activeAddOn={activeAddOn}
+              setActiveAddOn={setActiveAddOn}
+              setCameraView={setCameraView}
+              queueInfoCard={queueInfoCard}
+            />
+            <ServiceDock
+              activeService={activeService}
+              activeMenuItem={activeMenuItem}
+              setActiveMenuItem={setActiveMenuItem}
+              setActiveService={(service) => {
+                setActiveService(service);
+                setActiveMenuItem(service?.id || activeMenuItem);
+                if (service?.id === 'exterior') handleClean();
               }}
-            >
-              <h2 style={{
-                fontFamily: 'Playfair Display, serif',
-                fontSize: '2.5rem',
-                lineHeight: '1.1',
-                margin: '0 0 16px 0',
-                color: 'white',
-                textShadow: '0 2px 10px rgba(0,0,0,0.8)'
-              }}>
-                Mobile Car Detailing<br />
-                <span style={{ color: THEME.primary }}>Sacramento, CA</span>
-              </h2>
-              <p style={{
-                fontFamily: 'Inter, sans-serif',
-                fontSize: '1rem',
-                lineHeight: '1.5',
-                color: 'rgba(255,255,255,0.9)',
-                textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-                maxWidth: '90%'
-              }}>
-                Providing Interior Detailing, Exterior Detailing, Paint Correction, Ceramic Coating, and more! Serving Sacramento, Davis, Woodland, Dixon, Winters, Elk Grove, and surrounding areas — all delivered with precision, care, and professional-grade results.
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Book Button (Top Right) */}
-        {!isBookingOpen && (activeService.id !== 'home' || activeAddOn) && (
-          <div style={{ pointerEvents: 'auto' }}>
-            <button
-              onClick={() => setIsBookingOpen(true)}
-              style={{
-                background: THEME.primary,
-                color: 'white',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: '30px',
-                fontWeight: '600',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
-              }}>
-              <Phone size={16} />
-              Book Selection • ${(activeService?.price || 0) + (activeAddOn?.price || 0)}
-            </button>
-          </div>
-        )}
-      </header>
-
-      {/* InfoCard - Now enabled for mobile too */}
-      <InfoCard
-        visible={infoCardVisible}
-        onClose={() => setInfoCardVisible(false)}
-        isMobile={isMobile}
-        view={cameraView}
-      />
-
-      {isMobile ? (
-        <>
-          <AddOnBar
-            activeService={activeService}
-            activeAddOn={activeAddOn}
-            setActiveAddOn={setActiveAddOn}
-            setCameraView={setCameraView}
-            queueInfoCard={queueInfoCard}
-          />
-          <ServiceDock
+              setCameraView={setCameraView}
+              queueInfoCard={queueInfoCard}
+              onShare={handleShare}
+            />
+          </>
+        ) : (
+          <Sidebar
             activeService={activeService}
             activeMenuItem={activeMenuItem}
             setActiveMenuItem={setActiveMenuItem}
@@ -1484,89 +1489,45 @@ export default function App() {
               setActiveMenuItem(service?.id || activeMenuItem);
               if (service?.id === 'exterior') handleClean();
             }}
+            activeAddOn={activeAddOn}
+            setActiveAddOn={setActiveAddOn}
             setCameraView={setCameraView}
             queueInfoCard={queueInfoCard}
-            onShare={handleShare}
           />
-        </>
-      ) : (
-        <Sidebar
-          activeService={activeService}
-          activeMenuItem={activeMenuItem}
-          setActiveMenuItem={setActiveMenuItem}
-          setActiveService={(service) => {
-            setActiveService(service);
-            setActiveMenuItem(service?.id || activeMenuItem);
-            if (service?.id === 'exterior') handleClean();
+        )}
+
+        <Canvas
+          key={isMobile ? 'canvas-mobile' : 'canvas-desktop'}
+          shadows={!isMobile}
+          dpr={isMobile ? [0.75, 1.1] : [1, 1.75]} // Clamp DPR harder on mobile to shrink render targets
+          performance={{ min: isMobile ? 0.3 : 0.5 }} // Allow deeper frame drops on mobile
+          gl={{
+            antialias: !isMobile,
+            alpha: true,
+            powerPreference: 'high-performance',
+            preserveDrawingBuffer: false
           }}
-          activeAddOn={activeAddOn}
-          setActiveAddOn={setActiveAddOn}
-          setCameraView={setCameraView}
-          queueInfoCard={queueInfoCard}
-        />
-      )}
-
-      <Canvas
-        key={isMobile ? 'canvas-mobile' : 'canvas-desktop'}
-        shadows={!isMobile}
-        dpr={isMobile ? [0.75, 1.1] : [1, 1.75]} // Clamp DPR harder on mobile to shrink render targets
-        performance={{ min: isMobile ? 0.3 : 0.5 }} // Allow deeper frame drops on mobile
-        gl={{
-          antialias: !isMobile,
-          alpha: true,
-          powerPreference: 'high-performance',
-          preserveDrawingBuffer: false
-        }}
-        style={{ marginLeft: isMobile ? '0' : '350px', width: isMobile ? '100%' : 'calc(100% - 350px)' }}
-      >
-        <Suspense fallback={<CanvasLoader setLoadingProgress={setLoadingProgress} />}>
-          <ambientLight intensity={0.45} />
-          <spotLight
-            position={[10, 10, 10]}
-            angle={0.15}
-            penumbra={1}
-            intensity={8}
-            castShadow={!isMobile}
-            shadow-mapSize={isMobile ? [384, 384] : [768, 768]} // Reduced for mobile performance
-          />
-          <pointLight position={[-10, -10, -10]} color={THEME.primary} intensity={5} />
-
-          <Environment preset="city" blur={isMobile ? 0.6 : 0.4} resolution={isMobile ? 128 : 256} />
-
-          {isMobile ? (
-            <CarModel
-              activeService={activeService}
-              activeAddOn={activeAddOn}
-              onPartClick={setCameraView}
-              cleaningState={cleaningState}
-              petHairTrigger={petHairTrigger}
-              isMobile={isMobile}
-              view={cameraView}
-              foamCount={foamCount}
-              waterCount={waterCount}
-              foamSplatCount={foamSplatCount}
-              headlightTrigger={headlightTrigger}
-              engineTrigger={engineTrigger}
+          style={{
+            marginLeft: isMobile ? '0' : '350px',
+            width: isMobile ? '100%' : 'calc(100% - 350px)',
+            pointerEvents: 'none'
+          }}
+        >
+          <Suspense fallback={<CanvasLoader setLoadingProgress={setLoadingProgress} />}>
+            <ambientLight intensity={0.45} />
+            <spotLight
+              position={[10, 10, 10]}
+              angle={0.15}
+              penumbra={1}
+              intensity={8}
+              castShadow={!isMobile}
+              shadow-mapSize={isMobile ? [384, 384] : [768, 768]} // Reduced for mobile performance
             />
-          ) : (
-            shouldFloat ? (
-              <Float speed={1} rotationIntensity={0.1} floatIntensity={0.1}>
-                <CarModel
-                  activeService={activeService}
-                  activeAddOn={activeAddOn}
-                  onPartClick={setCameraView}
-                  cleaningState={cleaningState}
-                  petHairTrigger={petHairTrigger}
-                  isMobile={isMobile}
-                  view={cameraView}
-                  foamCount={foamCount}
-                  waterCount={waterCount}
-                  foamSplatCount={foamSplatCount}
-                  headlightTrigger={headlightTrigger}
-                  engineTrigger={engineTrigger}
-                />
-              </Float>
-            ) : (
+            <pointLight position={[-10, -10, -10]} color={THEME.primary} intensity={5} />
+
+            <Environment preset="city" blur={isMobile ? 0.6 : 0.4} resolution={isMobile ? 128 : 256} />
+
+            {isMobile ? (
               <CarModel
                 activeService={activeService}
                 activeAddOn={activeAddOn}
@@ -1581,114 +1542,153 @@ export default function App() {
                 headlightTrigger={headlightTrigger}
                 engineTrigger={engineTrigger}
               />
-            )
-          )}
+            ) : (
+              shouldFloat ? (
+                <Float speed={1} rotationIntensity={0.1} floatIntensity={0.1}>
+                  <CarModel
+                    activeService={activeService}
+                    activeAddOn={activeAddOn}
+                    onPartClick={setCameraView}
+                    cleaningState={cleaningState}
+                    petHairTrigger={petHairTrigger}
+                    isMobile={isMobile}
+                    view={cameraView}
+                    foamCount={foamCount}
+                    waterCount={waterCount}
+                    foamSplatCount={foamSplatCount}
+                    headlightTrigger={headlightTrigger}
+                    engineTrigger={engineTrigger}
+                  />
+                </Float>
+              ) : (
+                <CarModel
+                  activeService={activeService}
+                  activeAddOn={activeAddOn}
+                  onPartClick={setCameraView}
+                  cleaningState={cleaningState}
+                  petHairTrigger={petHairTrigger}
+                  isMobile={isMobile}
+                  view={cameraView}
+                  foamCount={foamCount}
+                  waterCount={waterCount}
+                  foamSplatCount={foamSplatCount}
+                  headlightTrigger={headlightTrigger}
+                  engineTrigger={engineTrigger}
+                />
+              )
+            )}
 
-          <ContactShadows
-            resolution={isMobile ? 320 : 768}
-            scale={isMobile ? 24 : 32}
-            blur={isMobile ? 2.2 : 2.8}
-            opacity={0.65}
-            far={30}
-            color="#000000"
-            frames={1}
-          />
+            <ContactShadows
+              resolution={isMobile ? 320 : 768}
+              scale={isMobile ? 24 : 32}
+              blur={isMobile ? 2.2 : 2.8}
+              opacity={0.65}
+              far={30}
+              color="#000000"
+              frames={1}
+            />
 
-          <PerspectiveCamera
-            makeDefault
-            position={[4, 2, 5]}
-            fov={isMobile ? 100 : 45}
-            onUpdate={(c) => c.updateProjectionMatrix()}
-          />
-          <CameraRig view={cameraView} enableHomeOrbit={true} isMobile={isMobile} />
-        </Suspense>
-      </Canvas>
+            <PerspectiveCamera
+              makeDefault
+              position={[4, 2, 5]}
+              fov={isMobile ? 100 : 45}
+              onUpdate={(c) => c.updateProjectionMatrix()}
+            />
+            <CameraRig view={cameraView} enableHomeOrbit={true} isMobile={isMobile} />
+          </Suspense>
+        </Canvas>
 
-      {/* HERO FOOTER */}
-      {/* HERO FOOTER - Desktop Only or Simplified Mobile */}
-      {!isMobile && (
-        <div style={{
-          position: 'absolute',
-          bottom: '40px',
-          left: '390px', // Sidebar width + padding
-          zIndex: 25,
-          maxWidth: '600px',
-          pointerEvents: 'none'
-        }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{
-              opacity: activeMenuItem === 'home' ? 1 : 0,
-              y: activeMenuItem === 'home' ? 0 : 20
-            }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 style={{
-              margin: '0 0 16px 0',
-              lineHeight: '1.1',
-              textShadow: '0 2px 20px rgba(0,0,0,0.8)',
-              fontFamily: '"Playfair Display", serif',
-              fontSize: '3rem',
-            }}>
-              <span style={{ display: 'block', color: 'white', marginBottom: '8px' }}>
-                Mobile Car Detailing
-              </span>
-              <span style={{ color: THEME.primary, fontWeight: 'normal' }}>
-                Sacramento, CA
-              </span>
-            </h1>
-            <h2 style={{
-              color: '#e0e0e0',
-              fontSize: '1.1rem',
-              lineHeight: '1.6',
-              marginBottom: '24px',
-              textShadow: '0 1px 10px rgba(0,0,0,0.8)',
-              fontWeight: 'normal',
-              fontFamily: 'inherit'
-            }}>
-              Providing Interior Detailing, Exterior Detailing, Paint Correction,
-              Ceramic Coating, and more! Serving Sacramento, Davis, Woodland,
-              Dixon, Winters, Elk Grove, and surrounding areas — all delivered
-              with precision, care, and professional-grade results.
-            </h2>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Mobile Floating Action Button for Booking */}
-      {isMobile && (
-        <motion.button
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          onClick={() => setIsBookingOpen(true)}
-          style={{
+        {/* HERO FOOTER */}
+        {/* HERO FOOTER - Desktop Only or Simplified Mobile */}
+        {!isMobile && (
+          <div style={{
             position: 'absolute',
-            bottom: '80px', // Above bottom sheet collapsed state
-            right: '20px',
-            zIndex: 50,
-            background: THEME.primary,
-            color: 'white',
-            border: 'none',
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 20px rgba(255, 127, 80, 0.4)'
-          }}
-        >
-          <Phone size={24} />
-        </motion.button>
-      )}
+            bottom: '40px',
+            left: '390px', // Sidebar width + padding
+            zIndex: 25,
+            maxWidth: '600px',
+            pointerEvents: 'none'
+          }}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{
+                opacity: activeMenuItem === 'home' ? 1 : 0,
+                y: activeMenuItem === 'home' ? 0 : 20
+              }}
+              transition={{ duration: 0.5 }}
+            >
+              <h1 style={{
+                margin: '0 0 16px 0',
+                lineHeight: '1.1',
+                textShadow: '0 2px 20px rgba(0,0,0,0.8)',
+                fontFamily: '"Playfair Display", serif',
+                fontSize: '3rem',
+              }}>
+                <span style={{ display: 'block', color: 'white', marginBottom: '8px' }}>
+                  Mobile Car Detailing
+                </span>
+                <span style={{ color: THEME.primary, fontWeight: 'normal' }}>
+                  Sacramento, CA
+                </span>
+              </h1>
+              <h2 style={{
+                color: '#e0e0e0',
+                fontSize: '1.1rem',
+                lineHeight: '1.6',
+                marginBottom: '24px',
+                textShadow: '0 1px 10px rgba(0,0,0,0.8)',
+                fontWeight: 'normal',
+                fontFamily: 'inherit'
+              }}>
+                Providing Interior Detailing, Exterior Detailing, Paint Correction,
+                Ceramic Coating, and more! Serving Sacramento, Davis, Woodland,
+                Dixon, Winters, Elk Grove, and surrounding areas — all delivered
+                with precision, care, and professional-grade results.
+              </h2>
+            </motion.div>
+          </div>
+        )}
 
-      <BookingModal
-        isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
-        service={activeService}
-        addOn={activeAddOn}
-        isMobile={isMobile}
-      />
+        {/* Mobile Floating Action Button for Booking */}
+        {isMobile && (
+          <motion.button
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            onClick={() => setIsBookingOpen(true)}
+            style={{
+              position: 'absolute',
+              bottom: '80px', // Above bottom sheet collapsed state
+              right: '20px',
+              zIndex: 50,
+              background: THEME.primary,
+              color: 'white',
+              border: 'none',
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 20px rgba(255, 127, 80, 0.4)'
+            }}
+          >
+            <Phone size={24} />
+          </motion.button>
+        )}
+
+        <BookingModal
+          isOpen={isBookingOpen}
+          onClose={() => setIsBookingOpen(false)}
+          service={activeService}
+          addOn={activeAddOn}
+          isMobile={isMobile}
+        />
+
+      </div>
+      {/* End Hero Section */}
+
+      {/* REVIEWS SECTION */}
+      <ReviewsSection />
 
     </div>
   );

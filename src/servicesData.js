@@ -86,32 +86,35 @@ export const VIEW_CONTENT = {
   interior: {
     title: "INTERIOR DETAIL",
     description: "Complete cabin restoration. Deep vacuuming, leather conditioning, and sanitization.",
-    position: { top: '20%', left: '400px' }
+    // Move toward the passenger seat bolster area (see reference screenshot)
+    position: { top: '34%', right: '22%' }
   },
   engine: {
     title: "ENGINE BAY DETAIL",
     description: "Safe degreasing and dressing. Keeps your powertrain looking showroom new.",
-    position: { bottom: '100px', right: '32px' }
+    // Place the card over the rear cowl area (upper-left of the engine bay) as indicated
+    position: { top: '12%', left: '18%' }
   },
   front: {
     title: "HEADLIGHT RESTORATION",
     description: "Restore clarity and brightness. Improves visibility and safety.",
-    position: { top: '150px', left: '400px' }
+    // Move toward the circled hood area above the headlight
+    position: { top: '18%', left: '36%' }
   },
   interior_floor: {
     title: "PET HAIR REMOVAL",
     description: "Specialized removal of stubborn hair. Clears what standard vacuums miss.",
-    position: { bottom: '15%', left: '50%', transform: 'translateX(-50%)' }
+    position: { top: '48%', left: '50%', transform: 'translate(-50%, -50%)' }
   },
   paint_correction: {
     title: "PAINT CORRECTION",
     description: "Multi-stage machine polishing. Removes swirls for a mirror-like finish.",
-    position: { top: '120px', right: '32px' }
+    position: { top: '25%', left: '62%', transform: 'translate(-50%, -50%)' }
   },
   ceramic_coating: {
     title: "CERAMIC COATING",
     description: "Long-lasting nano-protection. Repels water, dirt, and UV rays for years.",
-    position: { top: '120px', right: '32px' }
+    position: { top: '18%', left: '34%', transform: 'translate(-50%, -50%)' }
   },
   wheel: {
     title: "WHEEL & TIRE PACKAGE",
@@ -126,12 +129,14 @@ export const VIEW_CONTENT = {
   interior_detail: {
     title: "DEEP INTERIOR CARE",
     description: "Intensive treatment for leather and carpets. Revitalizes your cabin's feel.",
-    position: { top: '20%', left: '400px' }
+    // Match the revised interior placement near the seat bolster
+    position: { top: '34%', right: '22%' }
   },
   floor_mat: {
     title: "FLOOR MAT RESTORATION",
     description: "Detailed rubber mat cleaning and dressing. Focused on the driver's footwell.",
-    position: { top: '20%', left: '320px' }
+    // Move closer to the circled driver footwell area
+    position: { top: '58%', left: '62%', transform: 'translate(-50%, -50%)' }
   },
   paint_detail: {
     title: "PAINT INSPECTION",

@@ -5,18 +5,83 @@ import { useTexture } from '@react-three/drei';
 
 // --- Dirt Shell Component ---
 // Renders a transparent "dirt" layer over the existing geometry
-export function DirtShell({ nodes, opacity = 1, opacityRef, color = '#3e2b22', texturePath = '/dirt_mask_inverted.png' }) {
-    const texture = useTexture(texturePath);
+export function DirtShell({ nodes, opacity = 1, opacityRef, color = '#3e2b22', texturePath = '/dirt_mask.png', textureRepeat = null, usePlanar = false }) {
+    const originalTexture = useTexture(texturePath);
+    const texture = useMemo(() => {
+        const t = originalTexture.clone();
+        t.colorSpace = THREE.SRGBColorSpace;
+        t.anisotropy = 8;
+        if (textureRepeat) {
+            t.wrapS = t.wrapT = THREE.RepeatWrapping;
+            t.repeat.set(textureRepeat[0], textureRepeat[1]);
+        } else {
+            t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+        }
+        t.needsUpdate = true;
+        return t;
+    }, [originalTexture, textureRepeat]);
+
     const materialRefs = useRef([]);
+    const meshRefs = useRef([]);
+
+    // Custom Shader for Planar Projection (Side View / YZ Plane)
+    const planarShader = useMemo(() => ({
+        uniforms: {
+            uMap: { value: texture },
+            uColor: { value: new THREE.Color(color) },
+            uOpacity: { value: opacity },
+            uScale: { value: new THREE.Vector2(3.5, 3.5) } // Scale to fit door size
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            uniform vec2 uScale;
+            void main() {
+                // Project UVs from local Position (YZ plane for side door)
+                vUv = position.zy * uScale; 
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            uniform sampler2D uMap;
+            uniform vec3 uColor;
+            uniform float uOpacity;
+            varying vec2 vUv;
+            void main() {
+                vec4 tex = texture2D(uMap, vUv);
+                // Invert: Black spots (0.0) become visible (1.0), White bg (1.0) becomes transparent (0.0)
+                float mask = 1.0 - tex.r; 
+                float alpha = mask * uOpacity;
+                if (alpha < 0.01) discard;
+                gl_FragColor = vec4(uColor, alpha);
+            }
+        `
+    }), [texture, color, opacity]);
 
     useFrame(() => {
-        if (!opacityRef) return;
-        const next = opacityRef.current ?? 0;
+        const next = opacityRef ? opacityRef.current ?? 0 : opacity;
+
+        // Keep shell meshes glued to their source transforms every frame
+        nodes.forEach((node, i) => {
+            const shell = meshRefs.current[i];
+            if (!shell || !node) return;
+            node.updateWorldMatrix(true, false);
+            shell.matrixAutoUpdate = false;
+            shell.matrix.copy(node.matrix);
+            shell.matrixWorldNeedsUpdate = true;
+        });
+
         materialRefs.current.forEach((mat) => {
             if (!mat) return;
-            mat.opacity = next;
+            // Update uniforms for shader material
+            if (mat.uniforms) {
+                mat.uniforms.uOpacity.value = next;
+                mat.uniforms.uMap.value = texture; // Ensure texture is current
+            } else {
+                // Standard material fallback
+                mat.opacity = next;
+                mat.visible = next > 0.001;
+            }
             mat.transparent = true;
-            mat.visible = next > 0.001;
         });
     });
 
@@ -25,24 +90,41 @@ export function DirtShell({ nodes, opacity = 1, opacityRef, color = '#3e2b22', t
             {nodes.map((node, i) => (
                 <mesh
                     key={i}
+                    ref={(ref) => { meshRefs.current[i] = ref; }}
                     geometry={node.geometry}
-                    position={node.position}
-                    rotation={node.rotation}
-                    scale={node.scale}
+                    renderOrder={20}
+                    frustumCulled={false}
                 >
-                    <meshStandardMaterial
-                        ref={(ref) => { materialRefs.current[i] = ref; }}
-                        color={color} // Deep dirt brown
-                        alphaMap={texture} // White spots = Visible Dirt
-                        transparent
-                        opacity={opacityRef ? opacityRef.current : opacity}
-                        roughness={1.0}
-                        metalness={0.0}
-                        depthWrite={false}
-                        side={THREE.DoubleSide}
-                        polygonOffset
-                        polygonOffsetFactor={-1}
-                    />
+                    {usePlanar ? (
+                        <shaderMaterial
+                            ref={(ref) => { materialRefs.current[i] = ref; }}
+                            uniforms={planarShader.uniforms}
+                            vertexShader={planarShader.vertexShader}
+                            fragmentShader={planarShader.fragmentShader}
+                            transparent
+                            depthWrite={false}
+                            depthTest={false}
+                            side={THREE.DoubleSide}
+                            polygonOffset
+                            polygonOffsetFactor={-2}
+                        />
+                    ) : (
+                        <meshStandardMaterial
+                            ref={(ref) => { materialRefs.current[i] = ref; }}
+                            color={color}
+                            map={texture}
+                            alphaMap={texture}
+                            transparent
+                            opacity={opacityRef ? opacityRef.current : opacity}
+                            roughness={1.0}
+                            metalness={0.0}
+                            depthWrite={false}
+                            depthTest={false}
+                            side={THREE.DoubleSide}
+                            polygonOffset
+                            polygonOffsetFactor={-2}
+                        />
+                    )}
                 </mesh>
             ))}
         </group>
@@ -53,7 +135,7 @@ export function DirtShell({ nodes, opacity = 1, opacityRef, color = '#3e2b22', t
 // Replaced by foam splat accumulator below
 
 // --- Foam Cannon Component (GPU Instanced) ---
-export function FoamParticles({ active, rinsing, doorMeshes = [], onHit, count = 500 }) {
+export function FoamParticles({ active, rinsing, doorMeshes = [], onHit, count = 500, enableHitDetection = true }) {
     const meshRef = useRef();
     const nozzleRef = useRef();
     const nozzleAlpha = useRef(0);
@@ -61,7 +143,7 @@ export function FoamParticles({ active, rinsing, doorMeshes = [], onHit, count =
     const dummy = useMemo(() => new THREE.Object3D(), []);
     const spawnIndex = useRef(0);
     const raycaster = useMemo(() => new THREE.Raycaster(), []);
-    const spawnPerFrame = useMemo(() => Math.max(6, Math.floor(count / 36)), [count]);
+    const spawnPerFrame = useMemo(() => Math.max(4, Math.floor(count / 42)), [count]);
 
     // World-space references for aiming/hit placement
     const cannonOrigin = useMemo(() => new THREE.Vector3(-2.5, 1.05, 0.52), []);
@@ -131,7 +213,9 @@ export function FoamParticles({ active, rinsing, doorMeshes = [], onHit, count =
             });
             doorBox.getCenter(doorCenter);
             doorBox.getSize(doorSize);
-            doorExpanded.copy(doorBox).expandByScalar(0.12);
+            if (enableHitDetection) {
+                doorExpanded.copy(doorBox).expandByScalar(0.12);
+            }
         } else {
             doorBox.makeEmpty();
         }
@@ -209,15 +293,8 @@ export function FoamParticles({ active, rinsing, doorMeshes = [], onHit, count =
                 }
 
                 // Kill particles that fly past the car envelope
-                if (
-                    p.position.distanceToSquared(cannonOrigin) > maxTravel * maxTravel ||
-                    (!doorBox.isEmpty() && p.position.x > doorBox.max.x + 0.3)
-                ) {
-                    p.life = 0;
-                }
-
                 // Broad-phase bounds check then precise raycast to the actual door meshes
-                if (!doorBox.isEmpty() && onHit) {
+                if (enableHitDetection && !doorBox.isEmpty() && onHit) {
                     const maxY = Math.max(p.prev.y, p.position.y);
                     const minY = Math.min(p.prev.y, p.position.y);
                     const maxZ = Math.max(p.prev.z, p.position.z);
@@ -551,6 +628,7 @@ export function WaterParticles({ active, doorMeshes = [], count = 280 }) {
 // --- Foam Accumulation Splat Layer (sticks to door) ---
 export const FoamAccumulator = forwardRef(function FoamAccumulator({ foaming, rinsing, count = 320 }, ref) {
     const meshRef = useRef();
+    const initialized = useRef(false);
 
     const foamAlpha = useMemo(() => {
         const size = 64;
@@ -585,6 +663,7 @@ export const FoamAccumulator = forwardRef(function FoamAccumulator({ foaming, ri
     // Initialize all splats hidden
     useEffect(() => {
         if (!meshRef.current) return;
+        meshRef.current.visible = false;
         for (let i = 0; i < count; i++) {
             dummy.scale.setScalar(0);
             dummy.updateMatrix();
@@ -592,6 +671,7 @@ export const FoamAccumulator = forwardRef(function FoamAccumulator({ foaming, ri
         }
         meshRef.current.count = count;
         meshRef.current.instanceMatrix.needsUpdate = true;
+        initialized.current = true;
     }, [count, dummy]);
 
     useImperativeHandle(ref, () => ({
@@ -613,11 +693,11 @@ export const FoamAccumulator = forwardRef(function FoamAccumulator({ foaming, ri
             s.size = 0.12 + Math.random() * 0.12;
             writeIndex.current++;
         }
-    }), [splats, tmpMatrix, foaming, baseNormal, tmpQuat]);
+    }), [baseNormal, count, splats, tmpMatrix, tmpQuat]);
 
     useFrame((_, delta) => {
         const mesh = meshRef.current;
-        if (!mesh) return;
+        if (!mesh || !initialized.current) return;
 
         // Keep foam opaque until water has had time to reach the door
         if (foaming) {
@@ -633,8 +713,8 @@ export const FoamAccumulator = forwardRef(function FoamAccumulator({ foaming, ri
         const speed = rinsing ? 2.2 : foaming ? 6 : 1.2;
         globalAlpha.current = THREE.MathUtils.lerp(globalAlpha.current, target, 1 - Math.exp(-speed * delta));
 
-        // When idle and fully faded, skip updates to avoid unnecessary work
-        if (!foaming && !rinsing && globalAlpha.current < 1e-3) {
+        const shouldShow = foaming || rinsing || globalAlpha.current > 1e-3;
+        if (!shouldShow) {
             mesh.visible = false;
             return;
         }
@@ -882,7 +962,6 @@ export function HeadlightFrontSparkles({
     const opacityRef = useRef(0);
     const remainingRef = useRef(0);
     const holdRef = useRef(0);
-    const lastLogRef = useRef(0);
     const { gl } = useThree();
     const tmpVec = useMemo(() => new THREE.Vector3(), []);
 
@@ -940,7 +1019,7 @@ export function HeadlightFrontSparkles({
         holdRef.current = holdDuration;
         delayRef.current = introDelay;
         opacityRef.current = 1;
-    }, [trigger]);
+    }, [fadeDuration, holdDuration, introDelay, trigger]);
 
     useFrame((state, delta) => {
         const mat = materialRef.current;
@@ -987,12 +1066,6 @@ export function HeadlightFrontSparkles({
             pointsRef.current.position.copy(baseCenter).add(tmpVec);
             pointsRef.current.lookAt(baseCenter.clone().add(forward));
 
-            // Throttle debug logs to ~2/sec
-            const now = state.clock.elapsedTime;
-            if (now - lastLogRef.current > 0.5 && opacityRef.current > 0) {
-                lastLogRef.current = now;
-                console.info('[HeadlightSparkles] fade:', opacityRef.current.toFixed(2), 'center:', liveCenter.toArray().map(n => n.toFixed(2)).join(','));
-            }
         }
     });
 
