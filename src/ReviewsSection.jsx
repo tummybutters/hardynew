@@ -1,157 +1,158 @@
-import React from 'react';
-import { Star, Quote } from 'lucide-react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
+import { Star } from 'lucide-react';
+import { googleReviews } from './data/reviews';
 
-const THEME = {
-    primary: '#FF7F50',
-    dark: '#0a0a0a',
-    text: '#ffffff',
-    cardBg: '#111111',
-};
+const bgColors = ['#FFB375', '#FFD7B5', '#F3F4E6'];
+const GOOGLE_URL = "https://www.google.com/maps/place/Hardy's+Wash+N'+Wax/@36.021654,-119.6405944,7z/data=!4m16!1m9!3m8!1s0xb7923c2630ca509:0x5009d49d618f9525!2sHardy's+Wash+N'+Wax!8m2!3d36.021654!4d-119.6405944!9m1!1b1!16s%2Fg%2F11lw10v4qc!3m5!1s0xb7923c2630ca509:0x5009d49d618f9525!8m2!3d36.021654!4d-119.6405944!16s%2Fg%2F11lw10v4qc?entry=ttu";
 
-const reviews = [
-    {
-        id: 1,
-        name: "Sarah Jenkins",
-        role: "Tesla Model Y Owner",
-        rating: 5,
-        text: "Absolutely incredible service. The ceramic coating makes my car look better than when I drove it off the lot. The team was professional, punctual, and meticulous.",
-        date: "2 days ago"
-    },
-    {
-        id: 2,
-        name: "Michael Chen",
-        role: "BMW M4 Owner",
-        rating: 5,
-        text: "I was skeptical about mobile detailing, but Hardy's blew me away. They removed pet hair I thought was permanent. The interior feels brand new again.",
-        date: "1 week ago"
-    },
-    {
-        id: 3,
-        name: "David Rodriguez",
-        role: "Porsche 911 Owner",
-        rating: 5,
-        text: "Best detailer in Sacramento, hands down. The paint correction removed all the swirl marks from previous bad washes. Highly recommended!",
-        date: "3 weeks ago"
-    }
-];
+function ReviewCard({ review, index }) {
+  const bg = bgColors[index % bgColors.length];
+  return (
+    <div
+      className="review-card"
+      style={{
+        minWidth: '320px',
+        width: '320px',
+        height: '280px',
+        margin: '0 8px',
+        background: bg,
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', gap: '2px' }}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star key={i} size={16} fill="#05060f" color="#05060f" />
+          ))}
+        </div>
+        <div style={{ color: '#05060f', fontSize: '13px', fontWeight: 600 }}>{review.time}</div>
+      </div>
+      <h4 style={{ color: '#05060f', fontSize: '18px', fontWeight: 800, marginBottom: '8px' }}>{review.author}</h4>
+      <p style={{ color: '#05060f', lineHeight: 1.5, flexGrow: 1, marginBottom: '10px', overflow: 'hidden' }}>
+        “{review.content}”
+      </p>
+      <div style={{ color: '#05060f', fontSize: '13px', fontWeight: 600 }}>Posted on Google</div>
+    </div>
+  );
+}
+
+function AutoScrollRow({ items, speed = 30, reverse = false }) {
+  const containerRef = useRef(null);
+  const isDragging = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartScroll = useRef(0);
+  const effectiveSpeed = reverse ? -Math.abs(speed) : Math.abs(speed);
+
+  useEffect(() => {
+    let rafId;
+    let lastTs = performance.now();
+
+    const step = (ts) => {
+      const el = containerRef.current;
+      if (!el) return;
+      const dt = (ts - lastTs) / 1000;
+      lastTs = ts;
+
+      const loopWidth = el.scrollWidth / 2;
+      if (!isDragging.current && loopWidth > 0) {
+        el.scrollLeft += effectiveSpeed * dt;
+        if (el.scrollLeft >= loopWidth) el.scrollLeft -= loopWidth;
+        if (el.scrollLeft <= 0) el.scrollLeft += loopWidth;
+      }
+
+      rafId = requestAnimationFrame(step);
+    };
+
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, [effectiveSpeed]);
+
+  const onPointerDown = (e) => {
+    const el = containerRef.current;
+    if (!el) return;
+    isDragging.current = true;
+    dragStartX.current = e.clientX;
+    dragStartScroll.current = el.scrollLeft;
+    el.setPointerCapture(e.pointerId);
+  };
+
+  const onPointerMove = (e) => {
+    if (!isDragging.current) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const delta = e.clientX - dragStartX.current;
+    el.scrollLeft = dragStartScroll.current - delta;
+  };
+
+  const onPointerUp = (e) => {
+    const el = containerRef.current;
+    if (!el) return;
+    isDragging.current = false;
+    el.releasePointerCapture(e.pointerId);
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerLeave={onPointerUp}
+      style={{
+        overflow: 'hidden',
+        cursor: 'grab'
+      }}
+    >
+      <div style={{ display: 'flex', flexWrap: 'nowrap' }}>
+        {items.map((review, idx) => (
+          <ReviewCard key={`${review.id}-${idx}`} review={review} index={idx} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const ReviewsSection = () => {
-    return (
-        <section id="reviews" style={{
-            padding: '100px 20px',
-            background: '#050505',
-            position: 'relative',
-            overflow: 'hidden'
-        }}>
-            {/* Background Elements */}
-            <div style={{
-                position: 'absolute',
-                top: '20%',
-                left: '-10%',
-                width: '500px',
-                height: '500px',
-                background: THEME.primary,
-                opacity: 0.03,
-                filter: 'blur(120px)',
-                borderRadius: '50%'
-            }} />
+  const { rowOne, rowTwo } = useMemo(() => {
+    const midpoint = Math.ceil(googleReviews.length / 2);
+    return {
+      rowOne: googleReviews.slice(0, midpoint),
+      rowTwo: googleReviews.slice(midpoint)
+    };
+  }, []);
 
-            <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
-                {/* Header */}
-                <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-                    <h2 style={{
-                        fontFamily: '"Playfair Display", serif',
-                        fontSize: '3rem',
-                        color: 'white',
-                        marginBottom: '16px'
-                    }}>
-                        Client Stories
-                    </h2>
-                    <div style={{
-                        width: '60px',
-                        height: '3px',
-                        background: THEME.primary,
-                        margin: '0 auto 24px'
-                    }} />
-                    <p style={{
-                        color: '#888',
-                        fontSize: '1.1rem',
-                        maxWidth: '600px',
-                        margin: '0 auto'
-                    }}>
-                        Don't just take our word for it. See what our satisfied clients have to say about their transformation experience.
-                    </p>
-                </div>
-
-                {/* Reviews Grid */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '30px'
-                }}>
-                    {reviews.map((review) => (
-                        <div key={review.id} style={{
-                            background: 'rgba(20, 20, 20, 0.6)',
-                            backdropFilter: 'blur(10px)',
-                            border: '1px solid rgba(255, 255, 255, 0.05)',
-                            borderRadius: '16px',
-                            padding: '32px',
-                            transition: 'transform 0.3s ease, border-color 0.3s ease',
-                            cursor: 'default'
-                        }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-5px)';
-                                e.currentTarget.style.borderColor = 'rgba(255, 127, 80, 0.3)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
-                            }}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '20px' }}>
-                                <div style={{ display: 'flex', gap: '4px' }}>
-                                    {[...Array(review.rating)].map((_, i) => (
-                                        <Star key={i} size={16} fill={THEME.primary} color={THEME.primary} />
-                                    ))}
-                                </div>
-                                <Quote size={24} color="rgba(255,255,255,0.1)" />
-                            </div>
-
-                            <p style={{
-                                color: '#ddd',
-                                lineHeight: '1.6',
-                                fontSize: '1rem',
-                                marginBottom: '24px',
-                                fontStyle: 'italic'
-                            }}>
-                                "{review.text}"
-                            </p>
-
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <div style={{
-                                    width: '40px',
-                                    height: '40px',
-                                    borderRadius: '50%',
-                                    background: 'linear-gradient(135deg, #333, #111)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: THEME.primary,
-                                    fontWeight: 'bold'
-                                }}>
-                                    {review.name.charAt(0)}
-                                </div>
-                                <div>
-                                    <div style={{ color: 'white', fontWeight: '600', fontSize: '0.95rem' }}>{review.name}</div>
-                                    <div style={{ color: '#666', fontSize: '0.85rem' }}>{review.role}</div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+  return (
+    <section id="reviews" style={{ background: 'linear-gradient(135deg, #F3F4E6, #FFD7B5)', padding: '80px 0' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '36px', fontWeight: 800, color: '#0f172a', marginBottom: '10px' }}>
+            What Our Customers Are Saying
+          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#0f172a' }}>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} fill="#EE432C" color="#EE432C" />
+              ))}
             </div>
-        </section>
-    );
+            <span style={{ fontWeight: 800 }}>5.0</span>
+            <span style={{ color: '#374151' }}>on Google Reviews</span>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gap: '24px' }}>
+          <AutoScrollRow items={[...rowOne, ...rowOne]} speed={42} reverse={false} />
+          <AutoScrollRow items={[...rowTwo, ...rowTwo]} speed={42} reverse />
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
+          <a className="google-review-btn" href={GOOGLE_URL} target="_blank" rel="noreferrer">
+            See All Reviews on Google
+          </a>
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default ReviewsSection;

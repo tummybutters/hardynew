@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
-  useGLTF,
   Environment,
   ContactShadows,
   Float,
   CameraControls,
-  PerspectiveCamera,
-  useProgress
+  PerspectiveCamera
 } from '@react-three/drei';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Check, Plus, X } from 'lucide-react';
 import { SERVICES_DATA, VIEW_CONTENT } from './servicesData';
@@ -19,8 +19,8 @@ import Navbar from './Navbar';
 import ReviewsSection from './ReviewsSection';
 import { LegacyServices, LegacyWhyChoose, LegacyCTA } from './LegacySections';
 
-// Preload the model
-useGLTF.preload('/bmw_m4_f82_optimized.glb');
+// Model path (respect base path for subdirectory deploys)
+const MODEL_PATH = `${process.env.PUBLIC_URL || ''}/bmw_m4_f82_optimized.glb`;
 
 // --- Constants & Styles ---
 const THEME = {
@@ -67,6 +67,13 @@ function ModelDebugger({ scene }) {
     });
     // console.log("---------------------------");
   }, [scene]);
+  return null;
+}
+
+function FrameProbe({ onFrame }) {
+  useFrame(() => {
+    if (onFrame) onFrame();
+  });
   return null;
 }
 
@@ -277,22 +284,9 @@ function CameraRig({ view, enableHomeOrbit = true, isMobile }) {
   );
 }
 
-
-
-// --- Canvas Loader Component ---
-function CanvasLoader({ setLoadingProgress }) {
-  const { progress } = useProgress();
-
-  useEffect(() => {
-    setLoadingProgress(progress);
-  }, [progress, setLoadingProgress]);
-
-  return null;
-}
-
 // --- 3D Car Component ---
-function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMobile, view, foamCount, waterCount, foamSplatCount, headlightTrigger, engineTrigger, petHairTrigger }) {
-  const { scene } = useGLTF('/bmw_m4_f82_optimized.glb');
+function CarModel({ gltf, activeService, activeAddOn, onPartClick, cleaningState, isMobile, view, foamCount, waterCount, foamSplatCount, headlightTrigger, engineTrigger, petHairTrigger, onModelReady }) {
+  const scene = gltf.scene;
 
   // We store the *Pivot Groups* not the raw nodes for animation
   const [hoodGroup, setHoodGroup] = useState(null);
@@ -318,6 +312,10 @@ function CarModel({ activeService, activeAddOn, onPartClick, cleaningState, isMo
   const foamAccumRef = useRef();
   const [waterActive, setWaterActive] = useState(false);
   const waterActiveRef = useRef(false);
+
+  useEffect(() => {
+    if (onModelReady) onModelReady();
+  }, [onModelReady]);
 
   const isSetup = useRef(false);
   const lastCleaningState = useRef(cleaningState);
@@ -1276,10 +1274,66 @@ export default function App() {
   const [cameraView, setCameraView] = useState('home');
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [modelReady, setModelReady] = useState(false);
+  const [modelError, setModelError] = useState(null);
+  const [modelGltf, setModelGltf] = useState(null);
+  const [canvasKey, setCanvasKey] = useState(0);
+  const [frameAgeMs, setFrameAgeMs] = useState(null);
+  const lastFrameAtRef = useRef(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [headlightTrigger, setHeadlightTrigger] = useState(0);
   const [infoCardVisible, setInfoCardVisible] = useState(false);
   const infoCardTimer = useRef(null);
+
+  // External GLTF load (decoupled from R3F render loop)
+  useEffect(() => {
+    if (modelReady || modelError || modelGltf) return;
+    const loader = new GLTFLoader();
+    const draco = new DRACOLoader();
+    draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/'); // CDN decoders
+    loader.setDRACOLoader(draco);
+    console.info('[Loader] start', MODEL_PATH);
+    loader.load(
+      MODEL_PATH,
+      (gltf) => {
+        console.info('[Loader] gltf loaded', MODEL_PATH);
+        setModelGltf(gltf);
+        setLoadingProgress(100);
+        setModelReady(true);
+        setModelError(null);
+      },
+      (xhr) => {
+        const total = xhr.total || xhr.loaded;
+        const pct = total ? Math.min(100, (xhr.loaded / total) * 100) : 0;
+        setLoadingProgress(Math.round(pct));
+        console.info('[Loader] progress', { pct: Number.isFinite(pct) ? Number(pct.toFixed(1)) : pct, loaded: xhr.loaded, total: xhr.total, time: new Date().toISOString() });
+      },
+      (err) => {
+        console.error('[Loader] gltf error', err);
+        setModelError(err);
+      }
+    );
+    return () => {
+      loader?.dispose?.();
+      draco?.dispose?.();
+    };
+  }, [modelReady, modelError, modelGltf]);
+
+  // Once the model is ready (CarModel mounted), finish loading and hide overlay
+  useEffect(() => {
+    if (!modelReady) return;
+    const t = setTimeout(() => setIsLoaded(true), 200);
+    return () => clearTimeout(t);
+  }, [modelReady]);
+
+  // Frame age tracker so we can see if the render loop is running without devtools
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!lastFrameAtRef.current) return;
+      setFrameAgeMs(Date.now() - lastFrameAtRef.current);
+    }, 500);
+    return () => clearInterval(id);
+  }, []);
 
   // Cleaning State (Lifted)
   const [cleaningState, setCleaningState] = useState('clean');
@@ -1388,11 +1442,10 @@ export default function App() {
 
   // Hide loading screen when model is fully loaded
   useEffect(() => {
-    if (loadingProgress >= 100) {
-      const timer = setTimeout(() => setIsLoaded(true), 150);
-      return () => clearTimeout(timer);
-    }
-  }, [loadingProgress]);
+    if (!modelReady) return;
+    const timer = setTimeout(() => setIsLoaded(true), 150);
+    return () => clearTimeout(timer);
+  }, [modelReady]);
 
   return (
     <div style={{ width: '100%', minHeight: '100vh', minWidth: '320px', background: 'linear-gradient(to bottom, #000000 0%, #1a0b05 70%, #4a1905 100%)', position: 'relative', overflowX: 'hidden' }}>
@@ -1401,6 +1454,44 @@ export default function App() {
       <AnimatePresence>
         {!isLoaded && <LoadingScreen progress={loadingProgress} />}
       </AnimatePresence>
+      {!isLoaded && modelError && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '28px',
+            left: 0,
+            right: 0,
+            textAlign: 'center',
+            color: '#ffb3b3',
+            fontWeight: 700,
+            zIndex: 10000
+          }}
+        >
+          3D model failed to load. Check network/paths for {MODEL_PATH}
+        </div>
+      )}
+      <div
+        style={{
+          position: 'fixed',
+          top: 8,
+          right: 8,
+          background: 'rgba(0,0,0,0.6)',
+          color: '#fff',
+          padding: '8px 10px',
+          borderRadius: '8px',
+          fontSize: '12px',
+          zIndex: 15000,
+          lineHeight: 1.4,
+          pointerEvents: 'none'
+        }}
+      >
+        <div>loadingProgress: {loadingProgress}</div>
+        <div>modelReady: {String(modelReady)}</div>
+        <div>modelError: {modelError ? 'yes' : 'no'}</div>
+        <div>modelGltf: {modelGltf ? 'yes' : 'no'}</div>
+        <div>canvasKey: {canvasKey}</div>
+        <div>frameAgeMs: {frameAgeMs ?? 'n/a'}</div>
+      </div>
 
       {/* NAVBAR */}
       <Navbar onBookClick={() => setIsBookingOpen(true)} />
@@ -1514,15 +1605,27 @@ export default function App() {
         )}
 
         <Canvas
-          key={isMobile ? 'canvas-mobile' : 'canvas-desktop'}
+          key={`canvas-${canvasKey}-${isMobile ? 'm' : 'd'}`}
           shadows={!isMobile}
           dpr={isMobile ? [0.75, 1.1] : [1, 1.75]} // Clamp DPR harder on mobile to shrink render targets
           performance={{ min: isMobile ? 0.3 : 0.5 }} // Allow deeper frame drops on mobile
+          frameloop="always"
           gl={{
             antialias: !isMobile,
             alpha: true,
             powerPreference: 'high-performance',
             preserveDrawingBuffer: false
+          }}
+          onCreated={({ gl }) => {
+            const handleContextLost = (e) => {
+              e.preventDefault();
+              console.warn('[Canvas] WebGL context lost, remounting canvas');
+              setCanvasKey((k) => k + 1);
+            };
+            gl.domElement.addEventListener('webglcontextlost', handleContextLost, false);
+            return () => {
+              gl.domElement.removeEventListener('webglcontextlost', handleContextLost, false);
+            };
           }}
           style={{
             marginLeft: isMobile ? '0' : '350px',
@@ -1530,54 +1633,42 @@ export default function App() {
             pointerEvents: 'none'
           }}
         >
-          <Suspense fallback={<CanvasLoader setLoadingProgress={setLoadingProgress} />}>
-            <ambientLight intensity={0.45} />
-            <spotLight
-              position={[10, 10, 10]}
-              angle={0.15}
-              penumbra={1}
-              intensity={8}
-              castShadow={!isMobile}
-              shadow-mapSize={isMobile ? [384, 384] : [768, 768]} // Reduced for mobile performance
-            />
-            <pointLight position={[-10, -10, -10]} color={THEME.primary} intensity={5} />
+          <FrameProbe onFrame={() => { lastFrameAtRef.current = Date.now(); }} />
+          <ambientLight intensity={0.45} />
+          <spotLight
+            position={[10, 10, 10]}
+            angle={0.15}
+            penumbra={1}
+            intensity={8}
+            castShadow={!isMobile}
+            shadow-mapSize={isMobile ? [384, 384] : [768, 768]} // Reduced for mobile performance
+          />
+          <pointLight position={[-10, -10, -10]} color={THEME.primary} intensity={5} />
 
+          <Suspense fallback={null}>
             <Environment preset="city" blur={isMobile ? 0.6 : 0.4} resolution={isMobile ? 128 : 256} />
+          </Suspense>
 
-            {isMobile ? (
-              <CarModel
-                activeService={activeService}
-                activeAddOn={activeAddOn}
-                onPartClick={setCameraView}
-                cleaningState={cleaningState}
-                petHairTrigger={petHairTrigger}
-                isMobile={isMobile}
-                view={cameraView}
-                foamCount={foamCount}
-                waterCount={waterCount}
-                foamSplatCount={foamSplatCount}
-                headlightTrigger={headlightTrigger}
-                engineTrigger={engineTrigger}
-              />
-            ) : (
-              shouldFloat ? (
-                <Float speed={1} rotationIntensity={0.1} floatIntensity={0.1}>
-                  <CarModel
-                    activeService={activeService}
-                    activeAddOn={activeAddOn}
-                    onPartClick={setCameraView}
-                    cleaningState={cleaningState}
-                    petHairTrigger={petHairTrigger}
-                    isMobile={isMobile}
-                    view={cameraView}
-                    foamCount={foamCount}
-                    waterCount={waterCount}
-                    foamSplatCount={foamSplatCount}
-                    headlightTrigger={headlightTrigger}
-                    engineTrigger={engineTrigger}
-                  />
-                </Float>
-              ) : (
+          {isMobile ? (
+            modelGltf && <CarModel
+              activeService={activeService}
+              activeAddOn={activeAddOn}
+              onPartClick={setCameraView}
+              cleaningState={cleaningState}
+              petHairTrigger={petHairTrigger}
+              isMobile={isMobile}
+              view={cameraView}
+              foamCount={foamCount}
+              waterCount={waterCount}
+              foamSplatCount={foamSplatCount}
+              headlightTrigger={headlightTrigger}
+              engineTrigger={engineTrigger}
+              onModelReady={() => setModelReady(true)}
+              gltf={modelGltf}
+            />
+          ) : (
+            shouldFloat ? (
+              modelGltf && <Float speed={1} rotationIntensity={0.1} floatIntensity={0.1}>
                 <CarModel
                   activeService={activeService}
                   activeAddOn={activeAddOn}
@@ -1591,28 +1682,47 @@ export default function App() {
                   foamSplatCount={foamSplatCount}
                   headlightTrigger={headlightTrigger}
                   engineTrigger={engineTrigger}
+                  onModelReady={() => setModelReady(true)}
+                  gltf={modelGltf}
                 />
-              )
-            )}
+              </Float>
+            ) : (
+              modelGltf && <CarModel
+                activeService={activeService}
+                activeAddOn={activeAddOn}
+                onPartClick={setCameraView}
+                cleaningState={cleaningState}
+                petHairTrigger={petHairTrigger}
+                isMobile={isMobile}
+                view={cameraView}
+                foamCount={foamCount}
+                waterCount={waterCount}
+                foamSplatCount={foamSplatCount}
+                headlightTrigger={headlightTrigger}
+                engineTrigger={engineTrigger}
+                onModelReady={() => setModelReady(true)}
+                gltf={modelGltf}
+              />
+            )
+          )}
 
-            <ContactShadows
-              resolution={isMobile ? 320 : 768}
-              scale={isMobile ? 24 : 32}
-              blur={isMobile ? 2.2 : 2.8}
-              opacity={0.65}
-              far={30}
-              color="#000000"
-              frames={1}
-            />
+          <ContactShadows
+            resolution={isMobile ? 320 : 768}
+            scale={isMobile ? 24 : 32}
+            blur={isMobile ? 2.2 : 2.8}
+            opacity={0.65}
+            far={30}
+            color="#000000"
+            frames={1}
+          />
 
-            <PerspectiveCamera
-              makeDefault
-              position={[4, 2, 5]}
-              fov={isMobile ? 100 : 45}
-              onUpdate={(c) => c.updateProjectionMatrix()}
-            />
-            <CameraRig view={cameraView} enableHomeOrbit={true} isMobile={isMobile} />
-          </Suspense>
+          <PerspectiveCamera
+            makeDefault
+            position={[4, 2, 5]}
+            fov={isMobile ? 100 : 45}
+            onUpdate={(c) => c.updateProjectionMatrix()}
+          />
+          <CameraRig view={cameraView} enableHomeOrbit={true} isMobile={isMobile} />
         </Canvas>
 
         {/* HERO FOOTER */}

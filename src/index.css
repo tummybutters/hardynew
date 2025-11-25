@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -12,4 +14,155 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
   /* Prevent overscroll bounce on mobile */
   overscroll-behavior-y: none;
+}
+
+:root {
+  --primary: #EE432C;
+}
+
+header {
+  font-family: 'Inter', sans-serif;
+}
+
+.nav-button {
+  font-size: 15px;
+  color: #1f2937;
+  font-family: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  position: relative;
+  border: none;
+  background: none;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+  padding: 0.4rem 0.5rem;
+  margin: 0 0.1rem;
+  white-space: nowrap;
+}
+
+.nav-button:focus,
+.nav-button:hover {
+  color: var(--primary);
+}
+
+.nav-button:after {
+  content: "";
+  pointer-events: none;
+  bottom: -2px;
+  left: 50%;
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  background-color: var(--primary);
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.nav-button:focus:after,
+.nav-button:hover:after,
+.nav-button.active:after {
+  width: 100%;
+  left: 0%;
+}
+
+.nav-button.active {
+  color: var(--primary);
+}
+
+.mobile-nav-button {
+  font-size: 15px;
+  color: #1f2937;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  position: relative;
+  border: none;
+  background: none;
+  text-transform: uppercase;
+  padding: 0.75rem 0;
+  margin: 0.35rem 0;
+  width: 100%;
+  text-align: left;
+}
+
+.mobile-nav-button:focus,
+.mobile-nav-button:hover,
+.mobile-nav-button.active {
+  color: var(--primary);
+}
+
+/* Reviews carousel styles */
+@keyframes carousel {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(calc(-324px * 5));
+  }
+}
+
+@keyframes carousel-reverse {
+  0% {
+    transform: translateX(calc(-324px * 5));
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.continuous-carousel {
+  display: flex;
+  flex-wrap: nowrap;
+  animation: carousel 45s linear infinite;
+}
+
+.continuous-carousel-reverse {
+  display: flex;
+  flex-wrap: nowrap;
+  animation: carousel-reverse 45s linear infinite;
+}
+
+.continuous-carousel:hover,
+.continuous-carousel-reverse:hover {
+  animation-play-state: paused;
+}
+
+.review-card {
+  background: #FFB375;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 0.5vmin solid #05060f;
+  box-shadow: 0.4rem 0.4rem #05060f;
+  overflow: hidden;
+  color: black;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.review-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0.5rem 0.5rem #05060f;
+}
+
+.google-review-btn {
+  display: inline-flex;
+  align-items: center;
+  justifyContent: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background-color: #EE432C;
+  color: white;
+  border: 0.5vmin solid #05060f;
+  border-radius: 0.8rem;
+  box-shadow: 0.4rem 0.4rem #05060f;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.google-review-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0.5rem 0.5rem #05060f;
 }

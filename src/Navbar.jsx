@@ -1,184 +1,233 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, X, Phone } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { Menu, X, ChevronDown, Phone } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-const THEME = {
-    primary: '#FF7F50',
-    dark: '#0a0a0a',
-    text: '#ffffff',
-};
+const primary = '#EE432C';
+const lightOrange = '#FFE8D2';
+
+const NAV_LINKS = [
+  { to: '/services', label: 'Services' },
+  { to: '/blog', label: 'Blog' },
+  { to: '/booking', label: 'Book Now' },
+  { to: '/about', label: 'About Us' },
+  { to: '/contact', label: 'Contact' }
+];
+
+const LOCATION_LINKS = [
+  { to: '/', label: 'Sacramento, CA' },
+  { to: '/orange-county', label: 'Orange County, CA' }
+];
 
 const Navbar = ({ onBookClick }) => {
-    const [isScrolled, setIsScrolled] = useState(false);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [showLocations, setShowLocations] = useState(false);
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 50);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 16);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-    const navLinks = [
-        { name: 'Home', href: '#' },
-        { name: 'Services', href: '#services' },
-        { name: 'Reviews', href: '#reviews' },
-        { name: 'Contact', href: '#contact' },
-    ];
+  const goBook = () => {
+    setMobileOpen(false);
+    if (pathname === '/' && onBookClick) {
+      onBookClick();
+    } else {
+      navigate('/booking');
+    }
+  };
 
-    return (
-        <>
-            <nav style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: 100,
-                padding: '20px 40px',
-                display: 'flex',
-                justifyContent: 'space-between',
+  const isActive = (to) => pathname === to;
+
+  return (
+    <header
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        background: isScrolled ? 'rgba(255, 232, 210, 0.9)' : lightOrange,
+        boxShadow: isScrolled ? '0 12px 24px rgba(0,0,0,0.08)' : 'none',
+        borderBottom: '1px solid rgba(0,0,0,0.05)',
+        backdropFilter: isScrolled ? 'blur(8px)' : 'none'
+      }}
+    >
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '10px 20px' }}>
+        <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: '#111' }}>
+            <img src="/hardys_logo.png" alt="Hardys Wash N' Wax" style={{ height: 44 }} />
+            <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 800, fontSize: '18px', letterSpacing: '0.3px' }}>
+              Hardys Wash N&apos; Wax
+            </span>
+          </Link>
+
+          {/* Desktop */}
+          <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div
+              style={{ position: 'relative' }}
+              onMouseEnter={() => setShowLocations(true)}
+              onMouseLeave={() => setShowLocations(false)}
+            >
+              <button className={`nav-button ${showLocations ? 'active' : ''}`} style={{ color: '#111' }}>
+                Locations <ChevronDown size={14} style={{ marginLeft: 6 }} />
+              </button>
+              {showLocations && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '120%',
+                    left: 0,
+                    minWidth: '200px',
+                    background: '#fff',
+                    borderRadius: '12px',
+                    boxShadow: '0 16px 28px rgba(0,0,0,0.12)',
+                    border: '1px solid rgba(0,0,0,0.06)',
+                    padding: '10px',
+                    zIndex: 20
+                  }}
+                >
+                  <div style={{ fontSize: '12px', textTransform: 'uppercase', fontWeight: 700, color: '#6b7280', marginBottom: '8px', letterSpacing: '0.5px' }}>
+                    Service Areas
+                  </div>
+                  {LOCATION_LINKS.map((link) => (
+                    <Link
+                      key={link.to}
+                      to={link.to}
+                      style={{
+                        display: 'block',
+                        padding: '10px 12px',
+                        borderRadius: '10px',
+                        color: '#111',
+                        textDecoration: 'none',
+                        fontWeight: 600,
+                        background: isActive(link.to) ? 'rgba(238, 67, 44, 0.08)' : 'transparent',
+                        borderLeft: isActive(link.to) ? `3px solid ${primary}` : '3px solid transparent'
+                      }}
+                      onClick={() => setShowLocations(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {NAV_LINKS.map((link) => (
+              <Link key={link.to} to={link.to} style={{ textDecoration: 'none' }}>
+                <button className={`nav-button ${isActive(link.to) ? 'active' : ''}`}>
+                  {link.label}
+                </button>
+              </Link>
+            ))}
+
+            <button
+              onClick={goBook}
+              style={{
+                display: 'inline-flex',
                 alignItems: 'center',
-                background: isScrolled ? 'rgba(10, 10, 10, 0.95)' : 'transparent',
-                backdropFilter: isScrolled ? 'blur(10px)' : 'none',
-                borderBottom: isScrolled ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                transition: 'all 0.3s ease'
-            }}>
-                {/* Logo */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <img
-                        src="/hardys_logo.png"
-                        alt="Hardy's Logo"
-                        style={{ width: '40px', height: '40px', objectFit: 'contain' }}
-                    />
-                    <span style={{
-                        fontFamily: '"Playfair Display", serif',
-                        fontSize: '1.2rem',
-                        fontWeight: '700',
-                        color: 'white',
-                        letterSpacing: '0.5px'
-                    }}>
-                        Hardy's Wash N' Wax
-                    </span>
-                </div>
+                gap: '6px',
+                background: primary,
+                color: '#fff',
+                border: '2px solid #0f172a',
+                borderRadius: '14px',
+                padding: '8px 14px',
+                fontWeight: 800,
+                fontSize: '15px',
+                boxShadow: '4px 4px 0 #0f172a',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <Phone size={15} /> Book Now
+            </button>
+          </div>
 
-                {/* Desktop Links */}
-                <div className="desktop-nav" style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
-                    {navLinks.map((link) => (
-                        <a
-                            key={link.name}
-                            href={link.href}
-                            style={{
-                                color: 'white',
-                                textDecoration: 'none',
-                                fontSize: '0.95rem',
-                                fontWeight: '500',
-                                opacity: 0.9,
-                                transition: 'color 0.2s'
-                            }}
-                            onMouseEnter={(e) => e.target.style.color = THEME.primary}
-                            onMouseLeave={(e) => e.target.style.color = 'white'}
-                        >
-                            {link.name}
-                        </a>
-                    ))}
-                    <button
-                        onClick={onBookClick}
-                        style={{
-                            background: THEME.primary,
-                            color: 'white',
-                            border: 'none',
-                            padding: '10px 24px',
-                            borderRadius: '30px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            transition: 'transform 0.2s'
-                        }}
-                        onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-                        onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                    >
-                        <Phone size={16} />
-                        Book Now
-                    </button>
-                </div>
+          {/* Mobile toggle */}
+          <div className="nav-mobile-toggle" style={{ display: 'none' }}>
+            <button
+              onClick={() => setMobileOpen((v) => !v)}
+              style={{ background: '#fff', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.08)', padding: '8px', display: 'grid', placeItems: 'center' }}
+            >
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
+        </nav>
+      </div>
 
-                {/* Mobile Menu Toggle */}
-                <div className="mobile-toggle" style={{ display: 'none' }}>
-                    <button
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
-                    >
-                        {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
-                </div>
-            </nav>
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.45)',
+            zIndex: 90
+          }}
+          onClick={() => setMobileOpen(false)}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '78%',
+              maxWidth: '320px',
+              height: '100%',
+              background: '#fff8ef',
+              boxShadow: '-12px 0 24px rgba(0,0,0,0.15)',
+              padding: '18px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ fontWeight: 800, marginBottom: '10px', color: '#111', fontFamily: '"Playfair Display", serif' }}>Hardys Wash N&apos; Wax</div>
+            <div style={{ marginBottom: '12px', fontSize: '12px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.6px' }}>Locations</div>
+            {LOCATION_LINKS.map((link) => (
+              <Link key={link.to} to={link.to} onClick={() => setMobileOpen(false)} style={{ textDecoration: 'none' }}>
+                <button className={`mobile-nav-button ${isActive(link.to) ? 'active' : ''}`} style={{ width: '100%', textAlign: 'left' }}>
+                  {link.label}
+                </button>
+              </Link>
+            ))}
+            <div style={{ margin: '16px 0 10px', fontSize: '12px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.6px' }}>Navigate</div>
+            {NAV_LINKS.map((link) => (
+              <Link key={link.to} to={link.to} onClick={() => setMobileOpen(false)} style={{ textDecoration: 'none' }}>
+                <button className={`mobile-nav-button ${isActive(link.to) ? 'active' : ''}`} style={{ width: '100%', textAlign: 'left' }}>
+                  {link.label}
+                </button>
+              </Link>
+            ))}
+            <div style={{ marginTop: '18px' }}>
+              <button
+                onClick={goBook}
+                style={{
+                  width: '100%',
+                  background: primary,
+                  color: '#fff',
+                  border: '2px solid #0f172a',
+                  borderRadius: '12px',
+                  padding: '12px',
+                  fontWeight: 800,
+                  boxShadow: '4px 4px 0 #0f172a',
+                  cursor: 'pointer'
+                }}
+              >
+                Book Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-            {/* Mobile Menu Overlay */}
-            <AnimatePresence>
-                {mobileMenuOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        style={{
-                            position: 'fixed',
-                            top: '80px',
-                            left: 0,
-                            right: 0,
-                            background: '#0a0a0a',
-                            padding: '20px',
-                            zIndex: 99,
-                            borderBottom: '1px solid rgba(255,255,255,0.1)'
-                        }}
-                    >
-                        {navLinks.map((link) => (
-                            <a
-                                key={link.name}
-                                href={link.href}
-                                onClick={() => setMobileMenuOpen(false)}
-                                style={{
-                                    display: 'block',
-                                    color: 'white',
-                                    textDecoration: 'none',
-                                    padding: '16px 0',
-                                    fontSize: '1.1rem',
-                                    borderBottom: '1px solid rgba(255,255,255,0.05)'
-                                }}
-                            >
-                                {link.name}
-                            </a>
-                        ))}
-                        <button
-                            onClick={() => { onBookClick(); setMobileMenuOpen(false); }}
-                            style={{
-                                width: '100%',
-                                marginTop: '20px',
-                                background: THEME.primary,
-                                color: 'white',
-                                border: 'none',
-                                padding: '14px',
-                                borderRadius: '8px',
-                                fontWeight: '600',
-                                fontSize: '1rem'
-                            }}
-                        >
-                            Book Now
-                        </button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            <style>{`
-        @media (max-width: 768px) {
-          .desktop-nav { display: none !important; }
-          .mobile-toggle { display: block !important; }
+      <style>{`
+        @media (max-width: 900px) {
+          .nav-desktop { display: none !important; }
+          .nav-mobile-toggle { display: block !important; }
         }
       `}</style>
-        </>
-    );
+    </header>
+  );
 };
 
 export default Navbar;

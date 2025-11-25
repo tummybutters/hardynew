@@ -6,8 +6,10 @@ import { useTexture } from '@react-three/drei';
 // --- Dirt Shell Component ---
 // Renders a transparent "dirt" layer over the existing geometry
 export function DirtShell({ nodes, opacity = 1, opacityRef, color = '#3e2b22', texturePath = '/dirt_mask.png', textureRepeat = null, usePlanar = false }) {
+    // Texture: clone once, no setState in render
     const originalTexture = useTexture(texturePath);
     const texture = useMemo(() => {
+        if (!originalTexture) return null;
         const t = originalTexture.clone();
         t.colorSpace = THREE.SRGBColorSpace;
         t.anisotropy = 8;
