@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense, useLayoutEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
   useGLTF,
@@ -832,7 +832,7 @@ const ServiceItem = ({ item, isActive, onClick, isAddOn = false }) => (
       }}>
         {isAddOn && <Plus size={12} style={{ marginRight: 6, display: 'inline' }} />}
         {item.name || item.title}
-    </span>
+      </span>
     </div>
     {isActive && !isAddOn && (
       <motion.div
@@ -1268,6 +1268,20 @@ export default function LegacyHero({ location = 'sacramento' }: { location?: key
   const [isLoaded, setIsLoaded] = useState(initialHeroReady);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [showBookingWidget, setShowBookingWidget] = useState(false);
+  const heroCopyRef = useRef<HTMLDivElement>(null);
+  const [mobilePopupTop, setMobilePopupTop] = useState(220);
+
+  useLayoutEffect(() => {
+    if (!isMobile) return;
+    const updatePopupTop = () => {
+      const node = heroCopyRef.current;
+      if (!node) return;
+      setMobilePopupTop(node.offsetTop + node.offsetHeight + 12);
+    };
+    updatePopupTop();
+    window.addEventListener('resize', updatePopupTop);
+    return () => window.removeEventListener('resize', updatePopupTop);
+  }, [isMobile, activeMenuItem]);
   const [headlightTrigger, setHeadlightTrigger] = useState(0);
   const [infoCardVisible, setInfoCardVisible] = useState(false);
   const infoCardTimer = useRef(null);
@@ -1394,7 +1408,7 @@ export default function LegacyHero({ location = 'sacramento' }: { location?: key
           left: 0,
           right: 0,
           padding: '20px',
-          zIndex: 50,
+          zIndex: 30,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
@@ -1406,6 +1420,7 @@ export default function LegacyHero({ location = 'sacramento' }: { location?: key
           <AnimatePresence>
             {isMobile && activeMenuItem === 'home' && (
               <motion.div
+                ref={heroCopyRef}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
@@ -1443,37 +1458,43 @@ export default function LegacyHero({ location = 'sacramento' }: { location?: key
                 }}>
                   {locationCopy.description}
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: 'min(480px, 100%)' }}>
+                <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: 'min(480px, 100%)' }}>
                   <HeroButton
                     className="text-sm sm:text-base"
                     onClick={() => setShowBookingWidget((prev) => !prev)}
                   >
                     {showBookingWidget ? 'Hide Booking' : 'Book Your Detail'}
                   </HeroButton>
-                  <AnimatePresence>
-                    {showBookingWidget && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.97 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.97 }}
-                      transition={{ duration: 0.25 }}
-                      style={{
-                        width: '100%',
-                        pointerEvents: 'auto',
-                        zIndex: 80,
-                        position: 'relative'
-                      }}
-                    >
-                      <BookingWidgetCard isMobile iframeHeight={360} />
-                    </motion.div>
-                  )}
-                  </AnimatePresence>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
         </header>
+
+        {/* Mobile booking popup anchored below hero text */}
+        {isMobile && (
+          <AnimatePresence>
+            {showBookingWidget && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.97 }}
+                transition={{ duration: 0.25 }}
+                style={{
+                  position: 'absolute',
+                  top: mobilePopupTop,
+                  left: '16px',
+                  right: '16px',
+                  zIndex: 90,
+                  pointerEvents: 'auto'
+                }}
+              >
+                <BookingWidgetCard isMobile iframeHeight={360} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
 
         {/* InfoCard - Now enabled for mobile too */}
         <InfoCard
