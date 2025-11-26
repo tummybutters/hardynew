@@ -24,10 +24,8 @@ export const ServiceDock = ({
 }) => {
     return (
         <div style={{
-            position: 'absolute', // Anchor within hero so it scrolls away with the section
-            bottom: 0,
-            left: 0,
-            right: 0,
+            position: 'relative',
+            width: '100%',
             minHeight: '110px', // Slightly taller to fit helper text
             maxHeight: '150px', // Cap the maximum height
             background: 'rgba(10, 10, 10, 0.95)',

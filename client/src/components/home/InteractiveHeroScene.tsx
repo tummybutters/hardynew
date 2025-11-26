@@ -356,29 +356,14 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
         />
 
         {isMobile ? (
-          <>
-            <AddOnBar
-              activeService={activeService}
-              activeAddOn={activeAddOn}
-              setActiveAddOn={setActiveAddOn}
-              setCameraView={setCameraView}
-              queueInfoCard={queueInfoCard}
-              showPrice={false}
-            />
-            <ServiceDock
-              activeService={activeService}
-              activeMenuItem={activeMenuItem}
-              setActiveMenuItem={setActiveMenuItem}
-              setActiveService={(service) => {
-                setActiveService(service);
-                setActiveMenuItem(service?.id || activeMenuItem);
-                if (service?.id === 'exterior') handleClean();
-              }}
-              setCameraView={setCameraView}
-              queueInfoCard={queueInfoCard}
-              menuItems={MENU_ITEMS}
-            />
-          </>
+          <AddOnBar
+            activeService={activeService}
+            activeAddOn={activeAddOn}
+            setActiveAddOn={setActiveAddOn}
+            setCameraView={setCameraView}
+            queueInfoCard={queueInfoCard}
+            showPrice={false}
+          />
         ) : (
           <Sidebar
             activeService={activeService}
@@ -600,6 +585,22 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
 
       </div>
       {/* End Hero Section */}
+
+      {isMobile && (
+        <ServiceDock
+          activeService={activeService}
+          activeMenuItem={activeMenuItem}
+          setActiveMenuItem={setActiveMenuItem}
+          setActiveService={(service) => {
+            setActiveService(service);
+            setActiveMenuItem(service?.id || activeMenuItem);
+            if (service?.id === 'exterior') handleClean();
+          }}
+          setCameraView={setCameraView}
+          queueInfoCard={queueInfoCard}
+          menuItems={MENU_ITEMS}
+        />
+      )}
 
     </div>
   );
