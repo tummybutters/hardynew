@@ -7,6 +7,7 @@ interface BookingWidgetCardProps {
   style?: React.CSSProperties;
   showTrustRow?: boolean;
   iframeHeight?: number;
+  onClose?: () => void;
 }
 
 export default function BookingWidgetCard({
@@ -14,18 +15,29 @@ export default function BookingWidgetCard({
   className = "",
   style = {},
   showTrustRow = true,
-  iframeHeight
+  iframeHeight,
+  onClose
 }: BookingWidgetCardProps) {
   const computedIframeHeight = iframeHeight ?? (isMobile ? 315 : 340);
 
   return (
     <div className={`w-full ${className}`} style={style}>
       <div className="bg-white/95 backdrop-blur rounded-lg shadow-[5px_5px_0_0_#000] border-2 border-black overflow-hidden neo-brutalist-card">
-        <div className="py-1.5 px-3 bg-gradient-to-r from-[#EE432C] to-[#FFB375] text-white border-b-2 border-black">
-          <div>
+        <div className="py-1.5 px-3 bg-gradient-to-r from-[#EE432C] to-[#FFB375] text-white border-b-2 border-black flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
             <h3 className="text-lg font-bold leading-tight">Book Your Detail</h3>
             <p className="text-xs text-white/90">We&apos;ll call to confirm once booked</p>
           </div>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close booking"
+              className="shrink-0 text-white/85 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/70 rounded-full px-2 py-0.5 leading-none"
+            >
+              ×
+            </button>
+          )}
         </div>
 
         <iframe

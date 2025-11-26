@@ -373,20 +373,24 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
           <motion.div
             variants={bookingPopupVariants}
             initial="hidden"
-            animate={showBookingWidget ? 'visible' : 'hidden'}
-            transition={{ duration: 0.25 }}
-            style={{
-              position: 'absolute',
-              top: mobilePopupTop,
+          animate={showBookingWidget ? 'visible' : 'hidden'}
+          transition={{ duration: 0.25 }}
+          style={{
+            position: 'absolute',
+            top: mobilePopupTop,
               left: '16px',
               right: '16px',
               zIndex: 90,
-              pointerEvents: showBookingWidget ? 'auto' : 'none'
-            }}
-          >
-            <BookingWidgetCard isMobile iframeHeight={360} />
-          </motion.div>
-        )}
+            pointerEvents: showBookingWidget ? 'auto' : 'none'
+          }}
+        >
+          <BookingWidgetCard
+            isMobile
+            iframeHeight={360}
+            onClose={() => setShowBookingWidget(false)}
+          />
+        </motion.div>
+      )}
 
         {/* InfoCard - Now enabled for mobile too */}
         <InfoCard
@@ -643,15 +647,18 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
                   style={{
                     width: '100%',
                     maxWidth: '520px',
-                    pointerEvents: showBookingWidget ? 'auto' : 'none'
-                  }}
-                >
-                  <BookingWidgetCard iframeHeight={300} />
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
-        )}
+                  pointerEvents: showBookingWidget ? 'auto' : 'none'
+                }}
+              >
+                <BookingWidgetCard
+                  iframeHeight={300}
+                  onClose={() => setShowBookingWidget(false)}
+                />
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
         <BookingModal
           isOpen={isBookingOpen}
