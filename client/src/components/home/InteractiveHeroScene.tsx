@@ -346,17 +346,17 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
                 </h2>
                 <p style={{
                   fontFamily: 'Inter, sans-serif',
-                  fontSize: 'clamp(0.95rem, 2.5vw + 0.6rem, 1.05rem)',
-                  lineHeight: '1.45',
+                  fontSize: 'clamp(0.82rem, 2.2vw + 0.48rem, 0.94rem)',
+                  lineHeight: '1.35',
                   color: 'rgba(255,255,255,0.9)',
                   textShadow: '0 1px 4px rgba(0,0,0,0.8)',
                   maxWidth: '92%'
                 }}>
                   {locationCopy.description}
                 </p>
-                <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: 'min(480px, 100%)' }}>
+                <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', maxWidth: 'min(320px, 90%)' }}>
                   <HeroButton
-                    className="text-sm sm:text-base"
+                    className="text-xs sm:text-sm"
                     onClick={() => setShowBookingWidget((prev) => !prev)}
                   >
                     {showBookingWidget ? 'Hide Booking' : 'Book Your Detail'}
@@ -622,15 +622,15 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'flex-start',
-                  gap: '12px',
+                  gap: '10px',
                   width: '100%',
-                  maxWidth: '520px',
-                  marginTop: '8px',
+                  maxWidth: '360px',
+                  marginTop: '6px',
                   pointerEvents: isHome ? 'auto' : 'none'
                 }}
               >
                 <HeroButton
-                  className="text-sm sm:text-base"
+                  className="text-xs sm:text-sm"
                   onClick={() => setShowBookingWidget((prev) => !prev)}
                 >
                   {showBookingWidget ? 'Hide Booking' : 'Book Your Detail'}
