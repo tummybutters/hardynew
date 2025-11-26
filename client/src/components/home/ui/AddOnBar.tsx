@@ -24,13 +24,13 @@ export const AddOnBar = ({ activeService, activeAddOn, setActiveAddOn, setCamera
             exit={{ opacity: 0, y: 20 }}
             style={{
                 position: 'relative',
-                padding: '10px 12px',
+                padding: '8px 10px',
                 display: 'flex',
-                gap: '10px',
+                gap: '8px',
                 overflowX: 'auto',
                 overflowY: 'hidden',
                 zIndex: 54,
-                background: 'linear-gradient(180deg, rgba(10,10,10,0.94) 0%, rgba(10,10,10,0.92) 100%)',
+                background: 'linear-gradient(180deg, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.88) 100%)',
                 WebkitOverflowScrolling: 'touch',
                 touchAction: 'pan-x pan-y',
                 overscrollBehavior: 'contain',
@@ -52,18 +52,19 @@ export const AddOnBar = ({ activeService, activeAddOn, setActiveAddOn, setCamera
                             }
                         }}
                         style={{
-                            background: isSelected ? 'rgba(255, 127, 80, 0.18)' : 'rgba(255,255,255,0.08)',
-                            border: isSelected ? `1px solid ${THEME.primary}` : '1px solid rgba(255,255,255,0.18)',
+                            background: isSelected ? 'rgba(255, 127, 80, 0.14)' : 'rgba(255,255,255,0.06)',
+                            border: isSelected ? `1px solid ${THEME.primary}` : '1px solid rgba(255,255,255,0.12)',
                             borderRadius: '999px',
-                            padding: '12px 18px',
+                            padding: '10px 14px',
                             color: 'white',
-                            fontSize: '0.85rem',
+                            fontSize: '0.8rem',
                             fontWeight: 600,
                             whiteSpace: 'normal',
-                            lineHeight: 1.2,
+                            lineHeight: 1.1,
                             textAlign: 'center',
-                            minWidth: '150px',
-                            boxShadow: isSelected ? '0 12px 26px rgba(255,127,80,0.24)' : '0 8px 16px rgba(0,0,0,0.22)',
+                            minWidth: '120px',
+                            maxWidth: '160px',
+                            boxShadow: isSelected ? '0 8px 18px rgba(255,127,80,0.18)' : '0 6px 12px rgba(0,0,0,0.18)',
                             transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease'
                         }}
                     >
