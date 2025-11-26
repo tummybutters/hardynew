@@ -53,7 +53,9 @@ export const ServiceDock = ({
                 overflowY: 'hidden',
                 gap: '12px',
                 scrollSnapType: 'x mandatory',
-                WebkitOverflowScrolling: 'touch' // Smooth scrolling on iOS
+                WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+                touchAction: 'pan-x pan-y',
+                overscrollBehavior: 'contain'
             }}>
             {menuItems?.map((service) => {
                 const isActive = activeMenuItem === service.id;

@@ -245,16 +245,16 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
         id="hero"
         style={{
           width: '100%',
-          height: '100vh',
-          minHeight: '100vh',
-          minWidth: '320px',
-          background: 'linear-gradient(to bottom, #000000 0%, #1a0b05 70%, #4a1905 100%)',
-          position: 'relative',
-          paddingTop: 'calc(96px + env(safe-area-inset-top))',
-          boxSizing: 'border-box',
-          overflow: 'hidden'
-        }}
-      >
+      height: '100vh',
+      minHeight: '100vh',
+      minWidth: '320px',
+      background: 'linear-gradient(to bottom, #000000 0%, #1a0b05 70%, #4a1905 100%)',
+      position: 'relative',
+      paddingTop: 'calc(96px + env(safe-area-inset-top))',
+      boxSizing: 'border-box',
+      overflowX: 'hidden'
+    }}
+  >
 
         <header style={{
           position: 'absolute',
