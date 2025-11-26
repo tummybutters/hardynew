@@ -51,7 +51,7 @@ export default function BookingWidgetCard({
           loading="lazy"
         ></iframe>
 
-        <div className="py-1.5 px-3 bg-[#FFD7B5] flex justify-between items-center border-t-2 border-black">
+        <div className="py-1 px-3 bg-[#FFD7B5] flex justify-between items-center border-t-2 border-black">
           <div className="text-black">
             <p className="font-medium text-sm leading-tight">Have questions?</p>
             <p className="text-xs text-gray-700 hidden sm:block">Our team is ready to assist you</p>
