@@ -580,15 +580,15 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
       {isMobile && (
         <div
           style={{
-            position: 'sticky',
-            bottom: 0,
+            position: 'relative',
             left: 0,
             right: 0,
             display: 'flex',
             flexDirection: 'column',
-            gap: '0px',
-            background: 'transparent',
-            zIndex: 80
+            gap: 0,
+            background: 'rgba(10, 10, 10, 0.92)',
+            boxShadow: '0 -10px 30px rgba(0,0,0,0.35)',
+            zIndex: 40
           }}
         >
           <AddOnBar

@@ -24,14 +24,13 @@ export const AddOnBar = ({ activeService, activeAddOn, setActiveAddOn, setCamera
             exit={{ opacity: 0, y: 20 }}
             style={{
                 position: 'relative',
-                padding: '12px 16px',
-                display: 'flex',
+                padding: '10px 12px',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
                 gap: '10px',
-                overflowX: 'auto',
-                overflowY: 'hidden',
+                overflow: 'hidden',
                 zIndex: 54,
-                background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
-                maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+                background: 'rgba(10, 10, 10, 0.92)',
                 WebkitOverflowScrolling: 'touch',
                 touchAction: 'pan-x pan-y',
                 overscrollBehavior: 'contain'
@@ -50,14 +49,17 @@ export const AddOnBar = ({ activeService, activeAddOn, setActiveAddOn, setCamera
                             }
                         }}
                         style={{
-                            background: isSelected ? THEME.primary : 'rgba(0,0,0,0.6)',
-                            border: `1px solid ${isSelected ? THEME.primary : 'rgba(255,255,255,0.2)'}`,
-                            borderRadius: '20px',
-                            padding: '8px 16px',
+                            background: isSelected ? 'rgba(255, 127, 80, 0.12)' : 'rgba(255,255,255,0.04)',
+                            border: isSelected ? `1px solid ${THEME.primary}` : '1px solid rgba(255,255,255,0.12)',
+                            borderRadius: '12px',
+                            padding: '10px 12px',
                             color: 'white',
-                            fontSize: '0.8rem',
+                            fontSize: '0.85rem',
                             whiteSpace: 'nowrap',
-                            flexShrink: 0
+                            width: '100%',
+                            textAlign: 'center',
+                            boxShadow: isSelected ? '0 8px 20px rgba(255,127,80,0.18)' : 'none',
+                            transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease'
                         }}
                     >
                         {isSelected && <Check size={12} style={{ marginRight: 6, display: 'inline' }} />}

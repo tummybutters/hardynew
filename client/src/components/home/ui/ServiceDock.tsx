@@ -26,17 +26,16 @@ export const ServiceDock = ({
         <div style={{
             position: 'relative',
             width: '100%',
-            minHeight: '110px', // Slightly taller to fit helper text
-            maxHeight: '150px', // Cap the maximum height
-            background: 'rgba(10, 10, 10, 0.95)',
+            background: 'rgba(10, 10, 10, 0.92)',
             borderTop: `1px solid ${THEME.border}`,
             zIndex: 80, // Above other hero UI, still below booking popup
             display: 'flex',
             flexDirection: 'column',
-            gap: '6px',
-            padding: '8px 16px 12px',
-            paddingBottom: 'max(12px, env(safe-area-inset-bottom))', // Account for iOS safe area
-            boxSizing: 'border-box'
+            gap: '8px',
+            padding: '10px 12px 14px',
+            paddingBottom: 'max(14px, env(safe-area-inset-bottom))', // Account for iOS safe area
+            boxSizing: 'border-box',
+            boxShadow: '0 -6px 20px rgba(0,0,0,0.35)'
         }}>
             <div style={{
                 color: '#b3b3b3',
@@ -47,15 +46,10 @@ export const ServiceDock = ({
                 Tap a service to view the 3D experience
             </div>
             <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                overflowX: 'auto',
-                overflowY: 'hidden',
-                gap: '12px',
-                scrollSnapType: 'x mandatory',
-                WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
-                touchAction: 'pan-x pan-y',
-                overscrollBehavior: 'contain'
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                gap: '10px',
+                alignItems: 'stretch'
             }}>
             {menuItems?.map((service) => {
                 const isActive = activeMenuItem === service.id;
@@ -70,18 +64,19 @@ export const ServiceDock = ({
                             queueInfoCard(service.target);
                         }}
                         style={{
-                            minWidth: '140px',
-                            height: '80%',
-                            background: isActive ? 'rgba(255, 127, 80, 0.15)' : 'rgba(255,255,255,0.03)',
-                            border: isActive ? `1px solid ${THEME.primary}` : '1px solid rgba(255,255,255,0.1)',
+                            width: '100%',
+                            minHeight: '52px',
+                            background: isActive ? 'rgba(255, 127, 80, 0.12)' : 'rgba(255,255,255,0.04)',
+                            border: isActive ? `1px solid ${THEME.primary}` : '1px solid rgba(255,255,255,0.12)',
                             borderRadius: '12px',
-                            padding: '12px',
+                            padding: '10px 12px',
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'center',
                             cursor: 'pointer',
-                            scrollSnapAlign: 'center',
-                            position: 'relative'
+                            position: 'relative',
+                            boxShadow: isActive ? '0 8px 20px rgba(255,127,80,0.18)' : 'none',
+                            transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease'
                         }}
                     >
                         <div style={{
