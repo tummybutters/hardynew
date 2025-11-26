@@ -23,10 +23,7 @@ export const AddOnBar = ({ activeService, activeAddOn, setActiveAddOn, setCamera
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             style={{
-                position: 'absolute', // Clamp within hero so it scrolls away with the section
-                bottom: 'calc(110px + env(safe-area-inset-bottom, 0px))',
-                left: 0,
-                right: 0,
+                position: 'relative',
                 padding: '12px 16px',
                 display: 'flex',
                 gap: '10px',

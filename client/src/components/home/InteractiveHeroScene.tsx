@@ -355,16 +355,7 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
           viewContent={VIEW_CONTENT}
         />
 
-        {isMobile ? (
-          <AddOnBar
-            activeService={activeService}
-            activeAddOn={activeAddOn}
-            setActiveAddOn={setActiveAddOn}
-            setCameraView={setCameraView}
-            queueInfoCard={queueInfoCard}
-            showPrice={false}
-          />
-        ) : (
+        {isMobile ? null : (
           <Sidebar
             activeService={activeService}
             activeMenuItem={activeMenuItem}
@@ -587,19 +578,41 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
       {/* End Hero Section */}
 
       {isMobile && (
-        <ServiceDock
-          activeService={activeService}
-          activeMenuItem={activeMenuItem}
-          setActiveMenuItem={setActiveMenuItem}
-          setActiveService={(service) => {
-            setActiveService(service);
-            setActiveMenuItem(service?.id || activeMenuItem);
-            if (service?.id === 'exterior') handleClean();
+        <div
+          style={{
+            position: 'sticky',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0px',
+            background: 'transparent',
+            zIndex: 80
           }}
-          setCameraView={setCameraView}
-          queueInfoCard={queueInfoCard}
-          menuItems={MENU_ITEMS}
-        />
+        >
+          <AddOnBar
+            activeService={activeService}
+            activeAddOn={activeAddOn}
+            setActiveAddOn={setActiveAddOn}
+            setCameraView={setCameraView}
+            queueInfoCard={queueInfoCard}
+            showPrice={false}
+          />
+          <ServiceDock
+            activeService={activeService}
+            activeMenuItem={activeMenuItem}
+            setActiveMenuItem={setActiveMenuItem}
+            setActiveService={(service) => {
+              setActiveService(service);
+              setActiveMenuItem(service?.id || activeMenuItem);
+              if (service?.id === 'exterior') handleClean();
+            }}
+            setCameraView={setCameraView}
+            queueInfoCard={queueInfoCard}
+            menuItems={MENU_ITEMS}
+          />
+        </div>
       )}
 
     </div>
