@@ -16,14 +16,14 @@ export default function BookingWidgetCard({
   showTrustRow = true,
   iframeHeight
 }: BookingWidgetCardProps) {
-  const computedIframeHeight = iframeHeight ?? (isMobile ? 370 : 400);
+  const computedIframeHeight = iframeHeight ?? (isMobile ? 315 : 340);
 
   return (
     <div className={`w-full ${className}`} style={style}>
       <div className="bg-white/95 backdrop-blur rounded-lg shadow-[5px_5px_0_0_#000] border-2 border-black overflow-hidden neo-brutalist-card">
-        <div className="py-3 px-4 bg-gradient-to-r from-[#EE432C] to-[#FFB375] text-white border-b-2 border-black">
+        <div className="py-1.5 px-3 bg-gradient-to-r from-[#EE432C] to-[#FFB375] text-white border-b-2 border-black">
           <div>
-            <h3 className="text-lg font-bold">Book Your Detail</h3>
+            <h3 className="text-lg font-bold leading-tight">Book Your Detail</h3>
             <p className="text-xs text-white/90">We&apos;ll call to confirm once booked</p>
           </div>
         </div>
@@ -40,9 +40,9 @@ export default function BookingWidgetCard({
           loading="lazy"
         ></iframe>
 
-        <div className="py-3 px-4 bg-[#FFD7B5] flex justify-between items-center border-t-2 border-black">
+        <div className="py-1.5 px-3 bg-[#FFD7B5] flex justify-between items-center border-t-2 border-black">
           <div className="text-black">
-            <p className="font-medium text-sm">Have questions?</p>
+            <p className="font-medium text-sm leading-tight">Have questions?</p>
             <p className="text-xs text-gray-700 hidden sm:block">Our team is ready to assist you</p>
           </div>
           <CallOption phone="19497340201" text="" className="ml-4" />
