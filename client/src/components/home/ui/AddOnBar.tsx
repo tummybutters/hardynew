@@ -35,7 +35,9 @@ export const AddOnBar = ({ activeService, activeAddOn, setActiveAddOn, setCamera
                 zIndex: 54,
                 background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
                 maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
-                WebkitOverflowScrolling: 'touch'
+                WebkitOverflowScrolling: 'touch',
+                touchAction: 'pan-x pan-y',
+                overscrollBehavior: 'contain'
             }}
         >
             {activeService.addOns.map((addon, idx) => {
