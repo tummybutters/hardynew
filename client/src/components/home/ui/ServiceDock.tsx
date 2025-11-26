@@ -32,7 +32,7 @@ export const ServiceDock = ({
             maxHeight: '150px', // Cap the maximum height
             background: 'rgba(10, 10, 10, 0.95)',
             borderTop: `1px solid ${THEME.border}`,
-            zIndex: 55,
+            zIndex: 80, // Above other hero UI, still below booking popup
             display: 'flex',
             flexDirection: 'column',
             gap: '6px',
