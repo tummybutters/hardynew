@@ -26,8 +26,8 @@ export const ServiceDock = ({
         <div style={{
             position: 'relative',
             width: '100%',
-            background: 'linear-gradient(180deg, rgba(10,10,10,0.94) 0%, rgba(10,10,10,0.92) 100%)',
-            borderTop: `1px solid ${THEME.border}`,
+            background: 'linear-gradient(180deg, #0a0a0a 0%, #050505 100%)',
+            borderTop: '1px solid rgba(255,255,255,0.06)',
             zIndex: 80, // Above other hero UI, still below booking popup
             display: 'flex',
             flexDirection: 'column',

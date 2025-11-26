@@ -97,6 +97,9 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
   const [showBookingWidget, setShowBookingWidget] = useState(false);
   const heroCopyRef = useRef<HTMLDivElement>(null);
   const [mobilePopupTop, setMobilePopupTop] = useState(220);
+  const mobileDockRef = useRef<HTMLDivElement>(null);
+  const [mobileDockHeight, setMobileDockHeight] = useState(120);
+  const [heroHeight, setHeroHeight] = useState(720);
   const bookingPopupVariants = useMemo(
     () => ({
       hidden: { opacity: 0, y: -10, scale: 0.97 },
@@ -116,6 +119,43 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
     window.addEventListener('resize', updatePopupTop);
     return () => window.removeEventListener('resize', updatePopupTop);
   }, [isMobile, activeMenuItem]);
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    const measureHero = () => {
+      const header = document.getElementById('site-header');
+      const banner = document.getElementById('partnership-banner');
+      const headerHeight = header?.getBoundingClientRect().height || 0;
+      const bannerHeight = banner?.getBoundingClientRect().height || 0;
+      const viewportHeight = window.visualViewport?.height || window.innerHeight || 0;
+      const availableHeight = viewportHeight - headerHeight - bannerHeight;
+      setHeroHeight(Math.max(560, availableHeight));
+    };
+    measureHero();
+    window.addEventListener('resize', measureHero);
+    window.addEventListener('orientationchange', measureHero);
+    return () => {
+      window.removeEventListener('resize', measureHero);
+      window.removeEventListener('orientationchange', measureHero);
+    };
+  }, [isMobile]);
+
+  useLayoutEffect(() => {
+    if (!isMobile) return;
+    const measureDock = () => {
+      const node = mobileDockRef.current;
+      if (!node) return;
+      const rect = node.getBoundingClientRect();
+      if (rect.height) setMobileDockHeight(rect.height);
+    };
+    measureDock();
+    window.addEventListener('resize', measureDock);
+    window.addEventListener('orientationchange', measureDock);
+    return () => {
+      window.removeEventListener('resize', measureDock);
+      window.removeEventListener('orientationchange', measureDock);
+    };
+  }, [isMobile, activeService, activeAddOn]);
   const [headlightTrigger, setHeadlightTrigger] = useState(0);
   const [infoCardVisible, setInfoCardVisible] = useState(false);
   const infoCardTimer = useRef(null);
@@ -232,7 +272,8 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
       width: '100%',
       minWidth: '320px',
       position: 'relative',
-      overflowX: 'hidden'
+      overflowX: 'hidden',
+      background: '#000'
     }}>
 
       {/* LOADING SCREEN */}
@@ -245,16 +286,17 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
         id="hero"
         style={{
           width: '100%',
-      height: '100vh',
-      minHeight: '100vh',
-      minWidth: '320px',
-      background: 'linear-gradient(to bottom, #000000 0%, #1a0b05 70%, #4a1905 100%)',
-      position: 'relative',
-      paddingTop: 'calc(96px + env(safe-area-inset-top))',
-      boxSizing: 'border-box',
-      overflowX: 'hidden'
-    }}
-  >
+          height: heroHeight,
+          minHeight: heroHeight,
+          minWidth: '320px',
+          background: 'linear-gradient(180deg, #000000 0%, #0d0806 55%, #050505 100%)',
+          position: 'relative',
+          paddingTop: isMobile ? '12px' : '32px',
+          paddingBottom: isMobile ? '12px' : '24px',
+          boxSizing: 'border-box',
+          overflow: 'hidden'
+        }}
+      >
 
         <header style={{
           position: 'absolute',
@@ -385,9 +427,13 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
             preserveDrawingBuffer: false
           }}
           style={{
+            position: 'absolute',
+            inset: 0,
             marginLeft: isMobile ? '0' : '350px',
             width: isMobile ? '100%' : 'calc(100% - 350px)',
-            pointerEvents: 'none'
+            height: '100%',
+            pointerEvents: 'none',
+            zIndex: 1
           }}
         >
           <Suspense fallback={<CanvasLoader setLoadingProgress={setLoadingProgress} />}>
@@ -486,6 +532,47 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
           </Suspense>
         </Canvas>
 
+        {isMobile && (
+          <div
+            ref={mobileDockRef}
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0,
+              background: 'linear-gradient(180deg, #0a0a0a 0%, #050505 100%)',
+              boxShadow: '0 -10px 30px rgba(0,0,0,0.35)',
+              zIndex: 80,
+              paddingBottom: 'max(8px, env(safe-area-inset-bottom))'
+            }}
+          >
+            <AddOnBar
+              activeService={activeService}
+              activeAddOn={activeAddOn}
+              setActiveAddOn={setActiveAddOn}
+              setCameraView={setCameraView}
+              queueInfoCard={queueInfoCard}
+              showPrice={false}
+            />
+            <ServiceDock
+              activeService={activeService}
+              activeMenuItem={activeMenuItem}
+              setActiveMenuItem={setActiveMenuItem}
+              setActiveService={(service) => {
+                setActiveService(service);
+                setActiveMenuItem(service?.id || activeMenuItem);
+                if (service?.id === 'exterior') handleClean();
+              }}
+              setCameraView={setCameraView}
+              queueInfoCard={queueInfoCard}
+              menuItems={MENU_ITEMS}
+            />
+          </div>
+        )}
+
         {/* HERO FOOTER */}
         {/* HERO FOOTER - Desktop Only or Simplified Mobile */}
         {!isMobile && (
@@ -576,44 +663,6 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
 
       </div>
       {/* End Hero Section */}
-
-      {isMobile && (
-        <div
-          style={{
-            position: 'relative',
-            left: 0,
-            right: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 0,
-            background: 'rgba(10, 10, 10, 0.92)',
-            boxShadow: '0 -10px 30px rgba(0,0,0,0.35)',
-            zIndex: 40
-          }}
-        >
-          <AddOnBar
-            activeService={activeService}
-            activeAddOn={activeAddOn}
-            setActiveAddOn={setActiveAddOn}
-            setCameraView={setCameraView}
-            queueInfoCard={queueInfoCard}
-            showPrice={false}
-          />
-          <ServiceDock
-            activeService={activeService}
-            activeMenuItem={activeMenuItem}
-            setActiveMenuItem={setActiveMenuItem}
-            setActiveService={(service) => {
-              setActiveService(service);
-              setActiveMenuItem(service?.id || activeMenuItem);
-              if (service?.id === 'exterior') handleClean();
-            }}
-            setCameraView={setCameraView}
-            queueInfoCard={queueInfoCard}
-            menuItems={MENU_ITEMS}
-          />
-        </div>
-      )}
 
     </div>
   );

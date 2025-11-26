@@ -30,7 +30,7 @@ export const AddOnBar = ({ activeService, activeAddOn, setActiveAddOn, setCamera
                 overflowX: 'auto',
                 overflowY: 'hidden',
                 zIndex: 54,
-                background: 'linear-gradient(180deg, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.88) 100%)',
+                background: 'linear-gradient(180deg, #0a0a0a 0%, #050505 100%)',
                 WebkitOverflowScrolling: 'touch',
                 touchAction: 'pan-x pan-y',
                 overscrollBehavior: 'contain',

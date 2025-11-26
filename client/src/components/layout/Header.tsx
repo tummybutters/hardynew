@@ -29,7 +29,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 bg-light-orange shadow-md z-50">
+    <header id="site-header" className="sticky top-0 bg-light-orange shadow-md z-50">
       <div className="container mx-auto px-4 py-3">
         <nav className="flex justify-between items-center">
           {/* Logo */}
