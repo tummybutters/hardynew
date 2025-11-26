@@ -173,6 +173,15 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
   const infoCardTimer = useRef(null);
   const isHome = activeMenuItem === 'home';
   const heroSubtitle = locationCopy.description;
+  const isHighPerfMobile = isMobile && performanceTier === 'high';
+  const canvasDpr = isMobile ? (isHighPerfMobile ? [1, 1.5] : [0.75, 1.1]) : [1, 1.75];
+  const enableShadows = !isMobile || isHighPerfMobile;
+  const enableAntialias = !isMobile || isHighPerfMobile;
+  const envResolution = isMobile ? (isHighPerfMobile ? 256 : 128) : 256;
+  const envBlur = isMobile ? (isHighPerfMobile ? 0.4 : 0.6) : 0.4;
+  const shadowMapSize = isMobile ? (isHighPerfMobile ? [512, 512] : [384, 384]) : [768, 768];
+  const contactShadowRes = isMobile ? (isHighPerfMobile ? 512 : 320) : 768;
+  const contactShadowBlur = isMobile ? (isHighPerfMobile ? 2.0 : 2.2) : 2.8;
 
   // Cleaning State (Lifted)
   const [cleaningState, setCleaningState] = useState('clean');
@@ -301,7 +310,7 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
           height: heroHeight,
           minHeight: heroHeight,
           minWidth: '320px',
-          background: 'linear-gradient(180deg, #000000 0%, #0d0806 55%, #050505 100%)',
+          background: 'transparent',
           position: 'relative',
           paddingTop: isMobile ? '12px' : '32px',
           paddingBottom: isMobile ? '12px' : '24px',
@@ -438,12 +447,12 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
 
         <Canvas
           key={isMobile ? 'canvas-mobile' : 'canvas-desktop'}
-          shadows={!isMobile}
-          dpr={isMobile ? [0.75, 1.1] : [1, 1.75]} // Clamp DPR harder on mobile to shrink render targets
-          performance={{ min: isMobile ? 0.3 : 0.5 }} // Allow deeper frame drops on mobile
+          shadows={enableShadows}
+          dpr={canvasDpr}
+          performance={{ min: isMobile ? 0.3 : 0.5 }}
           gl={{
-            antialias: !isMobile,
-            alpha: true,
+            antialias: enableAntialias,
+            alpha: false,
             powerPreference: 'high-performance',
             preserveDrawingBuffer: false
           }}
@@ -454,7 +463,8 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
             width: isMobile ? '100%' : 'calc(100% - 350px)',
             height: '100%',
             pointerEvents: 'none',
-            zIndex: 1
+            zIndex: 1,
+            background: 'linear-gradient(180deg, #050505 0%, #0d0806 55%, #030303 100%)'
           }}
         >
           <Suspense fallback={<CanvasLoader setLoadingProgress={setLoadingProgress} />}>
@@ -464,12 +474,12 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
               angle={0.15}
               penumbra={1}
               intensity={8}
-              castShadow={!isMobile}
-              shadow-mapSize={isMobile ? [384, 384] : [768, 768]} // Reduced for mobile performance
+              castShadow={enableShadows}
+              shadow-mapSize={shadowMapSize} // Reduced for mobile performance
             />
             <pointLight position={[-10, -10, -10]} color={THEME.primary} intensity={5} />
 
-            <Environment preset="city" blur={isMobile ? 0.6 : 0.4} resolution={isMobile ? 128 : 256} />
+            <Environment preset="city" blur={envBlur} resolution={envResolution} />
 
             {/* Ceiling plane to hide stray objects above the scene */}
             <mesh
@@ -534,9 +544,9 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
             )}
 
             <ContactShadows
-              resolution={isMobile ? 320 : 768}
+              resolution={contactShadowRes}
               scale={isMobile ? 24 : 32}
-              blur={isMobile ? 2.2 : 2.8}
+              blur={contactShadowBlur}
               opacity={0.65}
               far={30}
               color="#000000"
