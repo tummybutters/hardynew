@@ -473,7 +473,7 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
 
             {/* Ceiling plane to hide stray objects above the scene */}
             <mesh
-              position={[0, 4, 0]}
+              position={[0, 6.4, 0]}
               rotation={[-Math.PI / 2, 0, 0]}
               receiveShadow={false}
               castShadow={false}
