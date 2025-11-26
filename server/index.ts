@@ -72,9 +72,9 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 3001 unless overridden.
+  // ALWAYS serve the app on port 5000 unless overridden.
   // This serves both the API and the client.
-  const port = Number(process.env.PORT || 3002);
+  const port = Number(process.env.PORT || 5000);
   const listenOptions = {
     port,
     host: "0.0.0.0",
