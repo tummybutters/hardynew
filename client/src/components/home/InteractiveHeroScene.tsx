@@ -102,8 +102,8 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
   const [heroHeight, setHeroHeight] = useState(720);
   const bookingPopupVariants = useMemo(
     () => ({
-      hidden: { opacity: 0, y: -10, scale: 0.97 },
-      visible: { opacity: 1, y: 0, scale: 1 },
+      hidden: { opacity: 0, y: -8, scale: 0.94 },
+      visible: { opacity: 1, y: 0, scale: 1 }
     }),
     []
   );
@@ -404,18 +404,22 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
             variants={bookingPopupVariants}
             initial="hidden"
             animate={showBookingWidget ? 'visible' : 'hidden'}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
             style={{
               position: 'absolute',
-              top: '170px',
-              left: '20px',
-              right: '40%',
+              top: '220px',
+              right: '12%',
+              width: '340px',
               zIndex: 90,
-              pointerEvents: showBookingWidget ? 'auto' : 'none'
+              pointerEvents: showBookingWidget ? 'auto' : 'none',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
             }}
           >
             <BookingWidgetCard
-              iframeHeight={360}
+              iframeHeight={320}
+              style={{ width: '100%', borderRadius: '16px' }}
               onClose={() => setShowBookingWidget(false)}
             />
           </motion.div>
