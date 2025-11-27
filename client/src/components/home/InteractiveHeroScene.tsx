@@ -381,7 +381,11 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
                   <HeroButton
                     className="text-xs sm:text-sm"
                     onClick={() => {
-                      window.location.href = '/booking';
+                      if (isMobile) {
+                        window.location.href = '/booking';
+                      } else {
+                        setShowBookingWidget((prev) => !prev);
+                      }
                     }}
                     style={{ width: 'fit-content', minWidth: '200px', maxWidth: '240px', alignSelf: 'flex-start' }}
                   >
@@ -394,29 +398,28 @@ export default function InteractiveHeroScene({ location = 'sacramento' }: { loca
 
         </header>
 
-        {/* Mobile booking popup anchored below hero text */}
-        {isMobile && false && (
+        {/* Desktop booking popup */}
+        {!isMobile && (
           <motion.div
             variants={bookingPopupVariants}
             initial="hidden"
             animate={showBookingWidget ? 'visible' : 'hidden'}
             transition={{ duration: 0.25 }}
-          style={{
-            position: 'absolute',
-            top: mobilePopupTop,
-              left: '16px',
-              right: '16px',
+            style={{
+              position: 'absolute',
+              top: '170px',
+              left: '20px',
+              right: '40%',
               zIndex: 90,
-            pointerEvents: showBookingWidget ? 'auto' : 'none'
-          }}
-        >
-          <BookingWidgetCard
-            isMobile
-            iframeHeight={360}
-            onClose={() => setShowBookingWidget(false)}
-          />
-        </motion.div>
-      )}
+              pointerEvents: showBookingWidget ? 'auto' : 'none'
+            }}
+          >
+            <BookingWidgetCard
+              iframeHeight={360}
+              onClose={() => setShowBookingWidget(false)}
+            />
+          </motion.div>
+        )}
 
         {/* InfoCard - Now enabled for mobile too */}
         <InfoCard
